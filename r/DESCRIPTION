@@ -1,0 +1,34 @@
+Package: rtemis.a3
+Title: Annotated Amino Acid format
+Version: 0.4.2
+Date: 2026-03-21
+Authors@R: 
+    person(given = "E.D.", family = "Gennatas", role = c("aut", "cre"),
+           email = "gennatas@gmail.com",
+           comment = c(ORCID = "0000-0001-9280-3609"))
+Description: Utilities for working with annotated amino acid sequences.
+URL: https://rtemis.a3.rtemis.org
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends:
+    R (>= 4.1.0)
+Imports:
+    cli,
+    data.table,
+    rtemis.utils,
+    S7,
+    utils
+Suggests:
+    biomaRt,
+    colorspace,
+    dplyr,
+    httr,
+    jsonlite,
+    rtemis,
+    seqinr,
+    testthat (>= 3.0.0)
+Additional_repositories:
+    https://rtemis-org.r-universe.dev
+Config/testthat/edition: 3
