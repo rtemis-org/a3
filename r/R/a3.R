@@ -1,4 +1,10 @@
-# %% A3Sequence ----
+# A3 S7 implementation
+#  A3
+#  ├── sequence:    A3Sequence
+#  ├── annotations: A3Annotation
+#  └── metadata:    A3Metadata
+
+# %% Level 1: A3Sequence ----
 A3Sequence <- new_class(
   "A3Sequence",
   properties = list(
@@ -156,7 +162,7 @@ A3Variant <- new_class(
 )
 
 
-# %% A3Annotation ----
+# %% Level 1: A3Annotation ----
 A3Annotation <- new_class(
   "A3Annotation",
   properties = list(
@@ -192,7 +198,7 @@ Metadata <- new_class(
 )
 
 
-# %% A3Metadata ----
+# %% Level 1: A3Metadata ----
 A3Metadata <- new_class(
   "A3Metadata",
   parent = Metadata,
@@ -276,3 +282,134 @@ A3 <- new_class(
     }
   }
 )
+
+# %% Public API ------------------------------------------------------------------------------------
+# The public API uses functions to create A3 objects from base R data structures.
+# Minimum set of required functions:
+# - create_A3(sequence, annotations, metadata)
+#   - sequence is character(1); can be character(n) that will be concatenated using `concat()`
+#   - site: named list created using `annotation_position()`
+#   - region: named list created using `annotation_range()`
+#   - ptm: named list created using `annotation_position()` OR `annotation_range()`
+#   - processing: named list created using `annotation_position()` OR `annotation_range()`
+#   - variant: named list created using `annotation_variant()`
+#   - uniprot_id: character(1)
+#   - description: character(1)
+#   - reference: character(1)
+#   - organism: character(1)
+
+#' Create Site Annotation
+#'
+#' @param index `A3Position` or `A3Range` object indicating the position(s) of the site.
+
+# %% concat ----
+#' Concatenate character vector to single string for sequence input
+#'
+#' @param x Character vector to concatenate
+#'
+#' @return Single character string
+#'
+#' @author EDG
+#' @export
+concat <- function(x) {
+  if (length(x) > 1) {
+    if (any(nchar(x) != 1)) {
+      cli::cli_abort(
+        "All elements of sequence vector must be single characters."
+      )
+    }
+    paste(x, collapse = "")
+  } else {
+    x
+  }
+}
+
+
+# %% annotation_position ----
+#' Create position-based annotations for A3
+#'
+#' Creates an `A3Position` object for site, PTM, or processing annotations with
+#' optional types.
+#'
+#' @param x Integer vector: Positions of the annotation (1-based indexing).
+#' @param type Optional character scalar: Annotation type
+#'
+#' @return A3Position object
+#'
+#' @author EDG
+#' @export
+annotation_position <- function(x, type = "") {
+  A3Position(
+    data = x,
+    type = type
+  )
+}
+
+# %% annotation_range ----
+#' Create range-based annotations for A3
+#'
+#' Creates an `A3Range` object for region, PTM, or processing annotations with
+#' optional types.
+#'
+#' @param x Integer matrix with 2 columns corresponding to start and end positions of the annotation (1-based indexing).
+#' @param type Optional character scalar: Annotation type
+#'
+#' @return A3Range object
+#'
+#' @author EDG
+#' @export
+annotation_range <- function(x, type = "") {
+  A3Range(
+    data = x,
+    type = type
+  )
+}
+
+# %% create_A3 ----
+#' Create an A3 object from sequence, annotations, and metadata
+#'
+#' @param sequence Character: Amino acid sequence string.
+#' @param site Named list of site annotations
+#' @param region Named list of region annotations
+#' @param ptm Named list of PTM annotations
+#' @param processing Named list of processing annotations
+#' @param variant Named list of variant annotations
+#' @param uniprot_id Character: UniProt ID for metadata
+#' @param description Character: Protein description for metadata
+#' @param reference Character: Reference for metadata
+#' @param organism Character: Organism name for metadata
+#'
+#' @return A3 object
+#'
+#' @author EDG
+#'
+#' @export
+create_A3 <- function(
+  sequence,
+  site = list(),
+  region = list(),
+  ptm = list(),
+  processing = list(),
+  variant = list(),
+  uniprot_id = "",
+  description = "",
+  reference = "",
+  organism = ""
+) {
+  A3(
+    sequence = A3Sequence(concat(sequence)),
+    annotations = A3Annotation(
+      site = site,
+      region = region,
+      ptm = ptm,
+      processing = processing,
+      variant = variant
+    ),
+    metadata = A3Metadata(
+      uniprot_id = uniprot_id,
+      description = description,
+      reference = reference,
+      organism = organism
+    )
+  )
+}
