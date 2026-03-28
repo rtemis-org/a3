@@ -12,8 +12,10 @@ __dev/
 .zed/
 
 # R
+.lintr
 *.Rcheck/
 *.tar.gz
 
 # Agents
+.claude/
 AGENTS.md
