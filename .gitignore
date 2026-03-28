@@ -1,5 +1,7 @@
 # Dev
 __dev/
+specs/
+examples/
 
 # macOS
 .DS_Store
