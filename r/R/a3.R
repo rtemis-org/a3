@@ -626,17 +626,17 @@ method(print, A3) <- function(x, output_type = NULL, ...) {
 # %% Public API ------------------------------------------------------------------------------------
 # The public API uses functions to create A3 objects from base R data structures.
 # Minimum set of required functions:
-# - create_A3(sequence, annotations, metadata)
-#   - sequence is character(1); can be character(n) that will be concatenated using `concat()`
-#   - site: named list created using `annotation_position()`
-#   - region: named list created using `annotation_range()`
-#   - ptm: named list created using `annotation_position()` OR `annotation_range()`
-#   - processing: named list created using `annotation_position()` OR `annotation_range()`
-#   - variant: named list created using `annotation_variant()`
-#   - uniprot_id: character(1)
-#   - description: character(1)
-#   - reference: character(1)
-#   - organism: character(1)
+# * `create_A3(sequence, annotations, metadata)`
+#   * sequence is character(1); can be character(n) that will be concatenated using `concat()`
+#   * site: named list created using `annotation_position()`
+#   * region: named list created using `annotation_range()`
+#   * ptm: named list created using `annotation_position()` OR `annotation_range()`
+#   * processing: named list created using `annotation_position()` OR `annotation_range()`
+#   * variant: named list created using `annotation_variant()`
+#   * uniprot_id: `character(1)`
+#   * description: `character(1)`
+#   * reference: `character(1)`
+#   * organism: `character(1)`
 
 # %% concat ----
 #' Concatenate character vector to single string for sequence input
@@ -756,16 +756,32 @@ create_A3 <- function(
   organism = ""
 ) {
   site <- lapply(site, function(a) {
-    if (S7_inherits(a, A3Site)) a else A3Site(index = a[["index"]], type = a[["type"]])
+    if (S7_inherits(a, A3Site)) {
+      a
+    } else {
+      A3Site(index = a[["index"]], type = a[["type"]])
+    }
   })
   region <- lapply(region, function(a) {
-    if (S7_inherits(a, A3Region)) a else A3Region(index = a[["index"]], type = a[["type"]])
+    if (S7_inherits(a, A3Region)) {
+      a
+    } else {
+      A3Region(index = a[["index"]], type = a[["type"]])
+    }
   })
   ptm <- lapply(ptm, function(a) {
-    if (S7_inherits(a, A3PTM)) a else A3PTM(index = a[["index"]], type = a[["type"]])
+    if (S7_inherits(a, A3PTM)) {
+      a
+    } else {
+      A3PTM(index = a[["index"]], type = a[["type"]])
+    }
   })
   processing <- lapply(processing, function(a) {
-    if (S7_inherits(a, A3Processing)) a else A3Processing(index = a[["index"]], type = a[["type"]])
+    if (S7_inherits(a, A3Processing)) {
+      a
+    } else {
+      A3Processing(index = a[["index"]], type = a[["type"]])
+    }
   })
   A3(
     sequence = A3Sequence(concat(sequence)),
