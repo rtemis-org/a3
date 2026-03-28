@@ -7,14 +7,14 @@
 write_A3json(x, filepath, overwrite = FALSE)
 }
 \arguments{
-\item{x}{\code{A3} object, as created by \code{as_A3()}.}
+\item{x}{\code{A3} object.}
 
 \item{filepath}{Character: Path to save JSON file.}
 
 \item{overwrite}{Logical: If TRUE, overwrite existing file.}
 }
 \value{
-Nothing. Writes JSON file.
+Invisible \code{x}. Writes JSON file as side effect.
 }
 \description{
 Write \code{A3} object to JSON file

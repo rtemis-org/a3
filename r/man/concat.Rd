@@ -2,21 +2,18 @@
 % Please edit documentation in R/a3.R
 \name{concat}
 \alias{concat}
-\title{Create Site Annotation}
+\title{Concatenate character vector to single string for sequence input}
 \usage{
 concat(x)
 }
 \arguments{
 \item{x}{Character vector to concatenate}
-
-\item{index}{\code{A3Position} or \code{A3Range} object indicating the position(s) of the site.
-Concatenate character vector to single string for sequence input}
 }
 \value{
 Single character string
 }
 \description{
-Create Site Annotation
+Concatenate character vector to single string for sequence input
 }
 \author{
 EDG

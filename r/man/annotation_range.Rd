@@ -7,16 +7,17 @@
 annotation_range(x, type = "")
 }
 \arguments{
-\item{x}{Integer matrix with 2 columns corresponding to start and end positions of the annotation (1-based indexing).}
+\item{x}{Integer matrix with 2 columns corresponding to start and end positions of the
+annotation (1-based indexing).}
 
 \item{type}{Optional character scalar: Annotation type}
 }
 \value{
-A3Range object
+Named list with \code{index} (A3Range) and \code{type} (character)
 }
 \description{
-Creates an \code{A3Range} object for region, PTM, or processing annotations with
-optional types.
+Creates an annotation spec (named list) with an \code{A3Range} index and optional type,
+for use with \code{create_A3()}.
 }
 \author{
 EDG

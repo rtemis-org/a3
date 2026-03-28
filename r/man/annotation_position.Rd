@@ -12,11 +12,11 @@ annotation_position(x, type = "")
 \item{type}{Optional character scalar: Annotation type}
 }
 \value{
-A3Position object
+Named list with \code{index} (A3Position) and \code{type} (character)
 }
 \description{
-Creates an \code{A3Position} object for site, PTM, or processing annotations with
-optional types.
+Creates an annotation spec (named list) with an \code{A3Position} index and optional type,
+for use with \code{create_A3()}.
 }
 \author{
 EDG
