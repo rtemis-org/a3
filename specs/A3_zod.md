@@ -69,8 +69,9 @@ A3Data → {
 
 ### Ranges (`RangesSchema`)
 
-- `z.array(z.tuple([PositionSchema, PositionSchema]).refine(([s, e]) => s <= e))`
-- `.transform(normalizeRanges)` — sorted by start, overlapping and adjacent ranges merged
+- `z.array(z.tuple([PositionSchema, PositionSchema]).refine(([s, e]) => s < e))`
+- `.transform(sortRanges)` — sorted by start (then end for ties)
+- `.superRefine(checkNoOverlap)` — rejects if any two consecutive ranges overlap (`curr[0] <= prev[1]`); adjacent ranges (`curr[0] = prev[1] + 1`) are permitted
 
 ### Annotation entry schemas
 
@@ -115,8 +116,9 @@ Pure functions used inside Zod transforms:
 sortDedup(arr: readonly number[]): number[]
 // Deduplicate and sort ascending
 
-normalizeRanges(arr: readonly [number, number][]): [number, number][]
-// Sort by start; merge [a,b] and [c,d] when c <= b+1 (overlap or adjacent)
+sortRanges(arr: readonly [number, number][]): [number, number][]
+// Sort by start (then end for ties); no merging
+// Overlap detection is a separate step in RangesSchema
 
 isJsonCompatible(v: unknown): boolean
 // Recursive check: null | boolean | number | string | array | plain object
