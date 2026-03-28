@@ -3,6 +3,7 @@
 export(aa_sub)
 export(annotation_position)
 export(annotation_range)
+export(annotation_variant)
 export(concat)
 export(create_A3)
 export(gene2sequence)
