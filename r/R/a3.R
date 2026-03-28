@@ -742,9 +742,15 @@ create_A3 <- function(
   reference = "",
   organism = ""
 ) {
-  site <- lapply(site, function(a) A3Site(index = a[["index"]], type = a[["type"]]))
-  region <- lapply(region, function(a) A3Region(index = a[["index"]], type = a[["type"]]))
-  ptm <- lapply(ptm, function(a) A3PTM(index = a[["index"]], type = a[["type"]]))
+  site <- lapply(site, function(a) {
+    A3Site(index = a[["index"]], type = a[["type"]])
+  })
+  region <- lapply(region, function(a) {
+    A3Region(index = a[["index"]], type = a[["type"]])
+  })
+  ptm <- lapply(ptm, function(a) {
+    A3PTM(index = a[["index"]], type = a[["type"]])
+  })
   processing <- lapply(processing, function(a) {
     A3Processing(index = a[["index"]], type = a[["type"]])
   })
@@ -860,7 +866,11 @@ A3from_json <- function(x, ...) {
   }
 
   # Sequence: accept character(1) or character(n) (legacy per-residue arrays)
-  sequence <- if (length(x[["sequence"]]) > 1) concat(x[["sequence"]]) else x[["sequence"]]
+  sequence <- if (length(x[["sequence"]]) > 1) {
+    concat(x[["sequence"]])
+  } else {
+    x[["sequence"]]
+  }
 
   annotations <- x[["annotations"]]
 
@@ -918,7 +928,11 @@ A3from_json <- function(x, ...) {
   }
 
   processing <- if (!is.null(annotations[["processing"]])) {
-    lapply(annotations[["processing"]], parse_feature, feature_class = A3Processing)
+    lapply(
+      annotations[["processing"]],
+      parse_feature,
+      feature_class = A3Processing
+    )
   } else {
     list()
   }
