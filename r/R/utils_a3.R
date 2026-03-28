@@ -15,59 +15,37 @@ get_alphafold <- function(uniprotid) {
   httr::stop_for_status(response)
   content <- httr::content(response, as = "text", encoding = "UTF-8")
   jsonlite::fromJSON(content)
-} # /rtemis.a3::get_alphafold
+}
 
+
+# %% get_alphafold_pdb ----
 get_alphafold_pdb <- function(uniprotid) {
   get_alphafold(uniprotid)$pdb
-} # /rtemis.a3::get_alphafold_pdb
+}
 
 
 #' Write `A3` object to JSON file
 #'
-#' @param x `A3` object, as created by `as_A3()`.
+#' @param x `A3` object.
 #' @param filepath Character: Path to save JSON file.
 #' @param overwrite Logical: If TRUE, overwrite existing file.
 #'
-#' @return Nothing. Writes JSON file.
+#' @return Invisible `x`. Writes JSON file as side effect.
 #'
 #' @author EDG
 #' @export
 write_A3json <- function(x, filepath, overwrite = FALSE) {
-  # Check types ----
   check_is_S7(x, A3)
   check_inherits(filepath, "character")
-
-  # Check dependencies ----
-  check_dependencies("jsonlite")
-
-  # Normalize path ----
   filepath <- normalizePath(filepath, mustWork = FALSE)
-
-  # Check file ----
   if (file.exists(filepath) && !overwrite) {
     cli::cli_abort(
-      "File ",
-      filepath,
-      " exists.\033[0m",
-      "\n  Set",
-      highlight("`overwrite = TRUE`"),
-      "if you wish to overwrite."
+      "File {.file {filepath}} exists. Set {.arg overwrite = TRUE} to overwrite."
     )
   }
-
-  # Save to file
-  jsonlite::write_json(
-    x = as.list(x),
-    path = filepath,
-    simplifyVector = TRUE,
-    simplifyMatrix = FALSE
-  )
-} # /rtemis.a3::write_A3json
-
-
-# read_A3json.R
-# ::rtemis.a3::
-# 2024 EDG rtemis.org
+  writeLines(to_json(x), filepath)
+  invisible(x)
+}
 
 #' Read `A3` object from JSON file
 #'
@@ -79,34 +57,19 @@ write_A3json <- function(x, filepath, overwrite = FALSE) {
 #' @author EDG
 #' @export
 read_A3json <- function(filepath, verbosity = 0L) {
-  # Check types ----
   check_inherits(filepath, "character")
-
-  # Check dependencies ----
-  check_dependencies("jsonlite")
-
-  # Normalize path ----
   filepath <- normalizePath(filepath)
-
-  # Check file ----
   if (!file.exists(filepath)) {
-    cli::cli_abort("File", filepath, "does not exist.")
+    cli::cli_abort("File {.file {filepath}} does not exist.")
   }
-
-  # Read from file
-  A3 <- jsonlite::read_json(
-    path = filepath,
-    simplifyVector = TRUE,
-    simplifyMatrix = FALSE
-  ) |>
-    as_A3()
-
+  json_str <- paste(readLines(filepath, warn = FALSE), collapse = "\n")
+  obj <- A3from_json(json_str)
   if (verbosity > 0) {
-    cat("Read", filepath, ":\n", sep = "")
-    print(A3)
+    cat("Read ", filepath, ":\n", sep = "")
+    print(obj)
   }
-  A3
-} # /rtemis.a3::read_A3json
+  obj
+}
 
 
 #' Perform amino acid substitutions
@@ -148,4 +111,4 @@ aa_sub <- function(x, substitutions, verbosity = 1L) {
     msg("All done.")
   }
   x
-} # /rtemis.a3::aa_sub
+}
