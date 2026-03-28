@@ -25,10 +25,10 @@ pkglogo <- function(
 
 #' @name rtemis.a3-package
 #'
-#' @title rtemis.a3: Annotated Amino Acid format
+#' @title rtemis.a3: Amino Acid Annotation format
 #'
 #' @description
-#' Annotated Amino Acid format utilities
+#' Amino Acid Annotation format utilities
 #'
 #' @import rtemis.utils data.table S7
 #' @importFrom stats ave
