@@ -50,11 +50,14 @@ test_that("A3Position fails with invalid data", {
 
 # %% A3Range ----
 test_that("A3Range succeeds with valid data", {
-  x <- A3Range(data = matrix(c(1L, 5L, 10L, 15L), ncol = 2))
-  expect_s7_class(x, A3Range)
-  x <- A3Range(data = matrix(c(1L, 5L, 10L, 15L), ncol = 2))
-  expect_s7_class(x, A3Range)
+  # Single range
   x <- A3Range(data = matrix(c(1L, 5L), ncol = 2))
+  expect_s7_class(x, A3Range)
+  # Two non-overlapping ranges: [1,5] and [10,15]
+  x <- A3Range(data = matrix(c(1L, 10L, 5L, 15L), ncol = 2))
+  expect_s7_class(x, A3Range)
+  # Adjacent ranges are permitted: [1,5] and [6,10]
+  x <- A3Range(data = matrix(c(1L, 6L, 5L, 10L), ncol = 2))
   expect_s7_class(x, A3Range)
 })
 
@@ -71,9 +74,10 @@ test_that("A3Range fails with invalid data", {
     A3Range(data = matrix(c(5L, 10L, 1L, 15L), ncol = 2)),
     "Start of range must be less than end of range."
   )
+  # Overlapping ranges: [1,5] and [3,8]
   expect_error(
-    A3Range(data = matrix(c(0L, 5L, 10L, 15L), ncol = 2)),
-    "Range values must be positive integers."
+    A3Range(data = matrix(c(1L, 3L, 5L, 8L), ncol = 2)),
+    "must not overlap"
   )
 })
 
