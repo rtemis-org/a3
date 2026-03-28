@@ -865,42 +865,22 @@ A3from_json <- function(x, ...) {
     )
   }
 
-  # Sequence: accept character(1) or character(n) (legacy per-residue arrays)
-  sequence <- if (length(x[["sequence"]]) > 1) {
-    concat(x[["sequence"]])
-  } else {
-    x[["sequence"]]
-  }
-
+  sequence <- x[["sequence"]]
   annotations <- x[["annotations"]]
 
-  # Parse a single annotation entry into a feature object
+  # Parse a single annotation entry (canonical {index, type} form only)
   parse_feature <- function(entry, feature_class) {
-    # Canonical form: list with $index and $type
-    if (is.list(entry) && !is.null(entry[["index"]])) {
-      idx_data <- entry[["index"]]
-      type <- if (is.null(entry[["type"]])) "" else entry[["type"]]
-    } else {
-      # Legacy bare array
-      idx_data <- entry
-      type <- ""
+    if (!is.list(entry) || is.null(entry[["index"]])) {
+      cli::cli_abort(
+        "Each annotation entry must be an object with 'index' and 'type' fields."
+      )
     }
+    idx_data <- entry[["index"]]
+    type <- if (is.null(entry[["type"]])) "" else entry[["type"]]
 
-    # Detect position vs range from structure
+    # List of 2-element vectors → range pairs; plain vector → positions
     if (is.list(idx_data)) {
-      # List of vectors: range pairs (or legacy expanded positions)
-      if (any(vapply(idx_data, length, integer(1)) != 2L)) {
-        # Legacy expanded positions: convert each group to [min, max]
-        mat <- do.call(
-          rbind,
-          lapply(idx_data, function(v) {
-            v <- as.integer(v)
-            c(min(v), max(v))
-          })
-        )
-      } else {
-        mat <- do.call(rbind, lapply(idx_data, as.integer))
-      }
+      mat <- do.call(rbind, lapply(idx_data, as.integer))
       index <- A3Range(data = mat)
     } else {
       index <- A3Position(data = as.integer(idx_data))

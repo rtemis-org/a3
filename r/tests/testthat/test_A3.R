@@ -575,26 +575,20 @@ test_that("A3from_json round-trips to_json with zero loss", {
   expect_identical(restored@metadata@organism, original@metadata@organism)
 })
 
-test_that("A3from_json handles legacy bare-array format", {
+test_that("A3from_json rejects legacy bare-array format", {
   legacy_json <- '{
     "sequence": "MKTAYIAKQRQISFVK",
     "annotations": {
       "site": {
         "Active site": [3, 5]
       },
-      "region": {
-        "KXGS": [[1, 10]]
-      },
+      "region": {},
       "ptm": {},
       "processing": {},
       "variant": []
     }
   }'
-  x <- A3from_json(legacy_json)
-  expect_s7_class(x, A3)
-  expect_identical(x@sequence@data, "MKTAYIAKQRQISFVK")
-  expect_identical(x@annotations@site$`Active site`@index@data, c(3L, 5L))
-  expect_identical(x@annotations@site$`Active site`@type, "")
+  expect_error(A3from_json(legacy_json), "index")
 })
 
 test_that("A3from_json handles missing metadata gracefully", {
