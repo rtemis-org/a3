@@ -743,16 +743,16 @@ create_A3 <- function(
   organism = ""
 ) {
   site <- lapply(site, function(a) {
-    A3Site(index = a[["index"]], type = a[["type"]])
+    if (S7_inherits(a, A3Site)) a else A3Site(index = a[["index"]], type = a[["type"]])
   })
   region <- lapply(region, function(a) {
-    A3Region(index = a[["index"]], type = a[["type"]])
+    if (S7_inherits(a, A3Region)) a else A3Region(index = a[["index"]], type = a[["type"]])
   })
   ptm <- lapply(ptm, function(a) {
-    A3PTM(index = a[["index"]], type = a[["type"]])
+    if (S7_inherits(a, A3PTM)) a else A3PTM(index = a[["index"]], type = a[["type"]])
   })
   processing <- lapply(processing, function(a) {
-    A3Processing(index = a[["index"]], type = a[["type"]])
+    if (S7_inherits(a, A3Processing)) a else A3Processing(index = a[["index"]], type = a[["type"]])
   })
   A3(
     sequence = A3Sequence(concat(sequence)),
