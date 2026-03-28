@@ -1,0 +1,21 @@
+# Dev
+__dev/
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Zed
+.zed/
+
+# Node
+node_modules/
+
+# Build output
+dist/
+
+# Test coverage
+coverage/
