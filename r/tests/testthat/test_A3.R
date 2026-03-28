@@ -13,17 +13,16 @@ test_that("A3Sequence fails with invalid data", {
     A3Sequence(data = "M"),
     "Sequence must be at least 2 characters long"
   )
+  expect_error(
+    A3Sequence(data = "MK123"),
+    "Sequence must only contain uppercase letters"
+  )
 })
 
 
-# %% test A3Index ----
-test_that("A3Index succeeds with valid data", {
-  x <- A3Index(data = c(3L, 5L, 7L))
-  expect_s7_class(x, A3Index)
-})
-
-test_that("A3Index fails with invalid data", {
-  expect_error(A3Index(data = c(1L, 2.5)))
+# %% A3Index ----
+test_that("A3Index is abstract and cannot be instantiated", {
+  expect_error(A3Index(data = c(3L, 5L, 7L)))
 })
 
 
@@ -79,16 +78,8 @@ test_that("A3Range fails with invalid data", {
 })
 
 # %% A3Feature ----
-test_that("A3Feature succeeds with valid type", {
-  x <- A3Feature(type = "phosphorylation")
-  expect_s7_class(x, A3Feature)
-})
-
-test_that("A3Feature fails with invalid type", {
-  expect_error(
-    A3Feature(type = 1L),
-    "object properties are invalid"
-  )
+test_that("A3Feature is abstract and cannot be instantiated", {
+  expect_error(A3Feature(type = "phosphorylation"))
 })
 
 
@@ -228,42 +219,42 @@ test_that("A3Variant fails with invalid position or info", {
 # %% A3Annotation ----
 test_that("A3Annotation succeeds with valid annotations", {
   x <- A3Annotation(
-    site = list(A3Site(index = A3Position(data = c(3L, 5L))))
+    site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L))))
   )
   expect_s7_class(x, A3Annotation)
   x <- A3Annotation(
-    site = list(A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(A3Region(
+    site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
+    region = list(KXGS = A3Region(
       index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
     ))
   )
   expect_s7_class(x, A3Annotation)
   x <- A3Annotation(
-    site = list(A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(A3Region(
+    site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
+    region = list(KXGS = A3Region(
       index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
     )),
-    ptm = list(A3PTM(index = A3Position(data = c(7L))))
+    ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L))))
   )
   expect_s7_class(x, A3Annotation)
   x <- A3Annotation(
-    site = list(A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(A3Region(
+    site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
+    region = list(KXGS = A3Region(
       index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
     )),
-    ptm = list(A3PTM(index = A3Position(data = c(7L)))),
-    processing = list(A3Processing(
+    ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
+    processing = list(`Signal peptide` = A3Processing(
       index = A3Range(data = matrix(c(20L, 30L), ncol = 2))
     ))
   )
   expect_s7_class(x, A3Annotation)
   x <- A3Annotation(
-    site = list(A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(A3Region(
+    site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
+    region = list(KXGS = A3Region(
       index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
     )),
-    ptm = list(A3PTM(index = A3Position(data = c(7L)))),
-    processing = list(A3Processing(
+    ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
+    processing = list(`Signal peptide` = A3Processing(
       index = A3Range(data = matrix(c(20L, 30L), ncol = 2))
     )),
     variant = list(A3Variant(
@@ -325,6 +316,21 @@ test_that("A3Annotation fails with invalid data", {
     ),
     "All variant annotations must be A3Variant objects."
   )
+  expect_error(
+    A3Annotation(
+      site = list(A3Site(index = A3Position(data = c(3L, 5L))))
+    ),
+    "All site annotation names must be non-empty strings."
+  )
+  expect_error(
+    A3Annotation(
+      site = setNames(
+        list(A3Site(index = A3Position(data = c(3L, 5L)))),
+        ""
+      )
+    ),
+    "All site annotation names must be non-empty strings."
+  )
 })
 
 
@@ -362,6 +368,14 @@ test_that("A3Metadata fails with invalid data", {
     A3Metadata(organism = 123L),
     "object properties are invalid"
   )
+  expect_error(
+    A3Metadata(uniprot_id = c("P10636", "Q9Y3Q8")),
+    "uniprot_id.*character\\(1\\)"
+  )
+  expect_error(
+    A3Metadata(organism = c("Homo sapiens", "Mus musculus")),
+    "organism.*character\\(1\\)"
+  )
 })
 
 
@@ -370,12 +384,12 @@ test_that("A3 can be instantiated with valid sequence and annotations", {
   x <- A3(
     sequence = A3Sequence(data = "MKTAYIAKQRQISFVK"),
     annotations = A3Annotation(
-      site = list(A3Site(index = A3Position(data = c(3L, 5L)))),
-      region = list(A3Region(
+      site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
+      region = list(KXGS = A3Region(
         index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
       )),
-      ptm = list(A3PTM(index = A3Position(data = c(7L)))),
-      processing = list(A3Processing(
+      ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
+      processing = list(`Signal peptide` = A3Processing(
         index = A3Range(data = matrix(c(8L, 12L), ncol = 2))
       )),
       variant = list(A3Variant(
