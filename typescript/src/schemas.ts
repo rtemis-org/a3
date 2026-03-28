@@ -1,21 +1,35 @@
-import { z } from "zod"
-import { sortDedup, normalizeRanges, isJsonCompatible } from "./normalize"
+import { z } from "zod";
+import { isJsonCompatible, sortDedup, sortRanges } from "./normalize";
 
 // ── Primitives ────────────────────────────────────────────────────────────────
 
 // 1-based positive integer position
-const PositionSchema = z.number().int().min(1)
+const PositionSchema = z.number().int().min(1);
 
 // Sorted, deduplicated array of positions
-const PositionsSchema = z.array(PositionSchema).transform(sortDedup)
+const PositionsSchema = z.array(PositionSchema).transform(sortDedup);
 
-// Inclusive [start, end] range tuple, start <= end
+// Inclusive [start, end] range tuple, start < end
 const RangeTupleSchema = z
   .tuple([PositionSchema, PositionSchema])
-  .refine(([s, e]) => s <= e, { message: "start must be <= end" })
+  .refine(([s, e]) => s < e, { message: "start must be < end" });
 
-// Sorted, overlaps-merged array of ranges
-const RangesSchema = z.array(RangeTupleSchema).transform(normalizeRanges)
+// Sorted array of ranges; overlapping ranges are rejected
+const RangesSchema = z
+  .array(RangeTupleSchema)
+  .transform(sortRanges)
+  .superRefine((ranges, ctx) => {
+    let prev: [number, number] | undefined;
+    for (const curr of ranges) {
+      if (prev !== undefined && curr[0] <= prev[1]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `ranges [${prev[0]},${prev[1]}] and [${curr[0]},${curr[1]}] overlap`,
+        });
+      }
+      prev = curr;
+    }
+  });
 
 // ── Annotation entry schemas ──────────────────────────────────────────────────
 //
@@ -27,17 +41,17 @@ const RangesSchema = z.array(RangeTupleSchema).transform(normalizeRanges)
 const SiteEntrySchema = z.object({
   index: PositionsSchema,
   type: z.string().default(""),
-})
+});
 
 const RegionEntrySchema = z.object({
   index: RangesSchema,
   type: z.string().default(""),
-})
+});
 
 const FlexEntrySchema = z.object({
   index: z.union([RangesSchema, PositionsSchema]),
   type: z.string().default(""),
-})
+});
 
 // ── Variant ───────────────────────────────────────────────────────────────────
 
@@ -45,7 +59,7 @@ const FlexEntrySchema = z.object({
 const VariantSchema = z
   .object({ position: PositionSchema })
   .catchall(z.unknown())
-  .refine((v) => isJsonCompatible(v), { message: "variant fields must be JSON-compatible" })
+  .refine((v) => isJsonCompatible(v), { message: "variant fields must be JSON-compatible" });
 
 // ── Annotation families ───────────────────────────────────────────────────────
 
@@ -57,7 +71,7 @@ const AnnotationsSchema = z
     processing: z.record(z.string().min(1), FlexEntrySchema).default({}),
     variant: z.array(VariantSchema).default([]),
   })
-  .strict()
+  .strict();
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
 
@@ -68,7 +82,7 @@ const MetadataSchema = z
     reference: z.string().default(""),
     organism: z.string().default(""),
   })
-  .strict()
+  .strict();
 
 // ── Root schema ───────────────────────────────────────────────────────────────
 
@@ -77,10 +91,7 @@ export const A3InputSchema = z
     sequence: z
       .string()
       .min(2, "sequence must be at least 2 characters")
-      .regex(
-        /^[A-Za-z*]+$/,
-        "sequence must contain only amino acid letters [A-Za-z] or '*'",
-      )
+      .regex(/^[A-Za-z*]+$/, "sequence must contain only amino acid letters [A-Za-z] or '*'")
       .transform((s) => s.toUpperCase()),
     annotations: AnnotationsSchema.default({
       site: {},
@@ -93,53 +104,56 @@ export const A3InputSchema = z
   })
   .strict()
   .superRefine((data, ctx) => {
-    const len = data.sequence.length
+    const len = data.sequence.length;
 
     const boundsMsg = (pos: number) =>
-      `position ${pos} is out of bounds for sequence of length ${len} (must be 1–${len})`
+      `position ${pos} is out of bounds for sequence of length ${len} (must be 1–${len})`;
 
     const checkPos = (pos: number, path: (string | number)[]) => {
       if (pos < 1 || pos > len)
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: boundsMsg(pos), path })
-    }
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: boundsMsg(pos), path });
+    };
 
-    const checkIndex = (
-      index: number[] | [number, number][],
-      basePath: (string | number)[],
-    ) => {
-      if (index.length === 0) return
+    const checkIndex = (index: number[] | [number, number][], basePath: (string | number)[]) => {
+      if (index.length === 0) return;
       if (Array.isArray(index[0])) {
-        ;(index as [number, number][]).forEach(([s, e], i) => {
-          checkPos(s, [...basePath, i, 0])
-          checkPos(e, [...basePath, i, 1])
-        })
+        let i = 0;
+        for (const [s, e] of index as [number, number][]) {
+          checkPos(s, [...basePath, i, 0]);
+          checkPos(e, [...basePath, i, 1]);
+          i++;
+        }
       } else {
-        ;(index as number[]).forEach((pos, i) => checkPos(pos, [...basePath, i]))
+        let i = 0;
+        for (const pos of index as number[]) {
+          checkPos(pos, [...basePath, i]);
+          i++;
+        }
       }
-    }
+    };
 
     for (const [name, entry] of Object.entries(data.annotations.site)) {
-      checkIndex(entry.index, ["annotations", "site", name, "index"])
+      checkIndex(entry.index, ["annotations", "site", name, "index"]);
     }
     for (const [name, entry] of Object.entries(data.annotations.region)) {
-      checkIndex(entry.index, ["annotations", "region", name, "index"])
+      checkIndex(entry.index, ["annotations", "region", name, "index"]);
     }
     for (const [name, entry] of Object.entries(data.annotations.ptm)) {
-      checkIndex(entry.index, ["annotations", "ptm", name, "index"])
+      checkIndex(entry.index, ["annotations", "ptm", name, "index"]);
     }
     for (const [name, entry] of Object.entries(data.annotations.processing)) {
-      checkIndex(entry.index, ["annotations", "processing", name, "index"])
+      checkIndex(entry.index, ["annotations", "processing", name, "index"]);
     }
     data.annotations.variant.forEach((v, i) => {
-      checkPos(v.position, ["annotations", "variant", i, "position"])
-    })
-  })
+      checkPos(v.position, ["annotations", "variant", i, "position"]);
+    });
+  });
 
 // ── Exported types (inferred from schemas) ────────────────────────────────────
 
-export type A3Data = z.infer<typeof A3InputSchema>
-export type MetadataData = z.infer<typeof MetadataSchema>
-export type VariantData = z.infer<typeof VariantSchema>
-export type SiteEntryData = z.infer<typeof SiteEntrySchema>
-export type RegionEntryData = z.infer<typeof RegionEntrySchema>
-export type FlexEntryData = z.infer<typeof FlexEntrySchema>
+export type A3Data = z.infer<typeof A3InputSchema>;
+export type MetadataData = z.infer<typeof MetadataSchema>;
+export type VariantData = z.infer<typeof VariantSchema>;
+export type SiteEntryData = z.infer<typeof SiteEntrySchema>;
+export type RegionEntryData = z.infer<typeof RegionEntrySchema>;
+export type FlexEntryData = z.infer<typeof FlexEntrySchema>;

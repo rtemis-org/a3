@@ -1,50 +1,50 @@
-import { ZodError } from "zod"
-import { A3InputSchema, type A3Data, type VariantData } from "./schemas"
+import type { ZodError } from "zod";
+import { type A3Data, A3InputSchema, type VariantData } from "./schemas";
 
 // ── Error classes ─────────────────────────────────────────────────────────────
 
 export class A3ValidationError extends Error {
-  readonly issues: ZodError["issues"]
+  readonly issues: ZodError["issues"];
 
   constructor(zodError: ZodError) {
-    super(zodError.message)
-    this.name = "A3ValidationError"
-    this.issues = zodError.issues
+    super(zodError.message);
+    this.name = "A3ValidationError";
+    this.issues = zodError.issues;
   }
 }
 
 export class A3ParseError extends Error {
   constructor(message: string, options?: ErrorOptions) {
-    super(message, options)
-    this.name = "A3ParseError"
+    super(message, options);
+    this.name = "A3ParseError";
   }
 }
 
 // ── A3 class ──────────────────────────────────────────────────────────────────
 
 export class A3 {
-  readonly #data: A3Data
+  readonly #data: A3Data;
 
   constructor(input: unknown) {
-    const result = A3InputSchema.safeParse(input)
-    if (!result.success) throw new A3ValidationError(result.error)
-    this.#data = Object.freeze(result.data)
+    const result = A3InputSchema.safeParse(input);
+    if (!result.success) throw new A3ValidationError(result.error);
+    this.#data = Object.freeze(result.data);
   }
 
   // ── Static constructors ───────────────────────────────────────────────────
 
   static fromData(data: unknown): A3 {
-    return new A3(data)
+    return new A3(data);
   }
 
   static fromJSONText(text: string): A3 {
-    let parsed: unknown
+    let parsed: unknown;
     try {
-      parsed = JSON.parse(text)
+      parsed = JSON.parse(text);
     } catch (e) {
-      throw new A3ParseError("Invalid JSON", { cause: e })
+      throw new A3ParseError("Invalid JSON", { cause: e });
     }
-    return new A3(parsed)
+    return new A3(parsed);
   }
 
   // readJSON is provided in io.ts and re-exported from index.ts
@@ -53,7 +53,7 @@ export class A3 {
 
   /** Number of residues in the sequence. */
   get length(): number {
-    return this.#data.sequence.length
+    return this.#data.sequence.length;
   }
 
   /**
@@ -64,16 +64,16 @@ export class A3 {
     if (!Number.isInteger(position) || position < 1 || position > this.length) {
       throw new RangeError(
         `position ${position} is out of bounds for sequence of length ${this.length} (must be 1–${this.length})`,
-      )
+      );
     }
-    return this.#data.sequence[position - 1]!
+    return this.#data.sequence.charAt(position - 1);
   }
 
   /**
    * Return all variants at a given 1-based position.
    */
   variantsAt(position: number): VariantData[] {
-    return this.#data.annotations.variant.filter((v) => v.position === position)
+    return this.#data.annotations.variant.filter((v) => v.position === position);
   }
 
   // ── Serialization ─────────────────────────────────────────────────────────
@@ -83,7 +83,7 @@ export class A3 {
    * The returned reference is frozen — spread to get a mutable copy.
    */
   toData(): A3Data {
-    return this.#data
+    return this.#data;
   }
 
   /**
@@ -91,7 +91,7 @@ export class A3 {
    * Called automatically by JSON.stringify — do not return a string here.
    */
   toJSON(): A3Data {
-    return this.#data
+    return this.#data;
   }
 
   /**
@@ -99,16 +99,16 @@ export class A3 {
    * @param indent Number of spaces for indentation (default 2). Pass 0 for compact output.
    */
   toJSONString(indent = 2): string {
-    return JSON.stringify(this, null, indent)
+    return JSON.stringify(this, null, indent);
   }
 
   // ── Introspection ─────────────────────────────────────────────────────────
 
   toString(): string {
-    const seq = this.#data.sequence
-    const preview = seq.length > 12 ? `${seq.slice(0, 12)}…` : seq
-    const id = this.#data.metadata.uniprot_id
-    const label = id ? ` [${id}]` : ""
-    return `A3${label} { length: ${this.length}, sequence: "${preview}" }`
+    const seq = this.#data.sequence;
+    const preview = seq.length > 12 ? `${seq.slice(0, 12)}…` : seq;
+    const id = this.#data.metadata.uniprot_id;
+    const label = id ? ` [${id}]` : "";
+    return `A3${label} { length: ${this.length}, sequence: "${preview}" }`;
   }
 }
