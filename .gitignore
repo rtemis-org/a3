@@ -18,4 +18,5 @@ __dev/
 
 # Agents
 .claude/
+CLAUDE.md
 AGENTS.md
