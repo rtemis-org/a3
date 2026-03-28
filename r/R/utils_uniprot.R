@@ -1,39 +1,37 @@
-#' Get protein sequence from UniProt
+# %% uniprot_sequence ----
+#' Fetch a protein sequence from UniProt
 #'
-#' @param accession Character: UniProt Accession number - e.g. "Q9UMX9".
-#' @param baseURL Character: UniProt rest API base URL.
-#' @param verbosity Integer: Verbosity level.
+#' Lightweight FASTA-only fetch. Use this when you only need the amino acid
+#' sequence. For full annotations and metadata use [uniprot_to_A3()].
 #'
-#' @return List with three elements: Identifier, Annotation, and Sequence.
+#' @param accession Character scalar: UniProt accession, e.g. `"P10636"`.
+#' @param base_url Character scalar: UniProt REST API base URL.
+#' @param verbosity Integer scalar: Verbosity level.
+#'
+#' @return Character scalar: amino acid sequence in single-letter code.
 #'
 #' @author EDG
 #' @export
+#'
 #' @examples
 #' \dontrun{
-#' mapt <- uniprot_get("Q9UMX9")
+#' seq <- uniprot_sequence("P10636")
 #' }
-uniprot_get <- function(
+uniprot_sequence <- function(
   accession,
-  baseURL = "https://rest.uniprot.org/uniprotkb",
+  base_url = "https://rest.uniprot.org/uniprotkb",
   verbosity = 1L
 ) {
-  # Check types
   check_inherits(accession, "character")
+  check_dependencies("seqinr")
 
-  path <- paste0(baseURL, "/", accession, ".fasta")
-  dat <- seqinr::read.fasta(path, seqtype = "AA")
-  Annotation <- attr(dat[[1]], "Annot")
-  Identifier <- gsub(" .*", "", Annotation)
+  path <- paste0(base_url, "/", accession, ".fasta")
+  dat  <- seqinr::read.fasta(path, seqtype = "AA")
   if (verbosity > 0L) {
-    msg("Got:", highlight(Annotation))
+    msg("Got:", highlight(attr(dat[[1L]], "Annot")))
   }
-
-  list(
-    Identifier = Identifier,
-    Annotation = Annotation,
-    Sequence = as.character(dat[[1]])
-  )
-} # /uniprot_get
+  paste(as.character(dat[[1L]]), collapse = "")
+} # /uniprot_sequence
 
 
 # %% uniprot_to_A3 ----
