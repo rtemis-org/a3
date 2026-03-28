@@ -28,10 +28,8 @@ test_that("A3Index fails with invalid data", {
 
 
 # %% A3Position ----
-test_that("A3Position succeeds with valid data +/- type", {
+test_that("A3Position succeeds with valid data", {
   x <- A3Position(data = c(3L, 5L, 7L))
-  expect_s7_class(x, A3Position)
-  x <- A3Position(data = c(3L, 5L, 7L), type = "phosphorylation")
   expect_s7_class(x, A3Position)
 })
 
@@ -48,10 +46,6 @@ test_that("A3Position fails with invalid data", {
     A3Position(data = c(1.5, 5L, 7L)),
     "object properties are invalid"
   )
-  expect_error(
-    A3Position(data = c(1.5, 5L, 7L), type = 99L),
-    "object properties are invalid"
-  )
 })
 
 
@@ -59,10 +53,7 @@ test_that("A3Position fails with invalid data", {
 test_that("A3Range succeeds with valid data", {
   x <- A3Range(data = matrix(c(1L, 5L, 10L, 15L), ncol = 2))
   expect_s7_class(x, A3Range)
-  x <- A3Range(
-    data = matrix(c(1L, 5L, 10L, 15L), ncol = 2),
-    type = "Phosphodegron"
-  )
+  x <- A3Range(data = matrix(c(1L, 5L, 10L, 15L), ncol = 2))
   expect_s7_class(x, A3Range)
   x <- A3Range(data = matrix(c(1L, 5L), ncol = 2))
   expect_s7_class(x, A3Range)
@@ -411,4 +402,220 @@ test_that("A3 fails with invalid sequence or annotations", {
     ),
     "object properties are invalid"
   )
+})
+
+
+# %% create_A3 ----
+test_that("create_A3 succeeds with valid inputs", {
+  x <- create_A3(
+    sequence = "MKTAYIAKQRQISFVK",
+    site = list(
+      `N-terminal repeat` = annotation_position(
+        c(3, 5)
+      )
+    ),
+    region = list(
+      Phosphodegron = annotation_range(
+        matrix(c(1, 10), ncol = 2),
+        type = "functional region"
+      )
+    ),
+    ptm = list(
+      Phosphorylation = annotation_position(
+        c(7)
+      )
+    ),
+    processing = list(
+      `Signal peptide` = annotation_range(
+        matrix(c(8, 12), ncol = 2)
+      )
+    ),
+    variant = list(
+      zdorg = annotation_variant(
+        15,
+        info = list(mutation = "R15H")
+      )
+    ),
+    uniprot_id = "P12345",
+    description = "Example protein",
+    reference = "PMID:12345678",
+    organism = "Homo sapiens"
+  )
+  expect_s7_class(x, A3)
+})
+
+
+# %% to_json / A3from_json ----
+test_that("to_json produces valid JSON with canonical structure", {
+  x <- create_A3(
+    sequence = "MKTAYIAKQRQISFVK",
+    site = list(
+      `Active site` = annotation_position(c(3, 5), type = "activeSite")
+    ),
+    region = list(
+      KXGS = annotation_range(matrix(c(1L, 10L), ncol = 2))
+    ),
+    ptm = list(
+      Phosphorylation = annotation_position(c(7))
+    ),
+    processing = list(
+      `Signal peptide` = annotation_range(matrix(c(8L, 12L), ncol = 2))
+    ),
+    variant = list(
+      annotation_variant(15, info = list(from = "R", to = "H"))
+    ),
+    uniprot_id = "P12345",
+    description = "Example protein",
+    organism = "Homo sapiens"
+  )
+  json <- to_json(x)
+  expect_type(json, "character")
+  parsed <- jsonlite::fromJSON(json, simplifyVector = FALSE)
+  expect_equal(parsed$sequence, "MKTAYIAKQRQISFVK")
+  expect_equal(parsed$annotations$site$`Active site`$type, "activeSite")
+  expect_equal(parsed$annotations$region$KXGS$index, list(list(1L, 10L)))
+  expect_equal(parsed$metadata$uniprot_id, "P12345")
+  expect_equal(parsed$metadata$organism, "Homo sapiens")
+  expect_equal(parsed$metadata$reference, "")
+})
+
+test_that("A3from_json round-trips to_json with zero loss", {
+  original <- create_A3(
+    sequence = "MKTAYIAKQRQISFVK",
+    site = list(
+      `Active site` = annotation_position(c(3, 5), type = "activeSite")
+    ),
+    region = list(
+      KXGS = annotation_range(matrix(c(1L, 10L), ncol = 2))
+    ),
+    ptm = list(
+      Phosphorylation = annotation_position(c(7))
+    ),
+    processing = list(
+      `Signal peptide` = annotation_range(matrix(c(8L, 12L), ncol = 2))
+    ),
+    variant = list(
+      annotation_variant(15, info = list(from = "R", to = "H"))
+    ),
+    uniprot_id = "P12345",
+    description = "Example protein",
+    reference = "PMID:12345678",
+    organism = "Homo sapiens"
+  )
+
+  restored <- A3from_json(to_json(original))
+
+  # Sequence
+  expect_identical(restored@sequence@data, original@sequence@data)
+
+  # Site annotations
+  expect_identical(
+    names(restored@annotations@site),
+    names(original@annotations@site)
+  )
+  expect_identical(
+    restored@annotations@site[[1]]@index@data,
+    original@annotations@site[[1]]@index@data
+  )
+  expect_identical(
+    restored@annotations@site[[1]]@type,
+    original@annotations@site[[1]]@type
+  )
+
+  # Region annotations
+  expect_identical(
+    names(restored@annotations@region),
+    names(original@annotations@region)
+  )
+  expect_identical(
+    restored@annotations@region[[1]]@index@data,
+    original@annotations@region[[1]]@index@data
+  )
+
+  # PTM annotations
+  expect_identical(
+    restored@annotations@ptm[[1]]@index@data,
+    original@annotations@ptm[[1]]@index@data
+  )
+
+  # Processing annotations
+  expect_identical(
+    restored@annotations@processing[[1]]@index@data,
+    original@annotations@processing[[1]]@index@data
+  )
+
+  # Variant annotations
+  expect_identical(
+    restored@annotations@variant[[1]]@position@data,
+    original@annotations@variant[[1]]@position@data
+  )
+  expect_identical(
+    restored@annotations@variant[[1]]@info$from,
+    original@annotations@variant[[1]]@info$from
+  )
+
+  # Metadata
+  expect_identical(restored@metadata@uniprot_id, original@metadata@uniprot_id)
+  expect_identical(restored@metadata@description, original@metadata@description)
+  expect_identical(restored@metadata@reference, original@metadata@reference)
+  expect_identical(restored@metadata@organism, original@metadata@organism)
+})
+
+test_that("A3from_json handles legacy bare-array format", {
+  legacy_json <- '{
+    "sequence": "MKTAYIAKQRQISFVK",
+    "annotations": {
+      "site": {
+        "Active site": [3, 5]
+      },
+      "region": {
+        "KXGS": [[1, 10]]
+      },
+      "ptm": {},
+      "processing": {},
+      "variant": []
+    }
+  }'
+  x <- A3from_json(legacy_json)
+  expect_s7_class(x, A3)
+  expect_identical(x@sequence@data, "MKTAYIAKQRQISFVK")
+  expect_identical(x@annotations@site$`Active site`@index@data, c(3L, 5L))
+  expect_identical(x@annotations@site$`Active site`@type, "")
+})
+
+test_that("A3from_json handles missing metadata gracefully", {
+  json <- '{
+    "sequence": "MKTAYIAKQRQISFVK",
+    "annotations": {
+      "site": {},
+      "region": {},
+      "ptm": {},
+      "processing": {},
+      "variant": []
+    }
+  }'
+  x <- A3from_json(json)
+  expect_s7_class(x, A3)
+  expect_identical(x@metadata@uniprot_id, "")
+  expect_identical(x@metadata@description, "")
+})
+
+test_that("A3from_json accepts pre-parsed list", {
+  lst <- list(
+    sequence = "MKTAYIAKQRQISFVK",
+    annotations = list(
+      site = list(
+        `Active site` = list(index = c(3L, 5L), type = "activeSite")
+      ),
+      region = list(),
+      ptm = list(),
+      processing = list(),
+      variant = list()
+    ),
+    metadata = list(uniprot_id = "P12345")
+  )
+  x <- A3from_json(lst)
+  expect_s7_class(x, A3)
+  expect_identical(x@annotations@site$`Active site`@type, "activeSite")
+  expect_identical(x@metadata@uniprot_id, "P12345")
 })
