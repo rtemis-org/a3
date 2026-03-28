@@ -31,6 +31,7 @@ pkglogo <- function(
 #' Annotated Amino Acid format utilities
 #'
 #' @import rtemis.utils data.table S7
+#' @importFrom stats ave
 "_PACKAGE"
 
 NULL
