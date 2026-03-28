@@ -34,10 +34,25 @@ A3Sequence <- new_class(
       cli::cli_abort("Sequence must be at least 2 characters long.")
     }
     if (!grepl("^[A-Z*]+$", self@data)) {
-      cli::cli_abort("Sequence must only contain uppercase letters [A-Z] and '*'.")
+      cli::cli_abort(
+        "Sequence must only contain uppercase letters [A-Z] and '*'."
+      )
     }
   }
 )
+
+
+# %% to_base.A3Sequence ----
+#' Convert A3Sequence to base character string
+#'
+#' @param x A3Sequence object
+#' @return Character string of the sequence
+#' @author EDG
+#' @keywords internal
+#' @noRd
+method(to_base, A3Sequence) <- function(x) {
+  x@data
+}
 
 
 # %% A3Index ----
@@ -210,7 +225,9 @@ A3Annotation <- new_class(
     check_names <- function(lst, category) {
       nms <- names(lst)
       if (length(lst) > 0 && (is.null(nms) || any(!nzchar(nms)))) {
-        cli::cli_abort("All {category} annotation names must be non-empty strings.")
+        cli::cli_abort(
+          "All {category} annotation names must be non-empty strings."
+        )
       }
     }
     if (!all(sapply(self@site, S7_inherits, A3Site))) {
@@ -234,6 +251,51 @@ A3Annotation <- new_class(
     }
   }
 )
+
+
+# %% to_base.A3Annotation ----
+#' Convert A3Annotation to base R list format
+#'
+#' @param x A3Annotation object
+#' @return Named list with site, region, ptm, processing, and variant annotations
+#' @author EDG
+#' @keywords internal
+#' @noRd
+method(to_base, A3Annotation) <- function(x) {
+  list(
+    site = lapply(x@site, function(site) {
+      list(
+        type = site@type,
+        index = site@index@data
+      )
+    }),
+    region = lapply(x@region, function(region) {
+      list(
+        type = region@type,
+        index = region@index@data
+      )
+    }),
+    ptm = lapply(x@ptm, function(ptm) {
+      list(
+        type = ptm@type,
+        index = ptm@index@data
+      )
+    }),
+    processing = lapply(x@processing, function(proc) {
+      list(
+        type = proc@type,
+        index = proc@index@data
+      )
+    }),
+    variant = lapply(x@variant, function(v) {
+      out <- list(position = v@position@data)
+      for (nm in names(v@info)) {
+        out[[nm]] <- v@info[[nm]]
+      }
+      out
+    })
+  )
+}
 
 
 # %% Metadata ----
@@ -268,10 +330,14 @@ A3Metadata <- new_class(
   },
   validator = function(self) {
     if (length(self@uniprot_id) != 1L) {
-      cli::cli_abort("{.arg uniprot_id} must be a single string (character(1)).")
+      cli::cli_abort(
+        "{.arg uniprot_id} must be a single string (character(1))."
+      )
     }
     if (length(self@description) != 1L) {
-      cli::cli_abort("{.arg description} must be a single string (character(1)).")
+      cli::cli_abort(
+        "{.arg description} must be a single string (character(1))."
+      )
     }
     if (length(self@reference) != 1L) {
       cli::cli_abort("{.arg reference} must be a single string (character(1)).")
@@ -281,6 +347,24 @@ A3Metadata <- new_class(
     }
   }
 )
+
+
+# %% to_base.A3Metadata ----
+#' Convert A3Metadata to base R list format
+#'
+#' @param x A3Metadata object
+#' @return Named list with uniprot_id, description, reference, and organism
+#' @author EDG
+#' @keywords internal
+#' @noRd
+method(to_base, A3Metadata) <- function(x) {
+  list(
+    uniprot_id = x@uniprot_id,
+    description = x@description,
+    reference = x@reference,
+    organism = x@organism
+  )
+}
 
 
 # %% A3 ----
@@ -342,47 +426,30 @@ A3 <- new_class(
 )
 
 
-# %% as.list.A3 ----
-method(as.list, A3) <- function(x, ...) {
+# %% `.DollarNames.A3` ----
+method(`.DollarNames`, A3) <- function(x, pattern = "") {
+  grep(pattern, prop_names(x), value = TRUE)
+}
+
+
+# %% `$.A3` ----
+method(`$`, A3) <- function(x, name) {
+  to_base(prop(x, name))
+}
+
+
+# %% `[[.A3` ----
+method(`[[`, A3) <- function(x, name) {
+  to_base(prop(x, name))
+}
+
+
+# %% to_base.A3 ----
+method(to_base, A3) <- function(x) {
   list(
-    sequence = x@sequence@data,
-    annotations = list(
-      site = lapply(x@annotations@site, function(site) {
-        list(
-          type = site@type,
-          index = site@index@data
-        )
-      }),
-      region = lapply(x@annotations@region, function(region) {
-        list(
-          type = region@type,
-          index = region@index@data
-        )
-      }),
-      ptm = lapply(x@annotations@ptm, function(ptm) {
-        list(
-          type = ptm@type,
-          index = ptm@index@data
-        )
-      }),
-      processing = lapply(x@annotations@processing, function(proc) {
-        list(
-          type = proc@type,
-          index = proc@index@data
-        )
-      }),
-      variant = lapply(x@annotations@variant, function(v) {
-        out <- list(position = v@position@data)
-        for (nm in names(v@info)) out[[nm]] <- v@info[[nm]]
-        out
-      })
-    ),
-    metadata = list(
-      uniprot_id = x@metadata@uniprot_id,
-      description = x@metadata@description,
-      reference = x@metadata@reference,
-      organism = x@metadata@organism
-    )
+    sequence = to_base(x@sequence),
+    annotations = to_base(x@annotations),
+    metadata = to_base(x@metadata)
   )
 }
 
@@ -675,11 +742,11 @@ create_A3 <- function(
   reference = "",
   organism = ""
 ) {
-  site <- lapply(site, function(a) A3Site(index = a$index, type = a$type))
-  region <- lapply(region, function(a) A3Region(index = a$index, type = a$type))
-  ptm <- lapply(ptm, function(a) A3PTM(index = a$index, type = a$type))
+  site <- lapply(site, function(a) A3Site(index = a[["index"]], type = a[["type"]]))
+  region <- lapply(region, function(a) A3Region(index = a[["index"]], type = a[["type"]]))
+  ptm <- lapply(ptm, function(a) A3PTM(index = a[["index"]], type = a[["type"]]))
   processing <- lapply(processing, function(a) {
-    A3Processing(index = a$index, type = a$type)
+    A3Processing(index = a[["index"]], type = a[["type"]])
   })
   A3(
     sequence = A3Sequence(concat(sequence)),
@@ -793,16 +860,16 @@ A3from_json <- function(x, ...) {
   }
 
   # Sequence: accept character(1) or character(n) (legacy per-residue arrays)
-  sequence <- if (length(x$sequence) > 1) concat(x$sequence) else x$sequence
+  sequence <- if (length(x[["sequence"]]) > 1) concat(x[["sequence"]]) else x[["sequence"]]
 
-  annotations <- x$annotations
+  annotations <- x[["annotations"]]
 
   # Parse a single annotation entry into a feature object
   parse_feature <- function(entry, feature_class) {
     # Canonical form: list with $index and $type
-    if (is.list(entry) && !is.null(entry$index)) {
-      idx_data <- entry$index
-      type <- if (is.null(entry$type)) "" else entry$type
+    if (is.list(entry) && !is.null(entry[["index"]])) {
+      idx_data <- entry[["index"]]
+      type <- if (is.null(entry[["type"]])) "" else entry[["type"]]
     } else {
       # Legacy bare array
       idx_data <- entry
@@ -832,52 +899,52 @@ A3from_json <- function(x, ...) {
     feature_class(index = index, type = type)
   }
 
-  site <- if (!is.null(annotations$site)) {
-    lapply(annotations$site, parse_feature, feature_class = A3Site)
+  site <- if (!is.null(annotations[["site"]])) {
+    lapply(annotations[["site"]], parse_feature, feature_class = A3Site)
   } else {
     list()
   }
 
-  region <- if (!is.null(annotations$region)) {
-    lapply(annotations$region, parse_feature, feature_class = A3Region)
+  region <- if (!is.null(annotations[["region"]])) {
+    lapply(annotations[["region"]], parse_feature, feature_class = A3Region)
   } else {
     list()
   }
 
-  ptm <- if (!is.null(annotations$ptm)) {
-    lapply(annotations$ptm, parse_feature, feature_class = A3PTM)
+  ptm <- if (!is.null(annotations[["ptm"]])) {
+    lapply(annotations[["ptm"]], parse_feature, feature_class = A3PTM)
   } else {
     list()
   }
 
-  processing <- if (!is.null(annotations$processing)) {
-    lapply(annotations$processing, parse_feature, feature_class = A3Processing)
+  processing <- if (!is.null(annotations[["processing"]])) {
+    lapply(annotations[["processing"]], parse_feature, feature_class = A3Processing)
   } else {
     list()
   }
 
   # Parse variants
-  variants_data <- annotations$variant
+  variants_data <- annotations[["variant"]]
   variant <- if (is.null(variants_data) || length(variants_data) == 0) {
     list()
   } else if (is.data.frame(variants_data)) {
     lapply(seq_len(nrow(variants_data)), function(i) {
       row <- as.list(variants_data[i, ])
-      pos <- as.integer(row$position)
+      pos <- as.integer(row[["position"]])
       info <- row[setdiff(names(row), "position")]
       A3Variant(position = A3Position(data = pos), info = info)
     })
   } else {
     lapply(variants_data, function(v) {
       v <- as.list(v)
-      pos <- as.integer(v$position)
+      pos <- as.integer(v[["position"]])
       info <- v[setdiff(names(v), "position")]
       A3Variant(position = A3Position(data = pos), info = info)
     })
   }
 
   # Parse metadata (all fields default to "")
-  meta <- x$metadata
+  meta <- x[["metadata"]]
   null_to_empty <- function(val) if (is.null(val)) "" else val
 
   A3(
@@ -890,10 +957,10 @@ A3from_json <- function(x, ...) {
       variant = variant
     ),
     metadata = A3Metadata(
-      uniprot_id = null_to_empty(meta$uniprot_id),
-      description = null_to_empty(meta$description),
-      reference = null_to_empty(meta$reference),
-      organism = null_to_empty(meta$organism)
+      uniprot_id = null_to_empty(meta[["uniprot_id"]]),
+      description = null_to_empty(meta[["description"]]),
+      reference = null_to_empty(meta[["reference"]]),
+      organism = null_to_empty(meta[["organism"]])
     )
   )
 }
