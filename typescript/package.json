@@ -1,6 +1,6 @@
 {
   "name": "@rtemis/a3",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Amino Acid Annotation (A3) format — TypeScript implementation",
   "license": "MPL-2.0",
   "repository": {
