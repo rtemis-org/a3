@@ -16,14 +16,11 @@ pdb_annotations(
 \item{accession}{Character scalar: UniProt accession, e.g. \code{"P10636"}.}
 
 \item{pdb_id}{Character scalar: Four-character PDB ID (e.g. \code{"2mz7"}). If
-\code{NULL} (default), the structure with the greatest UniProt residue coverage
-is selected automatically.}
+\code{NULL} (default), the top-ranked structure from PDBe is used.}
 
-\item{pdbe_graph_url}{Character scalar: PDBe Graph API base URL (used for
-SIFTS residue mappings).}
+\item{pdbe_graph_url}{Character scalar: PDBe Graph API base URL.}
 
-\item{pdbe_api_url}{Character scalar: PDBe REST API base URL (used for
-secondary structure and binding sites).}
+\item{pdbe_api_url}{Character scalar: PDBe REST API base URL.}
 
 \item{verbosity}{Integer scalar: Verbosity level.}
 }
@@ -43,11 +40,12 @@ coordinates via SIFTS, and returns named lists of \code{A3Region} and \code{A3Si
 objects ready for use with \code{create_A3()}.
 }
 \details{
-SIFTS residue mappings are fetched from the PDBe Graph API; secondary
-structure and binding sites from the PDBe REST API.
+Structure ranking and SIFTS residue mappings come from the PDBe Graph API
+\code{best_structures} endpoint. Secondary structure and binding sites are fetched
+from the PDBe REST API.
 
-When \code{pdb_id} is \code{NULL} the structure with the greatest UniProt residue
-coverage is selected automatically.
+When \code{pdb_id} is \code{NULL} the top-ranked structure (by PDBe coverage score) is
+used automatically.
 }
 \examples{
 \dontrun{
