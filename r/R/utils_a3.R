@@ -20,7 +20,7 @@ get_alphafold <- function(uniprotid) {
 
 # %% get_alphafold_pdb ----
 get_alphafold_pdb <- function(uniprotid) {
-  get_alphafold(uniprotid)$pdb
+  get_alphafold(uniprotid)[["pdb"]]
 }
 
 

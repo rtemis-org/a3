@@ -58,7 +58,7 @@ gene2sequence <- function(
   # Get sequence ----
   # Retrieve sequence(s) using transcript ID
   sequence <- biomaRt::getSequence(
-    id = transcripts$ensembl_transcript_id,
+    id = transcripts[["ensembl_transcript_id"]],
     type = "ensembl_transcript_id",
     seqType = seq_type,
     mart = mart,
@@ -67,7 +67,7 @@ gene2sequence <- function(
 
   if (verbosity > 0) {
     # Count number of sequences returned that are not "Sequence unavailable"
-    nretrieved <- sum(sequence$coding != "Sequence unavailable")
+    nretrieved <- sum(sequence[["coding"]] != "Sequence unavailable")
     msg0(
       "Database returned sequences for ",
       bold(nretrieved),
@@ -79,8 +79,8 @@ gene2sequence <- function(
 
   seq <- data.frame(
     gene = gene,
-    ensembl_transcript_id = sequence$ensembl_transcript_id,
-    sequence = sequence$coding
+    ensembl_transcript_id = sequence[["ensembl_transcript_id"]],
+    sequence = sequence[["coding"]]
   )
   seq
 } # /rtemis.a3::gene2sequence
