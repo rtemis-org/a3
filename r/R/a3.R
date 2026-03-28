@@ -113,6 +113,19 @@ A3Range <- new_class(
     if (any(self@data < 1L)) {
       cli::cli_abort("Range values must be positive integers.")
     }
+    if (nrow(self@data) > 1L) {
+      starts <- self@data[-1L, 1L]
+      ends <- self@data[-nrow(self@data), 2L]
+      overlap_idx <- which(starts <= ends)
+      if (length(overlap_idx) > 0L) {
+        i <- overlap_idx[[1L]]
+        cli::cli_abort(
+          "Range entries must not overlap. \\
+          Found: [{self@data[i, 1]}, {self@data[i, 2]}] and \\
+          [{self@data[i + 1L, 1]}, {self@data[i + 1L, 2]}]."
+        )
+      }
+    }
   }
 )
 
