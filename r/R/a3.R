@@ -33,23 +33,21 @@ A3Sequence <- new_class(
     if (nchar(self@data) < 2) {
       cli::cli_abort("Sequence must be at least 2 characters long.")
     }
+    if (!grepl("^[A-Z*]+$", self@data)) {
+      cli::cli_abort("Sequence must only contain uppercase letters [A-Z] and '*'.")
+    }
   }
 )
 
 
 # %% A3Index ----
-# Superclass for A3Position and A3Range, encoding the location of `A3Feature` objects.
+# Abstract superclass for A3Position and A3Range, encoding the location of `A3Feature` objects.
 A3Index <- new_class(
   "A3Index",
   properties = list(
     data = class_integer
   ),
-  constructor = function(data) {
-    new_object(
-      S7_object,
-      data = data
-    )
-  }
+  abstract = TRUE
 )
 
 
@@ -61,7 +59,7 @@ A3Position <- new_class(
   parent = A3Index,
   constructor = function(data) {
     new_object(
-      A3Index,
+      S7_object(),
       data = sort(data)
     )
   },
@@ -86,7 +84,7 @@ A3Range <- new_class(
     idx <- order(data[, 1])
     colnames(data) <- c("start", "end")
     new_object(
-      A3Index,
+      S7_object(),
       data = data[idx, , drop = FALSE]
     )
   },
@@ -105,12 +103,13 @@ A3Range <- new_class(
 
 
 # %% A3Feature ----
-# A3Feature class to represent a protein feature with an optional type and index
+# Abstract base class for annotation feature types.
 A3Feature <- new_class(
   "A3Feature",
   properties = list(
     type = class_character
-  )
+  ),
+  abstract = TRUE
 )
 
 
@@ -123,7 +122,7 @@ A3Site <- new_class(
   ),
   constructor = function(index, type = "") {
     new_object(
-      A3Feature,
+      S7_object(),
       index = index,
       type = type
     )
@@ -140,7 +139,7 @@ A3Region <- new_class(
   ),
   constructor = function(index, type = "") {
     new_object(
-      A3Feature,
+      S7_object(),
       index = index,
       type = type
     )
@@ -157,7 +156,7 @@ A3PTM <- new_class(
   ),
   constructor = function(index, type = "") {
     new_object(
-      A3Feature,
+      S7_object(),
       index = index,
       type = type
     )
@@ -174,7 +173,7 @@ A3Processing <- new_class(
   ),
   constructor = function(index, type = "") {
     new_object(
-      A3Feature,
+      S7_object(),
       index = index,
       type = type
     )
@@ -208,18 +207,28 @@ A3Annotation <- new_class(
     variant = class_list
   ),
   validator = function(self) {
+    check_names <- function(lst, category) {
+      nms <- names(lst)
+      if (length(lst) > 0 && (is.null(nms) || any(!nzchar(nms)))) {
+        cli::cli_abort("All {category} annotation names must be non-empty strings.")
+      }
+    }
     if (!all(sapply(self@site, S7_inherits, A3Site))) {
       cli::cli_abort("All site annotations must be A3Site objects.")
     }
+    check_names(self@site, "site")
     if (!all(sapply(self@region, S7_inherits, A3Region))) {
       cli::cli_abort("All region annotations must be A3Region objects.")
     }
+    check_names(self@region, "region")
     if (!all(sapply(self@ptm, S7_inherits, A3PTM))) {
       cli::cli_abort("All PTM annotations must be A3PTM objects.")
     }
+    check_names(self@ptm, "ptm")
     if (!all(sapply(self@processing, S7_inherits, A3Processing))) {
       cli::cli_abort("All processing annotations must be A3Processing objects.")
     }
+    check_names(self@processing, "processing")
     if (!all(sapply(self@variant, S7_inherits, A3Variant))) {
       cli::cli_abort("All variant annotations must be A3Variant objects.")
     }
@@ -256,6 +265,20 @@ A3Metadata <- new_class(
       reference = reference,
       organism = organism
     )
+  },
+  validator = function(self) {
+    if (length(self@uniprot_id) != 1L) {
+      cli::cli_abort("{.arg uniprot_id} must be a single string (character(1)).")
+    }
+    if (length(self@description) != 1L) {
+      cli::cli_abort("{.arg description} must be a single string (character(1)).")
+    }
+    if (length(self@reference) != 1L) {
+      cli::cli_abort("{.arg reference} must be a single string (character(1)).")
+    }
+    if (length(self@organism) != 1L) {
+      cli::cli_abort("{.arg organism} must be a single string (character(1)).")
+    }
   }
 )
 
@@ -348,11 +371,10 @@ method(as.list, A3) <- function(x, ...) {
           index = proc@index@data
         )
       }),
-      variant = lapply(x@annotations@variant, function(variant) {
-        list(
-          position = variant@position@data,
-          info = variant@info
-        )
+      variant = lapply(x@annotations@variant, function(v) {
+        out <- list(position = v@position@data)
+        for (nm in names(v@info)) out[[nm]] <- v@info[[nm]]
+        out
       })
     ),
     metadata = list(
@@ -411,16 +433,18 @@ method(repr, A3) <- function(x, output_type = NULL, head_n = 10L) {
   }
 
   # Sequence
+  seq_length <- nchar(x@sequence@data)
+  display_seq <- if (seq_length > head_n) {
+    paste0(substr(x@sequence@data, 1L, head_n), "...")
+  } else {
+    x@sequence@data
+  }
   out <- paste0(
     out,
     "     Sequence: ",
-    bold(
-      paste0(utils::head(x@sequence@data, head_n), collapse = ""),
-      output_type = output_type
-    ),
-    "...",
+    bold(display_seq, output_type = output_type),
     " (length = ",
-    nchar(x@sequence@data),
+    seq_length,
     ")\n"
   )
 
