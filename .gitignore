@@ -12,11 +12,6 @@ examples/
 # Zed
 .zed/
 
-# R
-.lintr
-*.Rcheck/
-*.tar.gz
-
 # Agents
 .claude/
 CLAUDE.md

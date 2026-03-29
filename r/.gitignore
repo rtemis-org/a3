@@ -11,3 +11,7 @@ __dev/
 # Zed
 .zed/
 
+# R
+.lintr
+*.Rcheck/
+*.tar.gz
