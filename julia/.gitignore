@@ -1,0 +1,13 @@
+# Dev
+__dev/
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Zed
+.zed/
+
