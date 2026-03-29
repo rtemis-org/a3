@@ -5,7 +5,21 @@
 
 A3 monorepo: specification and cross-language implementations of the Amino Acid Annotation format
 
-![a3 draw screenshot](https://www.rtemis.org/draw-a3.webp)
+![rtemis a3 logo](https://www.rtemis.org/rtemis-a3-th.svg)
 
-- `r/`: `rtemis.a3` R package implementation
-- `typescript/`: `@rtemis/a3` TypeScript package implementation
+## Specifications
+
+- `specs/a3.md`: A3 format specification
+- `specs/A3_S7`: R implementation specification
+- `specs/A3_Zod`: TypeScript implementation specification
+- `specs/A3_Pydantic`: Python implementation specification
+- `specs/A3_Julia`: Julia implementation specification
+
+## Implementations
+
+- `r/`: `rtemis.a3`
+- `typescript/`: `@rtemis/a3`
+- `python/`: `rtemis.a3`
+- `julia/`: `RtemisA3`
+
+![a3 draw screenshot](https://www.rtemis.org/draw-a3.webp)
