@@ -7,7 +7,7 @@ Pydantic models are never constructed directly.
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, cast
 
 from pydantic import ValidationError
 
@@ -76,7 +76,7 @@ def create_a3(
     try:
         return A3.model_validate(data)
     except ValidationError as exc:
-        raise A3ValidationError(str(exc), exc.errors()) from exc
+        raise A3ValidationError(str(exc), cast(list[dict[str, Any]], exc.errors())) from exc
 
 
 def a3_from_json(text: str) -> A3:
@@ -107,7 +107,7 @@ def a3_from_json(text: str) -> A3:
     try:
         return A3.model_validate(data)
     except ValidationError as exc:
-        raise A3ValidationError(str(exc), exc.errors()) from exc
+        raise A3ValidationError(str(exc), cast(list[dict[str, Any]], exc.errors())) from exc
 
 
 def a3_to_json(a3: A3, *, indent: int | None = None) -> str:

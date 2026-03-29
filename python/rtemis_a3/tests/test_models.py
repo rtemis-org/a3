@@ -58,12 +58,12 @@ class TestSiteEntry:
 
 class TestRegionEntry:
     def test_basic(self):
-        entry = RegionEntry(index=[[6, 10], [1, 5]], type="domain")
+        entry = RegionEntry(index=[(6, 10), (1, 5)], type="domain")
         assert entry.index == [(1, 5), (6, 10)]  # sorted
         assert entry.type == "domain"
 
     def test_default_type(self):
-        entry = RegionEntry(index=[[1, 5]])
+        entry = RegionEntry(index=[(1, 5)])
         assert entry.type == ""
 
     def test_empty_index(self):
@@ -72,23 +72,23 @@ class TestRegionEntry:
 
     def test_start_equals_end_rejected(self):
         with pytest.raises(ValidationError, match="start must be less than end"):
-            RegionEntry(index=[[5, 5]])
+            RegionEntry(index=[(5, 5)])
 
     def test_start_greater_than_end_rejected(self):
         with pytest.raises(ValidationError, match="start must be less than end"):
-            RegionEntry(index=[[10, 5]])
+            RegionEntry(index=[(10, 5)])
 
     def test_overlapping_rejected(self):
         with pytest.raises(ValidationError, match="overlapping"):
-            RegionEntry(index=[[1, 5], [3, 8]])
+            RegionEntry(index=[(1, 5), (3, 8)])
 
     def test_adjacent_permitted(self):
-        entry = RegionEntry(index=[[1, 5], [6, 10]])
+        entry = RegionEntry(index=[(1, 5), (6, 10)])
         assert entry.index == [(1, 5), (6, 10)]
 
     def test_non_positive_rejected(self):
         with pytest.raises(ValidationError):
-            RegionEntry(index=[[0, 5]])
+            RegionEntry(index=[(0, 5)])
 
 
 # ---------------------------------------------------------------------------
@@ -102,7 +102,7 @@ class TestFlexEntry:
         assert entry.index == [1, 3, 5]
 
     def test_ranges(self):
-        entry = FlexEntry(index=[[6, 10], [1, 5]])
+        entry = FlexEntry(index=[(6, 10), (1, 5)])
         assert entry.index == [(1, 5), (6, 10)]
 
     def test_empty(self):
@@ -111,7 +111,7 @@ class TestFlexEntry:
 
     def test_range_overlap_rejected(self):
         with pytest.raises(ValidationError, match="overlapping"):
-            FlexEntry(index=[[1, 5], [3, 8]])
+            FlexEntry(index=[(1, 5), (3, 8)])
 
 
 # ---------------------------------------------------------------------------
@@ -127,13 +127,14 @@ class TestVariantRecord:
     def test_extra_fields(self):
         v = VariantRecord(position=1, **{"from": "M", "to": "L", "source": "ClinVar"})
         extras = v.__pydantic_extra__
+        assert extras is not None
         assert extras["from"] == "M"
         assert extras["to"] == "L"
         assert extras["source"] == "ClinVar"
 
     def test_position_required(self):
         with pytest.raises(ValidationError):
-            VariantRecord()
+            VariantRecord.model_validate({})
 
     def test_non_positive_position_rejected(self):
         with pytest.raises(ValidationError):
@@ -141,7 +142,7 @@ class TestVariantRecord:
 
     def test_non_json_extra_rejected(self):
         with pytest.raises(ValidationError, match="not JSON-compatible"):
-            VariantRecord(position=1, callback=lambda: None)
+            VariantRecord(position=1, **{"callback": lambda: None})
 
 
 # ---------------------------------------------------------------------------
@@ -160,11 +161,11 @@ class TestA3Annotations:
 
     def test_unknown_family_rejected(self):
         with pytest.raises(ValidationError):
-            A3Annotations(site={}, unknown_family={})
+            A3Annotations.model_validate({"site": {}, "unknown_family": {}})
 
     def test_empty_annotation_name_rejected(self):
         with pytest.raises(ValidationError, match="non-empty"):
-            A3Annotations(site={"": {"index": [1, 2], "type": ""}})
+            A3Annotations.model_validate({"site": {"": {"index": [1, 2], "type": ""}}})
 
 
 # ---------------------------------------------------------------------------
@@ -187,7 +188,7 @@ class TestA3Metadata:
 
     def test_unknown_field_rejected(self):
         with pytest.raises(ValidationError):
-            A3Metadata(gene_name="MAPT")
+            A3Metadata.model_validate({"gene_name": "MAPT"})
 
 
 # ---------------------------------------------------------------------------
@@ -224,69 +225,81 @@ class TestA3:
 
     def test_unknown_top_level_key_rejected(self):
         with pytest.raises(ValidationError):
-            A3(sequence="MA", extra_field="nope")
+            A3.model_validate({"sequence": "MA", "extra_field": "nope"})
 
     def test_bounds_check_site_out_of_range(self):
         with pytest.raises(ValidationError, match="out of bounds"):
-            A3(
-                sequence="MAEPRQ",
-                annotations={
-                    "site": {"bad": {"index": [100], "type": ""}},
-                },
+            A3.model_validate(
+                {
+                    "sequence": "MAEPRQ",
+                    "annotations": {
+                        "site": {"bad": {"index": [100], "type": ""}},
+                    },
+                }
             )
 
     def test_bounds_check_region_out_of_range(self):
         with pytest.raises(ValidationError, match="out of bounds"):
-            A3(
-                sequence="MAEPRQ",
-                annotations={
-                    "region": {"bad": {"index": [[1, 100]], "type": ""}},
-                },
+            A3.model_validate(
+                {
+                    "sequence": "MAEPRQ",
+                    "annotations": {
+                        "region": {"bad": {"index": [[1, 100]], "type": ""}},
+                    },
+                }
             )
 
     def test_bounds_check_variant_out_of_range(self):
         with pytest.raises(ValidationError, match="out of bounds"):
-            A3(
-                sequence="MAEPRQ",
-                annotations={
-                    "variant": [{"position": 100}],
-                },
+            A3.model_validate(
+                {
+                    "sequence": "MAEPRQ",
+                    "annotations": {
+                        "variant": [{"position": 100}],
+                    },
+                }
             )
 
     def test_bounds_check_ptm_positions(self):
         with pytest.raises(ValidationError, match="out of bounds"):
-            A3(
-                sequence="MAEPRQ",
-                annotations={
-                    "ptm": {"bad": {"index": [100], "type": ""}},
-                },
+            A3.model_validate(
+                {
+                    "sequence": "MAEPRQ",
+                    "annotations": {
+                        "ptm": {"bad": {"index": [100], "type": ""}},
+                    },
+                }
             )
 
     def test_bounds_check_ptm_ranges(self):
         with pytest.raises(ValidationError, match="out of bounds"):
-            A3(
-                sequence="MAEPRQ",
-                annotations={
-                    "ptm": {"bad": {"index": [[1, 100]], "type": ""}},
-                },
+            A3.model_validate(
+                {
+                    "sequence": "MAEPRQ",
+                    "annotations": {
+                        "ptm": {"bad": {"index": [[1, 100]], "type": ""}},
+                    },
+                }
             )
 
     def test_full_valid(self):
-        a3 = A3(
-            sequence="MAEPRQFV",
-            annotations={
-                "site": {"catalytic": {"index": [1, 3, 5], "type": "activeSite"}},
-                "region": {"domain": {"index": [[1, 4], [6, 8]], "type": ""}},
-                "ptm": {"phospho": {"index": [2, 4], "type": ""}},
-                "processing": {},
-                "variant": [{"position": 3, "from": "E", "to": "D"}],
-            },
-            metadata={
-                "uniprot_id": "P10636",
-                "description": "Test protein",
-                "reference": "",
-                "organism": "Homo sapiens",
-            },
+        a3 = A3.model_validate(
+            {
+                "sequence": "MAEPRQFV",
+                "annotations": {
+                    "site": {"catalytic": {"index": [1, 3, 5], "type": "activeSite"}},
+                    "region": {"domain": {"index": [[1, 4], [6, 8]], "type": ""}},
+                    "ptm": {"phospho": {"index": [2, 4], "type": ""}},
+                    "processing": {},
+                    "variant": [{"position": 3, "from": "E", "to": "D"}],
+                },
+                "metadata": {
+                    "uniprot_id": "P10636",
+                    "description": "Test protein",
+                    "reference": "",
+                    "organism": "Homo sapiens",
+                },
+            }
         )
         assert len(a3.sequence) == 8
         assert a3.annotations.site["catalytic"].index == [1, 3, 5]
