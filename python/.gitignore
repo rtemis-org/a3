@@ -11,3 +11,30 @@ __dev/
 # Zed
 .zed/
 
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg
+*.egg-info/
+
+# Distribution / Build
+dist/
+build/
+
+# Virtual environments
+.venv/
+
+# Tool caches
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.ty_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Docs output
+site/
+
