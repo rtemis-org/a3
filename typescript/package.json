@@ -29,7 +29,12 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
-    "check": "biome check src tests"
+    "check": "biome check src tests",
+    "lint": "biome lint src tests",
+    "format": "biome format src tests",
+    "format:write": "biome format --write src tests",
+    "lint:fix": "biome lint --write src tests",
+    "fix": "biome check --write src tests"
   },
   "dependencies": {
     "zod": "^3.23.0"
