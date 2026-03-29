@@ -2,7 +2,7 @@
 
 import json
 
-from rtemis_a3 import a3_from_json, a3_to_json, create_a3
+from rtemis.a3 import a3_from_json, a3_to_json, create_a3
 
 
 class TestRoundTrip:

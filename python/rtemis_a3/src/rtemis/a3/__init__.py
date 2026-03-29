@@ -1,4 +1,4 @@
-"""rtemis_a3 — Python implementation of the Amino Acid Annotation (A3) format."""
+"""rtemis.a3 — Python implementation of the Amino Acid Annotation (A3) format."""
 
 # Types (for type annotations and isinstance checks)
 from ._models import A3, VariantRecord

@@ -2,7 +2,7 @@
 
 import pytest
 
-from rtemis_a3._normalize import (
+from rtemis.a3._normalize import (
     check_no_overlap,
     is_json_compatible,
     sort_dedup,

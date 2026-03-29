@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from rtemis_a3._models import (
+from rtemis.a3._models import (
     A3,
     A3Annotations,
     A3Metadata,

@@ -2,7 +2,7 @@
 
 import pytest
 
-from rtemis_a3 import (
+from rtemis.a3 import (
     A3ParseError,
     A3ValidationError,
     a3_from_json,
