@@ -11,6 +11,10 @@
   "type": "module",
   "exports": {
     ".": {
+      "browser": {
+        "import": "./dist/index-browser.js",
+        "types": "./dist/index-browser.d.ts"
+      },
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
