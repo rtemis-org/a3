@@ -1,5 +1,10 @@
 //! Data model for the A3 format.
 //!
+//! All struct fields are `pub(crate)` — visible within this crate for
+//! construction and validation, but invisible to external callers. Public
+//! getter methods on each type provide read-only access. This enforces the
+//! invariant that every `A3` value has passed through [`crate::validate`].
+//!
 //! The hierarchy mirrors the JSON wire format exactly:
 //!
 //! ```text
@@ -14,12 +19,8 @@
 //!  └── metadata:    Metadata
 //! ```
 
-// `HashMap` is Rust's standard hash map — equivalent to a Python dict or
-// TypeScript Record. We need it for the named annotation families.
 use std::collections::HashMap;
 
-// `Deserialize` and `Serialize` are traits (like interfaces) from serde.
-// Deriving them on a struct generates all the JSON read/write code for us.
 use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------------------
@@ -28,30 +29,36 @@ use serde::{Deserialize, Serialize};
 
 /// A named annotation marking individual residue positions.
 ///
-/// In Rust, a `struct` is a named collection of typed fields — like a
-/// dataclass in Python or an interface in TypeScript.
+/// Fields are `pub(crate)` so only code within this crate can construct or
+/// mutate a `SiteEntry`. External callers use the getter methods.
 ///
-/// `#[derive(...)]` asks the compiler to auto-generate implementations of
-/// listed traits. Here:
-/// - `Debug`       — enables `println!("{:?}", entry)` for inspection
-/// - `Clone`       — enables `.clone()` to make a deep copy
-/// - `Serialize`   — enables `serde_json::to_string(&entry)`
-/// - `Deserialize` — enables `serde_json::from_str::<SiteEntry>(json)`
+/// `#[derive(Serialize, Deserialize)]` generates JSON read/write code even for
+/// `pub(crate)` fields — the derive macros run inside the crate and have full
+/// field access.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SiteEntry {
     /// 1-based residue positions, sorted ascending, no duplicates.
-    /// After normalization this invariant is always upheld.
-    pub index: Vec<u32>,
+    pub(crate) index: Vec<u32>,
 
     /// Optional label (e.g. `"activeSite"`). Defaults to `""` when absent.
     ///
     /// `#[serde(rename = "type")]` maps this field to the JSON key `"type"`.
     /// We cannot name the Rust field `type` because that is a reserved keyword.
-    ///
-    /// `#[serde(default)]` means: if the key is missing from JSON, use the
-    /// type's `Default` value. `String::default()` is `""`, which is correct.
+    /// `#[serde(default)]` fills in `""` when the key is absent from JSON.
     #[serde(rename = "type", default)]
-    pub kind: String,
+    pub(crate) kind: String,
+}
+
+impl SiteEntry {
+    /// 1-based residue positions, sorted ascending, no duplicates.
+    pub fn index(&self) -> &[u32] {
+        &self.index
+    }
+
+    /// Annotation type label. Empty string when unset.
+    pub fn kind(&self) -> &str {
+        &self.kind
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -59,23 +66,30 @@ pub struct SiteEntry {
 // ---------------------------------------------------------------------------
 
 /// A named annotation marking contiguous sequence spans.
-///
-/// `[u32; 2]` is a fixed-length array of exactly two `u32` values — a
-/// compact way to represent an `[start, end]` pair without defining a
-/// separate struct.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RegionEntry {
     /// Inclusive `[start, end]` range pairs, sorted by start position.
     /// Each pair satisfies `start < end`; ranges do not overlap.
-    pub index: Vec<[u32; 2]>,
+    pub(crate) index: Vec<[u32; 2]>,
 
-    /// Optional label. Defaults to `""` when absent from JSON.
     #[serde(rename = "type", default)]
-    pub kind: String,
+    pub(crate) kind: String,
+}
+
+impl RegionEntry {
+    /// Inclusive `[start, end]` range pairs, sorted by start, non-overlapping.
+    pub fn index(&self) -> &[[u32; 2]] {
+        &self.index
+    }
+
+    /// Annotation type label. Empty string when unset.
+    pub fn kind(&self) -> &str {
+        &self.kind
+    }
 }
 
 // ---------------------------------------------------------------------------
-// FlexIndex — positions OR ranges (used by PTM and Processing)
+// A3Index — positions OR ranges (used by PTM and Processing)
 // ---------------------------------------------------------------------------
 
 /// The index for PTM and Processing entries can be either positions or ranges,
@@ -90,7 +104,7 @@ pub struct RegionEntry {
 /// This works because `Vec<[u32; 2]>` (array of 2-element arrays) and
 /// `Vec<u32>` (array of integers) are structurally unambiguous in JSON.
 ///
-/// Named `A3Index` to match the cross-language schema convention used across
+/// Named `A3Index` to match the cross-language naming convention used across
 /// the rtemis-a3 implementations (R, Python, TypeScript, Rust).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -101,13 +115,43 @@ pub enum A3Index {
     Positions(Vec<u32>),
 }
 
+impl A3Index {
+    /// Returns the positions slice if this is a `Positions` variant, else `None`.
+    pub fn as_positions(&self) -> Option<&[u32]> {
+        match self {
+            A3Index::Positions(p) => Some(p),
+            A3Index::Ranges(_) => None,
+        }
+    }
+
+    /// Returns the ranges slice if this is a `Ranges` variant, else `None`.
+    pub fn as_ranges(&self) -> Option<&[[u32; 2]]> {
+        match self {
+            A3Index::Ranges(r) => Some(r),
+            A3Index::Positions(_) => None,
+        }
+    }
+}
+
 /// A named PTM or Processing annotation with a flexible index type.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FlexEntry {
-    pub index: A3Index,
+    pub(crate) index: A3Index,
 
     #[serde(rename = "type", default)]
-    pub kind: String,
+    pub(crate) kind: String,
+}
+
+impl FlexEntry {
+    /// The index — either positions or ranges.
+    pub fn index(&self) -> &A3Index {
+        &self.index
+    }
+
+    /// Annotation type label. Empty string when unset.
+    pub fn kind(&self) -> &str {
+        &self.kind
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -117,22 +161,31 @@ pub struct FlexEntry {
 /// A single sequence variant record.
 ///
 /// The spec requires a `position` field and permits any additional
-/// JSON-compatible fields. We capture the extras with a `HashMap`.
+/// JSON-compatible fields, captured by `extra`.
 ///
 /// `#[serde(flatten)]` on a `HashMap` field instructs serde to absorb
 /// all JSON keys that are not explicitly named fields in this struct.
-/// So given `{ "position": 301, "from": "P", "to": "L" }`, serde puts
-/// `301` into `position` and `{"from": "P", "to": "L"}` into `extra`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VariantRecord {
     /// Required. 1-based position of the variant on the sequence.
-    pub position: u32,
+    pub(crate) position: u32,
 
     /// All other fields from the variant record, preserved as-is.
-    /// `serde_json::Value` is an enum that can represent any JSON value
-    /// (null, bool, number, string, array, or object).
+    /// `serde_json::Value` can represent any valid JSON value.
     #[serde(flatten)]
-    pub extra: HashMap<String, serde_json::Value>,
+    pub(crate) extra: HashMap<String, serde_json::Value>,
+}
+
+impl VariantRecord {
+    /// 1-based position of the variant on the sequence.
+    pub fn position(&self) -> u32 {
+        self.position
+    }
+
+    /// All extra fields from the variant record beyond `position`.
+    pub fn extra(&self) -> &HashMap<String, serde_json::Value> {
+        &self.extra
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -141,22 +194,47 @@ pub struct VariantRecord {
 
 /// Container for all five annotation families.
 ///
-/// `#[serde(default)]`        — if `annotations` is omitted from the top-level
-///                              JSON, the struct is filled with empty defaults.
-/// `#[serde(deny_unknown_fields)]` — any key other than the five families
-///                              (e.g. `"motif"`) is a hard error, matching the
-///                              spec requirement to reject unknown families.
-///
-/// `#[derive(Default)]` generates a `Default` implementation that sets each
-/// `HashMap` to empty and `Vec` to empty — required by `#[serde(default)]`.
+/// `#[serde(default)]`              — fills all fields with empty collections
+///                                    when `annotations` is absent from JSON.
+/// `#[serde(deny_unknown_fields)]`  — any key other than the five families
+///                                    is a hard error.
+/// `#[derive(Default)]`             — generates empty-collection defaults,
+///                                    required by `#[serde(default)]`.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Annotations {
-    pub site: HashMap<String, SiteEntry>,
-    pub region: HashMap<String, RegionEntry>,
-    pub ptm: HashMap<String, FlexEntry>,
-    pub processing: HashMap<String, FlexEntry>,
-    pub variant: Vec<VariantRecord>,
+    pub(crate) site: HashMap<String, SiteEntry>,
+    pub(crate) region: HashMap<String, RegionEntry>,
+    pub(crate) ptm: HashMap<String, FlexEntry>,
+    pub(crate) processing: HashMap<String, FlexEntry>,
+    pub(crate) variant: Vec<VariantRecord>,
+}
+
+impl Annotations {
+    /// Named site annotations (individual residue positions).
+    pub fn site(&self) -> &HashMap<String, SiteEntry> {
+        &self.site
+    }
+
+    /// Named region annotations (contiguous spans).
+    pub fn region(&self) -> &HashMap<String, RegionEntry> {
+        &self.region
+    }
+
+    /// Named PTM annotations (positions or ranges).
+    pub fn ptm(&self) -> &HashMap<String, FlexEntry> {
+        &self.ptm
+    }
+
+    /// Named processing annotations (positions or ranges).
+    pub fn processing(&self) -> &HashMap<String, FlexEntry> {
+        &self.processing
+    }
+
+    /// Ordered list of variant records.
+    pub fn variant(&self) -> &[VariantRecord] {
+        &self.variant
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -165,15 +243,37 @@ pub struct Annotations {
 
 /// Descriptive metadata attached to the sequence.
 ///
-/// All four fields are optional in JSON (default `""`). Unknown keys are
-/// rejected by `deny_unknown_fields`.
+/// All four fields default to `""`. Unknown keys are rejected by
+/// `deny_unknown_fields`.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Metadata {
-    pub uniprot_id: String,
-    pub description: String,
-    pub reference: String,
-    pub organism: String,
+    pub(crate) uniprot_id: String,
+    pub(crate) description: String,
+    pub(crate) reference: String,
+    pub(crate) organism: String,
+}
+
+impl Metadata {
+    /// UniProt accession (e.g. `"P10636"`). Empty string when unset.
+    pub fn uniprot_id(&self) -> &str {
+        &self.uniprot_id
+    }
+
+    /// Human-readable protein description. Empty string when unset.
+    pub fn description(&self) -> &str {
+        &self.description
+    }
+
+    /// Citation or URL. Empty string when unset.
+    pub fn reference(&self) -> &str {
+        &self.reference
+    }
+
+    /// Species name. Empty string when unset.
+    pub fn organism(&self) -> &str {
+        &self.organism
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -182,21 +282,38 @@ pub struct Metadata {
 
 /// The root A3 object.
 ///
-/// This is the type users interact with directly. `deny_unknown_fields`
-/// ensures that stray top-level keys (anything besides `sequence`,
-/// `annotations`, and `metadata`) are rejected during deserialization.
+/// Fields are `pub(crate)` — only [`crate::validate`] may construct an `A3`,
+/// guaranteeing that every value returned to external callers has passed full
+/// two-stage validation. Public getter methods provide read-only access.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct A3 {
     /// The amino acid sequence. Non-empty, ≥ 2 characters, `[A-Z*]` only.
     /// Lowercase input is normalized to uppercase during validation.
-    pub sequence: String,
+    pub(crate) sequence: String,
 
     /// All annotation families. Defaults to all-empty if omitted from JSON.
     #[serde(default)]
-    pub annotations: Annotations,
+    pub(crate) annotations: Annotations,
 
     /// Sequence metadata. Defaults to all-empty strings if omitted from JSON.
     #[serde(default)]
-    pub metadata: Metadata,
+    pub(crate) metadata: Metadata,
+}
+
+impl A3 {
+    /// The amino acid sequence, normalized to uppercase.
+    pub fn sequence(&self) -> &str {
+        &self.sequence
+    }
+
+    /// All five annotation families.
+    pub fn annotations(&self) -> &Annotations {
+        &self.annotations
+    }
+
+    /// Sequence metadata.
+    pub fn metadata(&self) -> &Metadata {
+        &self.metadata
+    }
 }
