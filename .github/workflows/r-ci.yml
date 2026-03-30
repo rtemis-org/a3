@@ -2,9 +2,13 @@ name: R-CMD-check
 
 on:
   pull_request:
+    paths:
+      - r/**
   push:
     branches:
       - main
+    paths:
+      - r/**
 
 permissions:
   contents: read
@@ -44,17 +48,16 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+          extra-repositories: https://rtemis-org.r-universe.dev
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: r
           extra-packages: any::rcmdcheck
-          extra-repositories: https://rtemis-org.r-universe.dev
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
         with:
           working-directory: r
-          extra-repositories: https://rtemis-org.r-universe.dev
           upload-snapshots: true
           build_args: 'c("--no-manual", "--compact-vignettes=gs+qpdf")'

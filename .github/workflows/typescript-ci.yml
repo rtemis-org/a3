@@ -2,9 +2,13 @@ name: typescript-ci
 
 on:
   pull_request:
+    paths:
+      - typescript/**
   push:
     branches:
       - main
+    paths:
+      - typescript/**
 
 permissions:
   contents: read
