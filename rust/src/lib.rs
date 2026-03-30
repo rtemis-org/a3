@@ -17,7 +17,7 @@
 //! }"#;
 //!
 //! let a3 = a3_from_json(json).unwrap();
-//! assert_eq!(a3.sequence, "MAEPRQ");
+//! assert_eq!(a3.sequence(), "MAEPRQ");
 //! ```
 //!
 //! ## Module layout
@@ -83,15 +83,18 @@ pub fn a3_from_json(text: &str) -> Result<A3, A3Error> {
 /// - `None`    — compact, no whitespace (good for storage / wire transfer)
 /// - `Some(n)` — pretty-printed with `n` spaces per level (good for display)
 ///
-/// Returns `Err(A3Error::Parse)` only if serde_json fails internally, which
-/// cannot happen for well-typed A3 values — so in practice this always succeeds.
+/// Returns `Err(`[`A3Error::Serialize`]`)` if serde_json fails while
+/// serializing. In practice this is unreachable for well-typed A3 values.
 ///
 /// `a3` is passed as `&A3` (an immutable reference) because we only need to
 /// read it, not own or modify it. The caller keeps ownership.
 pub fn a3_to_json(a3: &A3, indent: Option<usize>) -> Result<String, A3Error> {
     match indent {
         // Compact output — single line, no extra whitespace.
-        None => Ok(serde_json::to_string(a3)?),
+        // `.map_err(A3Error::Serialize)` converts the serde_json::Error into
+        // the correct variant. We cannot use `?` here because `#[from]` is
+        // only implemented for A3Error::Parse, not A3Error::Serialize.
+        None => Ok(serde_json::to_string(a3).map_err(A3Error::Serialize)?),
 
         // Pretty output with a custom indent width.
         //
@@ -110,7 +113,7 @@ pub fn a3_to_json(a3: &A3, indent: Option<usize>) -> Result<String, A3Error> {
 
             // `Serialize::serialize` is the trait method — we call it explicitly
             // because `a3` already has `#[derive(Serialize)]` from types.rs.
-            a3.serialize(&mut ser)?;
+            a3.serialize(&mut ser).map_err(A3Error::Serialize)?;
 
             // serde_json always produces valid UTF-8, so `unwrap` is safe here.
             // `expect` is like `unwrap` but with a custom panic message if it
@@ -132,10 +135,15 @@ pub fn residue_at(a3: &A3, position: u32) -> Option<char> {
         return None;
     }
 
-    // Positions are 1-based; `.nth()` is 0-based — subtract 1.
-    // `.chars()` iterates over Unicode scalar values (correct for UTF-8 strings).
-    // `.nth(i)` returns `Option<char>` — `Some(c)` if the index exists, else `None`.
-    a3.sequence.chars().nth((position - 1) as usize)
+    // Positions are 1-based; byte index is 0-based — subtract 1.
+    // The sequence is validated to be ASCII-only ([A-Z*]), so each character
+    // is exactly one byte. `.as_bytes().get(i)` is O(1), whereas
+    // `.chars().nth(i)` would be O(N) because it walks the UTF-8 string.
+    // Casting `u8 → char` is safe for ASCII values.
+    a3.sequence
+        .as_bytes()
+        .get((position - 1) as usize)
+        .map(|&b| b as char)
 }
 
 /// Return all variant records at a 1-based `position`.
