@@ -140,14 +140,11 @@ pub fn residue_at(a3: &A3, position: u32) -> Option<char> {
 
 /// Return all variant records at a 1-based `position`.
 ///
-/// Lifetime annotations (`'a`) tell the compiler how long the returned
-/// references are valid. Here, `'a` means: "the returned `&VariantRecord`
-/// references live as long as the `&A3` reference passed in." This lets us
-/// return references into `a3`'s data without copying anything.
-///
-/// Without lifetime annotations the compiler cannot verify that the references
-/// outlive the `A3` value — it would refuse to compile.
-pub fn variants_at<'a>(a3: &'a A3, position: u32) -> Vec<&'a VariantRecord> {
+/// Returns references into `a3`'s data without copying anything.
+/// The compiler infers that the returned `&VariantRecord` references live as
+/// long as the `&A3` reference passed in (lifetime elision — the `'a`
+/// annotations are implicit but enforced).
+pub fn variants_at(a3: &A3, position: u32) -> Vec<&VariantRecord> {
     a3.annotations
         .variant
         .iter()

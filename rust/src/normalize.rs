@@ -5,8 +5,8 @@
 //!
 //! Normalization rules (from the A3 spec):
 //! - Positions: sorted ascending, duplicates removed, all values ≥ 1
-//! - Ranges:    sorted by start position, all values ≥ 1, each start < end,
-//!              no overlapping pairs
+//! - Ranges: sorted by start position, all values ≥ 1, each start < end,
+//!   no overlapping pairs
 
 /// Normalize a list of positions.
 ///
