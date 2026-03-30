@@ -1,6 +1,7 @@
 name: R-CMD-check
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - r/**
