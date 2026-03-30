@@ -1,0 +1,6 @@
+# Local Cargo configuration for the rtemis-a3 crate.
+# This file is committed so all contributors share the same aliases.
+
+[alias]
+# Build rustdoc for this crate only (no dependency docs).
+doc-site = "doc --no-deps"

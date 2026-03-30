@@ -1,0 +1,48 @@
+name: Rust CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - rust/**
+  push:
+    branches:
+      - main
+    paths:
+      - rust/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: rust
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - name: Format
+        run: cargo fmt --check
+
+      - name: Lint
+        run: cargo clippy -- -D warnings
+
+      - name: Test
+        run: cargo test
