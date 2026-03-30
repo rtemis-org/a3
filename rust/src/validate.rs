@@ -129,8 +129,10 @@ pub fn validate(raw: A3) -> Result<A3, A3Error> {
                 "annotations.variant[{i}].position: must be ≥ 1 (1-based); got 0"
             ));
         }
-        // We keep the record even if the position is 0 so that Stage 2
-        // bounds-checks can run (they will also catch 0 as out-of-bounds).
+        // Keep the record regardless — Stage 1 already recorded the error above.
+        // Note: Stage 2 checks `position > seq_len`, which does NOT catch 0
+        // (since 0 > seq_len is always false). The zero check here is the only
+        // place it is caught.
         variant.push(record);
     }
 
