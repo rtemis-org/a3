@@ -1,3 +1,5 @@
+[![python-ci](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml)
+
 # rtemis-a3
 
 Python implementation of the **Amino Acid Annotation (A3)** format —
