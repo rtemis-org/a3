@@ -2,6 +2,7 @@
   "name": "@rtemis/a3",
   "version": "0.1.2",
   "description": "Amino Acid Annotation (A3) format — TypeScript implementation",
+  "homepage": "https://a3.rtemis.org",
   "keywords": [
     "rtemis",
     "bioinformatics",
