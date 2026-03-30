@@ -31,7 +31,8 @@ pkglogo <- function(
 #' Amino Acid Annotation format utilities
 #'
 #' @import data.table S7
-#' @importFrom stats ave
+#' @importFrom stats na.exclude ave
+#' @importFrom grDevices col2rgb
 "_PACKAGE"
 
 NULL
