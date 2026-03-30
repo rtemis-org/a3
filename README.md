@@ -5,6 +5,7 @@
 [![python-ci](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml)
 [![julia-ci](https://github.com/rtemis-org/a3/actions/workflows/julia-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/julia-ci.yml)
 [![typescript-ci](https://github.com/rtemis-org/a3/actions/workflows/typescript-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/typescript-ci.yml)
+[![rust-ci](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml)
 
 # a3
 
@@ -12,19 +13,25 @@ A3 monorepo: specification and cross-language implementations of the Amino Acid 
 
 ![rtemis a3 logo](https://www.rtemis.org/a3.svg)
 
-## Specifications
+## Specification
 
 - `specs/a3.md`: A3 format specification
 - `specs/A3_S7`: R implementation specification
-- `specs/A3_Zod`: TypeScript implementation specification
 - `specs/A3_Pydantic`: Python implementation specification
 - `specs/A3_Julia`: Julia implementation specification
+- `specs/A3_Zod`: TypeScript implementation specification
+- `specs/A3_Rust`: Rust implementation specification
 
-## Implementations
+## Implementation
 
 - `r/`: `rtemis.a3`
-- `typescript/`: `@rtemis/a3`
 - `python/`: `rtemis.a3`
 - `julia/`: `RtemisA3`
+- `typescript/`: `@rtemis/a3`
+- `rust/`: `rtemis_a3`
+
+## Visualization
+
+[rtemislive-draw](https://draw.rtemis.org) provides support for interactive visualization of A3 data using the [@rtemis/a3](https://www.npmjs.com/package/@rtemis/a3) TypeScript implementation.
 
 ![a3 draw screenshot](https://www.rtemis.org/draw-a3.webp)
