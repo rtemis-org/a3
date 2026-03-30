@@ -17,6 +17,7 @@
 ^dev$
 ^docs$
 ^AGENTS\.md$
+^CLAUDE\.md$
 ^NEWS\.md$
 ^pkgdown$
 ^SKILL\.md$

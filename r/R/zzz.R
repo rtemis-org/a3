@@ -20,4 +20,4 @@ rtemis.a3_version <- utils::packageVersion("rtemis.a3")
       utils::sessionInfo()[[2]]
     )
   )
-} # /rtemis.a3::.onAttach
+}

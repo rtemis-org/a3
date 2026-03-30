@@ -19,6 +19,10 @@ Named list with \code{index} (A3Range) and \code{type} (character)
 Creates an annotation spec (named list) with an \code{A3Range} index and optional type,
 for use with \code{create_A3()}.
 }
+\examples{
+# Create a region annotation for ranges 3-10 and 15-22, of type "repeat"
+annotation_range(matrix(c(3L, 10L, 15L, 22L), ncol = 2, byrow = TRUE), type = "repeat")
+}
 \author{
 EDG
 }

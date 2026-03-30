@@ -26,7 +26,7 @@ sequence. For full annotations and metadata use \code{\link[=uniprot_to_A3]{unip
 }
 \examples{
 \dontrun{
-seq <- uniprot_sequence("P10636")
+  seq <- uniprot_sequence("P10636")
 }
 }
 \author{

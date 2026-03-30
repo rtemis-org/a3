@@ -15,6 +15,10 @@ Single character string
 \description{
 Concatenate character vector to single string for sequence input
 }
+\examples{
+# Concatenate a character vector of single-letter amino acids into a sequence string
+concat(c("M", "A", "E", "P", "R"))
+}
 \author{
 EDG
 }

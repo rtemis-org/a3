@@ -11,6 +11,11 @@
 #'
 #' @author EDG
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#'   mapt_seqs <- gene2sequence("MAPT")
+#' }
 gene2sequence <- function(
   gene,
   organism = "hsapiens",
@@ -83,4 +88,4 @@ gene2sequence <- function(
     sequence = sequence[["coding"]]
   )
   seq
-} # /rtemis.a3::gene2sequence
+}

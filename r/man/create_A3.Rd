@@ -44,6 +44,28 @@ A3 object
 \description{
 Create an A3 object from sequence, annotations, and metadata
 }
+\examples{
+# Minimal: sequence only
+a <- create_A3("MAEPRQEFEVMEDHAGTYGLGDRK")
+
+# With site, region, and PTM annotations
+a <- create_A3(
+  "MAEPRQEFEVMEDHAGTYGLGDRK",
+  site = list(
+    Active_site = annotation_position(c(5L, 17L), type = "active site")
+  ),
+  region = list(
+    Domain = annotation_range(matrix(c(3L, 10L, 15L, 22L), ncol = 2, byrow = TRUE),
+      type = "repeat"
+    )
+  ),
+  ptm = list(
+    Phosphorylation = annotation_position(c(2L, 18L), type = "phosphoserine")
+  ),
+  uniprot_id = "P10636",
+  organism = "Homo sapiens"
+)
+}
 \author{
 EDG
 }

@@ -21,7 +21,7 @@ pkglogo <- function(
     do.call(fmt_fn, c(list(x = logo_txt), args)),
     collapse = "\n"
   )
-} # /rtemis::pkglogo
+}
 
 #' @name rtemis.a3-package
 #'
@@ -30,8 +30,9 @@ pkglogo <- function(
 #' @description
 #' Amino Acid Annotation format utilities
 #'
-#' @import rtemis.utils data.table S7
-#' @importFrom stats ave
+#' @import data.table S7
+#' @importFrom stats na.exclude ave
+#' @importFrom grDevices col2rgb
 "_PACKAGE"
 
 NULL

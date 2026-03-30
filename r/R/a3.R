@@ -647,6 +647,10 @@ method(print, A3) <- function(x, output_type = NULL, ...) {
 #'
 #' @author EDG
 #' @export
+#'
+#' @examples
+#' # Concatenate a character vector of single-letter amino acids into a sequence string
+#' concat(c("M", "A", "E", "P", "R"))
 concat <- function(x) {
   if (length(x) > 1) {
     if (any(nchar(x) != 1)) {
@@ -674,6 +678,10 @@ concat <- function(x) {
 #'
 #' @author EDG
 #' @export
+#'
+#' @examples
+#' # Create a site annotation for positions 5 and 17, of type "active site"
+#' annotation_position(c(5L, 17L), type = "active site")
 annotation_position <- function(x, type = "") {
   list(
     index = A3Position(data = clean_int(x)),
@@ -695,6 +703,10 @@ annotation_position <- function(x, type = "") {
 #'
 #' @author EDG
 #' @export
+#'
+#' @examples
+#' # Create a region annotation for ranges 3-10 and 15-22, of type "repeat"
+#' annotation_range(matrix(c(3L, 10L, 15L, 22L), ncol = 2, byrow = TRUE), type = "repeat")
 annotation_range <- function(x, type = "") {
   list(
     index = A3Range(data = clean_int(x)),
@@ -716,6 +728,10 @@ annotation_range <- function(x, type = "") {
 #'
 #' @author EDG
 #' @export
+#'
+#' @examples
+#' # Create a variant annotation for position 10 with info about the variant
+#' annotation_variant(10L, info = list(ref = "A", alt = "T", type = "missense"))
 annotation_variant <- function(x, info = list()) {
   A3Variant(
     position = A3Position(clean_int(x)),
@@ -741,8 +757,29 @@ annotation_variant <- function(x, info = list()) {
 #' @return A3 object
 #'
 #' @author EDG
-#'
 #' @export
+#'
+#' @examples
+#' # Minimal: sequence only
+#' a <- create_A3("MAEPRQEFEVMEDHAGTYGLGDRK")
+#'
+#' # With site, region, and PTM annotations
+#' a <- create_A3(
+#'   "MAEPRQEFEVMEDHAGTYGLGDRK",
+#'   site = list(
+#'     Active_site = annotation_position(c(5L, 17L), type = "active site")
+#'   ),
+#'   region = list(
+#'     Domain = annotation_range(matrix(c(3L, 10L, 15L, 22L), ncol = 2, byrow = TRUE),
+#'       type = "repeat"
+#'     )
+#'   ),
+#'   ptm = list(
+#'     Phosphorylation = annotation_position(c(2L, 18L), type = "phosphoserine")
+#'   ),
+#'   uniprot_id = "P10636",
+#'   organism = "Homo sapiens"
+#' )
 create_A3 <- function(
   sequence,
   site = list(),
@@ -986,4 +1023,65 @@ A3from_json <- function(x, ...) {
       organism = null_to_empty(meta[["organism"]])
     )
   )
+}
+
+
+#' Write `A3` object to JSON file
+#'
+#' @param x `A3` object.
+#' @param filepath Character: Path to save JSON file.
+#' @param overwrite Logical: If TRUE, overwrite existing file.
+#'
+#' @return Invisible `x`. Writes JSON file as side effect.
+#'
+#' @author EDG
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' mapt <- uniprot_to_A3("P10636")
+#' write_A3json(mapt, "P10636_A3.json")
+#' }
+write_A3json <- function(x, filepath, overwrite = FALSE) {
+  check_is_S7(x, A3)
+  check_inherits(filepath, "character")
+  filepath <- normalizePath(filepath, mustWork = FALSE)
+  if (file.exists(filepath) && !overwrite) {
+    cli::cli_abort(
+      "File {.file {filepath}} exists. Set {.arg overwrite = TRUE} to overwrite."
+    )
+  }
+  writeLines(to_json(x), filepath)
+  invisible(x)
+}
+
+#' Read `A3` object from JSON file
+#'
+#' @param filepath Character: Path to JSON file.
+#' @param verbosity Integer: if greater than 0, print messages.
+#'
+#' @return `A3` object.
+#'
+#' @author EDG
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' mapt <- uniprot_to_A3("P10636")
+#' write_A3json(mapt, "P10636_A3.json")
+#' mapt2 <- read_A3json("P10636_A3.json")
+#' }
+read_A3json <- function(filepath, verbosity = 0L) {
+  check_inherits(filepath, "character")
+  filepath <- normalizePath(filepath)
+  if (!file.exists(filepath)) {
+    cli::cli_abort("File {.file {filepath}} does not exist.")
+  }
+  json_str <- paste(readLines(filepath, warn = FALSE), collapse = "\n")
+  obj <- A3from_json(json_str)
+  if (verbosity > 0) {
+    cat("Read ", filepath, ":\n", sep = "")
+    print(obj)
+  }
+  obj
 }

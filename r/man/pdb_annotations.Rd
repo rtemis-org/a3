@@ -49,12 +49,12 @@ used automatically.
 }
 \examples{
 \dontrun{
-ann  <- pdb_annotations("P10636")
-mapt <- create_A3(
-  sequence = uniprot_sequence("P10636"),
-  region   = ann[["region"]],
-  site     = ann[["site"]]
-)
+  ann  <- pdb_annotations("P10636")
+  mapt <- create_A3(
+    sequence = uniprot_sequence("P10636"),
+    region   = ann[["region"]],
+    site     = ann[["site"]]
+  )
 }
 }
 \author{
