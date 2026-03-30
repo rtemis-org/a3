@@ -26,12 +26,12 @@ uniprot_sequence <- function(
   check_dependencies("seqinr")
 
   path <- paste0(base_url, "/", accession, ".fasta")
-  dat  <- seqinr::read.fasta(path, seqtype = "AA")
+  dat <- seqinr::read.fasta(path, seqtype = "AA")
   if (verbosity > 0L) {
     msg("Got:", highlight(attr(dat[[1L]], "Annot")))
   }
   paste(as.character(dat[[1L]]), collapse = "")
-} # /uniprot_sequence
+}
 
 
 # %% uniprot_to_A3 ----
@@ -273,4 +273,4 @@ uniprot_to_A3 <- function(
       organism = organism
     )
   )
-} # /uniprot_to_A3
+}

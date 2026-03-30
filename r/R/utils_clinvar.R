@@ -49,8 +49,11 @@ clinvar_variants <- function(
 
   # -- Build search term ----
   valid_sig <- c(
-    "pathogenic", "likely_pathogenic", "uncertain_significance",
-    "likely_benign", "benign"
+    "pathogenic",
+    "likely_pathogenic",
+    "uncertain_significance",
+    "likely_benign",
+    "benign"
   )
   if (!is.null(significance)) {
     significance <- match.arg(significance, valid_sig, several.ok = TRUE)
@@ -67,9 +70,9 @@ clinvar_variants <- function(
   search_resp <- httr::GET(
     esearch_url,
     query = list(
-      db      = "clinvar",
-      term    = term,
-      retmax  = as.character(max_variants),
+      db = "clinvar",
+      term = term,
+      retmax = as.character(max_variants),
       retmode = "json"
     )
   )
@@ -81,7 +84,9 @@ clinvar_variants <- function(
 
   uids <- search_dat[["esearchresult"]][["idlist"]]
   if (length(uids) == 0L) {
-    if (verbosity > 0L) msg("No ClinVar records found for gene:", highlight(gene))
+    if (verbosity > 0L) {
+      msg("No ClinVar records found for gene:", highlight(gene))
+    }
     return(list())
   }
   if (verbosity > 0L) {
@@ -100,8 +105,8 @@ clinvar_variants <- function(
     resp <- httr::POST(
       esummary_url,
       body = list(
-        db      = "clinvar",
-        id      = paste(batch, collapse = ","),
+        db = "clinvar",
+        id = paste(batch, collapse = ","),
         retmode = "json"
       ),
       encode = "form"
@@ -122,11 +127,13 @@ clinvar_variants <- function(
   # Returns list(from, position, to) or NULL if unparseable.
   parse_protein_change <- function(pc) {
     m <- regmatches(pc, regexpr("^([A-Z])([0-9]+)([A-Z*])$", pc))
-    if (length(m) == 0L) return(NULL)
+    if (length(m) == 0L) {
+      return(NULL)
+    }
     list(
-      from     = substr(m, 1L, 1L),
+      from = substr(m, 1L, 1L),
       position = as.integer(substr(m, 2L, nchar(m) - 1L)),
-      to       = substr(m, nchar(m), nchar(m))
+      to = substr(m, nchar(m), nchar(m))
     )
   }
 
@@ -135,7 +142,9 @@ clinvar_variants <- function(
 
   for (v in all_summaries) {
     pc_raw <- v[["protein_change"]]
-    if (is.null(pc_raw) || !nzchar(pc_raw)) next
+    if (is.null(pc_raw) || !nzchar(pc_raw)) {
+      next
+    }
 
     # protein_change may contain multiple isoform changes separated by "/"
     pc_entries <- strsplit(pc_raw, "/", fixed = TRUE)[[1L]]
@@ -145,62 +154,80 @@ clinvar_variants <- function(
       parsed <- parse_protein_change(trimws(entry))
       if (!is.null(parsed)) break
     }
-    if (is.null(parsed)) next
+    if (is.null(parsed)) {
+      next
+    }
 
     # Clinical significance
-    cs  <- v[["clinical_significance"]]
+    cs <- v[["clinical_significance"]]
     sig <- if (!is.null(cs[["description"]])) cs[["description"]] else ""
     rev <- if (!is.null(cs[["review_status"]])) cs[["review_status"]] else ""
 
     # Condition names
     traits <- v[["trait_set"]]
     conditions <- if (!is.null(traits) && length(traits) > 0L) {
-      cnames <- vapply(traits, function(t) {
-        nm <- t[["trait_name"]]
-        if (!is.null(nm) && nzchar(nm)) nm else ""
-      }, character(1L))
+      cnames <- vapply(
+        traits,
+        function(t) {
+          nm <- t[["trait_name"]]
+          if (!is.null(nm) && nzchar(nm)) nm else ""
+        },
+        character(1L)
+      )
       paste(cnames[nzchar(cnames)], collapse = "; ")
-    } else ""
+    } else {
+      ""
+    }
 
     info <- list(
-      from                 = parsed[["from"]],
-      to                   = parsed[["to"]],
+      from = parsed[["from"]],
+      to = parsed[["to"]],
       clinicalSignificance = sig,
-      reviewStatus         = rev,
-      conditions           = conditions,
-      accession            = if (!is.null(v[["accession"]])) v[["accession"]] else "",
-      clinvarId            = if (!is.null(v[["uid"]])) v[["uid"]] else ""
+      reviewStatus = rev,
+      conditions = conditions,
+      accession = if (!is.null(v[["accession"]])) v[["accession"]] else "",
+      clinvarId = if (!is.null(v[["uid"]])) v[["uid"]] else ""
     )
 
     variant_list <- c(
       variant_list,
       list(A3Variant(
         position = A3Position(data = parsed[["position"]]),
-        info     = info
+        info = info
       ))
     )
   }
 
   if (length(variant_list) == 0L) {
-    if (verbosity > 0L) msg("No protein-level variants parsed.")
+    if (verbosity > 0L) {
+      msg("No protein-level variants parsed.")
+    }
     return(list())
   }
 
   # -- Name variants: "{from}{position}{to}", disambiguate duplicates ----
-  raw_names <- vapply(variant_list, function(v) {
-    paste0(v@info[["from"]], v@position@data, v@info[["to"]])
-  }, character(1L))
+  raw_names <- vapply(
+    variant_list,
+    function(v) {
+      paste0(v@info[["from"]], v@position@data, v@info[["to"]])
+    },
+    character(1L)
+  )
   counts <- table(raw_names)
   running <- integer(length(counts))
   names(running) <- names(counts)
-  final_names <- vapply(raw_names, function(nm) {
-    if (counts[[nm]] == 1L) {
-      nm
-    } else {
-      running[[nm]] <<- running[[nm]] + 1L
-      paste0(nm, ".", running[[nm]])
-    }
-  }, character(1L))
+  final_names <- vapply(
+    raw_names,
+    function(nm) {
+      if (counts[[nm]] == 1L) {
+        nm
+      } else {
+        running[[nm]] <<- running[[nm]] + 1L
+        paste0(nm, ".", running[[nm]])
+      }
+    },
+    character(1L)
+  )
   names(variant_list) <- final_names
 
   if (verbosity > 0L) {
@@ -212,4 +239,4 @@ clinvar_variants <- function(
   }
 
   variant_list
-} # /clinvar_variants
+}

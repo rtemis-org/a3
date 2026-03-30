@@ -83,4 +83,4 @@ gene2sequence <- function(
     sequence = sequence[["coding"]]
   )
   seq
-} # /rtemis.a3::gene2sequence
+}

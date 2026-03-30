@@ -42,10 +42,10 @@
 #' }
 pdb_annotations <- function(
   accession,
-  pdb_id         = NULL,
+  pdb_id = NULL,
   pdbe_graph_url = "https://www.ebi.ac.uk/pdbe/graph-api",
-  pdbe_api_url   = "https://www.ebi.ac.uk/pdbe/api",
-  verbosity      = 1L
+  pdbe_api_url = "https://www.ebi.ac.uk/pdbe/api",
+  verbosity = 1L
 ) {
   check_inherits(accession, "character")
   check_dependencies(c("httr", "jsonlite"))
@@ -63,8 +63,10 @@ pdb_annotations <- function(
   # Returns a flat list of segments, each with:
   #   pdb_id, chain_id, unp_start, unp_end, pdb_start, pdb_end, coverage
   # PDBe ranks them by coverage then resolution, so the first entry is best.
-  best_dat   <- fetch_json(paste0(
-    pdbe_graph_url, "/mappings/best_structures/", accession
+  best_dat <- fetch_json(paste0(
+    pdbe_graph_url,
+    "/mappings/best_structures/",
+    accession
   ))
   all_segs <- best_dat[[accession]]
 
@@ -77,11 +79,19 @@ pdb_annotations <- function(
     # First entry is PDBe's top-ranked structure
     pdb_id <- tolower(all_segs[[1L]][["pdb_id"]])
     if (verbosity > 0L) {
-      msg("Selected PDB structure:", highlight(toupper(pdb_id)), "(PDBe top-ranked)")
+      msg(
+        "Selected PDB structure:",
+        highlight(toupper(pdb_id)),
+        "(PDBe top-ranked)"
+      )
     }
   } else {
-    pdb_id  <- tolower(pdb_id)
-    seg_ids <- vapply(all_segs, function(s) tolower(s[["pdb_id"]]), character(1L))
+    pdb_id <- tolower(pdb_id)
+    seg_ids <- vapply(
+      all_segs,
+      function(s) tolower(s[["pdb_id"]]),
+      character(1L)
+    )
     if (!pdb_id %in% seg_ids) {
       cli::cli_abort(
         "PDB ID {.val {pdb_id}} not found in best_structures for {.val {accession}}."
@@ -90,11 +100,26 @@ pdb_annotations <- function(
   }
 
   # Collect all segments for the chosen structure (may span multiple chains)
-  segments <- Filter(function(s) identical(tolower(s[["pdb_id"]]), pdb_id), all_segs)
+  segments <- Filter(
+    function(s) identical(tolower(s[["pdb_id"]]), pdb_id),
+    all_segs
+  )
 
-  mapped_chains <- unique(vapply(segments, function(s) s[["chain_id"]], character(1L)))
-  unp_start_global <- min(vapply(segments, function(s) s[["unp_start"]], integer(1L)))
-  unp_end_global   <- max(vapply(segments, function(s) s[["unp_end"]],   integer(1L)))
+  mapped_chains <- unique(vapply(
+    segments,
+    function(s) s[["chain_id"]],
+    character(1L)
+  ))
+  unp_start_global <- min(vapply(
+    segments,
+    function(s) s[["unp_start"]],
+    integer(1L)
+  ))
+  unp_end_global <- max(vapply(
+    segments,
+    function(s) s[["unp_end"]],
+    integer(1L)
+  ))
 
   # -- Coordinate converter: PDB author residue number → UniProt ----
   # best_structures uses "start"/"end" for PDB author residue numbers.
@@ -102,7 +127,9 @@ pdb_annotations <- function(
   convert_pos <- function(pdb_positions, chain) {
     result <- rep(NA_integer_, length(pdb_positions))
     for (seg in segments) {
-      if (!identical(seg[["chain_id"]], chain)) next
+      if (!identical(seg[["chain_id"]], chain)) {
+        next
+      }
       ps <- seg[["start"]]
       pe <- seg[["end"]]
       in_seg <- pdb_positions >= ps & pdb_positions <= pe
@@ -112,7 +139,11 @@ pdb_annotations <- function(
   }
 
   # -- Secondary structure from PDBe REST API ----
-  ss_raw    <- fetch_json(paste0(pdbe_api_url, "/pdb/entry/secondary_structure/", pdb_id))
+  ss_raw <- fetch_json(paste0(
+    pdbe_api_url,
+    "/pdb/entry/secondary_structure/",
+    pdb_id
+  ))
   molecules <- ss_raw[[pdb_id]][["molecules"]]
 
   region_list <- list()
@@ -120,19 +151,27 @@ pdb_annotations <- function(
   for (mol in molecules) {
     for (chain in mol[["chains"]]) {
       chain_id <- chain[["chain_id"]]
-      if (!chain_id %in% mapped_chains) next
+      if (!chain_id %in% mapped_chains) {
+        next
+      }
       ss <- chain[["secondary_structure"]]
 
       parse_ss_elements <- function(elements, a3_type) {
         lapply(elements, function(el) {
-          s   <- as.integer(el[["start"]][["author_residue_number"]])
-          e   <- as.integer(el[["end"]][["author_residue_number"]])
+          s <- as.integer(el[["start"]][["author_residue_number"]])
+          e <- as.integer(el[["end"]][["author_residue_number"]])
           unp <- convert_pos(c(s, e), chain_id)
-          if (anyNA(unp) || unp[[1L]] < unp_start_global ||
-              unp[[2L]] > unp_end_global || unp[[1L]] >= unp[[2L]]) return(NULL)
+          if (
+            anyNA(unp) ||
+              unp[[1L]] < unp_start_global ||
+              unp[[2L]] > unp_end_global ||
+              unp[[1L]] >= unp[[2L]]
+          ) {
+            return(NULL)
+          }
           A3Region(
             index = A3Range(data = matrix(unp, nrow = 1L)),
-            type  = a3_type
+            type = a3_type
           )
         })
       }
@@ -140,14 +179,21 @@ pdb_annotations <- function(
       region_list <- c(
         region_list,
         Filter(Negate(is.null), parse_ss_elements(ss[["helices"]], "helix")),
-        Filter(Negate(is.null), parse_ss_elements(ss[["strands"]], "betaStrand")),
-        Filter(Negate(is.null), parse_ss_elements(ss[["turns"]],   "turn"))
+        Filter(
+          Negate(is.null),
+          parse_ss_elements(ss[["strands"]], "betaStrand")
+        ),
+        Filter(Negate(is.null), parse_ss_elements(ss[["turns"]], "turn"))
       )
     }
   }
 
   # -- Binding sites from PDBe REST API ----
-  bs_resp   <- httr::GET(paste0(pdbe_api_url, "/pdb/entry/binding_sites/", pdb_id))
+  bs_resp <- httr::GET(paste0(
+    pdbe_api_url,
+    "/pdb/entry/binding_sites/",
+    pdb_id
+  ))
   site_list <- list()
 
   # 404 = no binding sites; anything else is an error
@@ -166,37 +212,51 @@ pdb_annotations <- function(
         },
         bs[["residues"]]
       )
-      if (length(residues) == 0L) next
+      if (length(residues) == 0L) {
+        next
+      }
 
-      chain_id  <- residues[[1L]][["chain_id"]]
+      chain_id <- residues[[1L]][["chain_id"]]
       unp_positions <- sort(unique(Filter(
         function(p) !is.na(p) & p >= unp_start_global & p <= unp_end_global,
         convert_pos(
-          vapply(residues, function(r) as.integer(r[["author_residue_number"]]), integer(1L)),
+          vapply(
+            residues,
+            function(r) as.integer(r[["author_residue_number"]]),
+            integer(1L)
+          ),
           chain_id
         )
       )))
-      if (length(unp_positions) == 0L) next
+      if (length(unp_positions) == 0L) {
+        next
+      }
 
-      site_list <- c(site_list, list(
-        A3Site(index = A3Position(data = unp_positions), type = "bindingSite")
-      ))
+      site_list <- c(
+        site_list,
+        list(
+          A3Site(index = A3Position(data = unp_positions), type = "bindingSite")
+        )
+      )
     }
   }
 
   # -- Name by type with sequential suffix ----
   name_by_type <- function(lst) {
-    if (length(lst) == 0L) return(lst)
+    if (length(lst) == 0L) {
+      return(lst)
+    }
     types <- vapply(lst, function(x) x@type, character(1L))
     names(lst) <- paste0(
-      types, "_",
+      types,
+      "_",
       as.integer(ave(seq_along(types), types, FUN = seq_along))
     )
     lst
   }
 
   region_list <- name_by_type(region_list)
-  site_list   <- name_by_type(site_list)
+  site_list <- name_by_type(site_list)
 
   if (verbosity > 0L) {
     msg(
@@ -210,4 +270,4 @@ pdb_annotations <- function(
   }
 
   list(region = region_list, site = site_list)
-} # /pdb_annotations
+}
