@@ -1,3 +1,5 @@
+[![typescript-ci](https://github.com/rtemis-org/a3/actions/workflows/typescript-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/typescript-ci.yml)
+
 # @rtemis/a3
 
 TypeScript implementation of the **Amino Acid Annotation (A3)** format —
