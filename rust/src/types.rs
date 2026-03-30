@@ -3,7 +3,7 @@
 //! All struct fields are `pub(crate)` — visible within this crate for
 //! construction and validation, but invisible to external callers. Public
 //! getter methods on each type provide read-only access. This enforces the
-//! invariant that every `A3` value has passed through [`crate::validate`].
+//! invariant that every `A3` value has passed through [`crate::validate()`].
 //!
 //! The hierarchy mirrors the JSON wire format exactly:
 //!
@@ -282,7 +282,7 @@ impl Metadata {
 
 /// The root A3 object.
 ///
-/// Fields are `pub(crate)` — only [`crate::validate`] may construct an `A3`,
+/// Fields are `pub(crate)` — only [`crate::validate()`] may construct an `A3`,
 /// guaranteeing that every value returned to external callers has passed full
 /// two-stage validation. Public getter methods provide read-only access.
 #[derive(Debug, Clone, Serialize, Deserialize)]
