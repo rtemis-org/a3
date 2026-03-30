@@ -1,3 +1,5 @@
+[![r-ci](https://github.com/rtemis-org/a3/actions/workflows/r-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/r-ci.yml)
+
 # rtemis.a3
 
 R implementation of the **Amino Acid Annotation (A3)** format —
