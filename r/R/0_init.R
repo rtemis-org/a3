@@ -1511,7 +1511,7 @@ red <- function(..., bold = FALSE) {
 #' @param bold Logical: If TRUE, make text bold.
 #'
 #' @author EDG
-#' @export
+#' @noRd
 green <- function(..., bold = FALSE) {
   fmt(
     paste(...),
