@@ -28,12 +28,7 @@ jobs:
           - os: windows-latest
             r: release
           - os: ubuntu-latest
-            r: devel
-            http-user-agent: release
-          - os: ubuntu-latest
             r: release
-          - os: ubuntu-latest
-            r: oldrel-1
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -54,10 +49,12 @@ jobs:
         with:
           working-directory: r
           extra-packages: any::rcmdcheck
+          extra-repositories: https://rtemis-org.r-universe.dev
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
         with:
           working-directory: r
+          extra-repositories: https://rtemis-org.r-universe.dev
           upload-snapshots: true
           build_args: 'c("--no-manual", "--compact-vignettes=gs+qpdf")'
