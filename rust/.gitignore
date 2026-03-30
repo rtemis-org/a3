@@ -17,3 +17,6 @@ target/
 # Cargo.lock is committed for binaries, not libraries
 # (library consumers resolve their own dependency versions)
 Cargo.lock
+
+# custom docs building
+build-docs.sh
