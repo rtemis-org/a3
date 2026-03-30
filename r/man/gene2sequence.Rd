@@ -32,6 +32,11 @@ data.frame with columns "gene", "ensembl_transcript_id" and "sequence".
 \description{
 Get the sequence of a gene
 }
+\examples{
+\dontrun{
+  mapt_seqs <- gene2sequence("MAPT")
+}
+}
 \author{
 EDG
 }

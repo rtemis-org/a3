@@ -15,7 +15,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' seq <- uniprot_sequence("P10636")
+#'   seq <- uniprot_sequence("P10636")
 #' }
 uniprot_sequence <- function(
   accession,

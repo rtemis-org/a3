@@ -18,6 +18,10 @@ Named list with \code{index} (A3Position) and \code{type} (character)
 Creates an annotation spec (named list) with an \code{A3Position} index and optional type,
 for use with \code{create_A3()}.
 }
+\examples{
+# Create a site annotation for positions 5 and 17, of type "active site"
+annotation_position(c(5L, 17L), type = "active site")
+}
 \author{
 EDG
 }

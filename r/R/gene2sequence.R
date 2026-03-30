@@ -11,6 +11,11 @@
 #'
 #' @author EDG
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#'   mapt_seqs <- gene2sequence("MAPT")
+#' }
 gene2sequence <- function(
   gene,
   organism = "hsapiens",

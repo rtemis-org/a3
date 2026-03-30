@@ -6,6 +6,11 @@
 #'
 #' @author EDG
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' get_alphafold("P10636")
+#' }
 get_alphafold <- function(uniprotid) {
   url <- paste0("https://www.alphafold.ebi.ac.uk/api/prediction/", uniprotid)
   headers <- c(
@@ -24,54 +29,6 @@ get_alphafold_pdb <- function(uniprotid) {
 }
 
 
-#' Write `A3` object to JSON file
-#'
-#' @param x `A3` object.
-#' @param filepath Character: Path to save JSON file.
-#' @param overwrite Logical: If TRUE, overwrite existing file.
-#'
-#' @return Invisible `x`. Writes JSON file as side effect.
-#'
-#' @author EDG
-#' @export
-write_A3json <- function(x, filepath, overwrite = FALSE) {
-  check_is_S7(x, A3)
-  check_inherits(filepath, "character")
-  filepath <- normalizePath(filepath, mustWork = FALSE)
-  if (file.exists(filepath) && !overwrite) {
-    cli::cli_abort(
-      "File {.file {filepath}} exists. Set {.arg overwrite = TRUE} to overwrite."
-    )
-  }
-  writeLines(to_json(x), filepath)
-  invisible(x)
-}
-
-#' Read `A3` object from JSON file
-#'
-#' @param filepath Character: Path to JSON file.
-#' @param verbosity Integer: if greater than 0, print messages.
-#'
-#' @return `A3` object.
-#'
-#' @author EDG
-#' @export
-read_A3json <- function(filepath, verbosity = 0L) {
-  check_inherits(filepath, "character")
-  filepath <- normalizePath(filepath)
-  if (!file.exists(filepath)) {
-    cli::cli_abort("File {.file {filepath}} does not exist.")
-  }
-  json_str <- paste(readLines(filepath, warn = FALSE), collapse = "\n")
-  obj <- A3from_json(json_str)
-  if (verbosity > 0) {
-    cat("Read ", filepath, ":\n", sep = "")
-    print(obj)
-  }
-  obj
-}
-
-
 #' Perform amino acid substitutions
 #'
 #' @param x Character vector: Amino acid sequence. e.g. `"ARND"` or
@@ -84,6 +41,9 @@ read_A3json <- function(filepath, verbosity = 0L) {
 #'
 #' @author EDG
 #' @export
+#'
+#' @examples
+#' aa_sub(c("A", "R", "N", "D"), c("R2K", "N3S"))
 aa_sub <- function(x, substitutions, verbosity = 1L) {
   stopifnot(is.character(x), is.character(substitutions))
   # Split x into characters

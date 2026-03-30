@@ -15,6 +15,11 @@ data frame with AlphaFold info.
 \description{
 Get AlphaFold info for a given UniProt ID
 }
+\examples{
+\dontrun{
+get_alphafold("P10636")
+}
+}
 \author{
 EDG
 }

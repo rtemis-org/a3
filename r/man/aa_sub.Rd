@@ -21,6 +21,9 @@ Character vector with substitutions performed.
 \description{
 Perform amino acid substitutions
 }
+\examples{
+aa_sub(c("A", "R", "N", "D"), c("R2K", "N3S"))
+}
 \author{
 EDG
 }

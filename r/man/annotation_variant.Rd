@@ -18,6 +18,10 @@ A3Variant object
 \description{
 Creates an \code{A3Variant} object for variant annotations with position and info.
 }
+\examples{
+# Create a variant annotation for position 10 with info about the variant
+annotation_variant(10L, info = list(ref = "A", alt = "T", type = "missense"))
+}
 \author{
 EDG
 }

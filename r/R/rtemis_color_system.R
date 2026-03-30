@@ -54,12 +54,9 @@ col_object <- rt_green
 #'   \item{tuner}{"coastside orange"}
 #' }
 #'
-#' @examples
-#' rtemis_colors[["orange"]]
-#'
 #' @author EDG
 #'
-#' @export
+#' @noRd
 #'
 #' @examples
 #' rtemis_colors[["teal"]]
