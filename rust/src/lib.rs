@@ -24,13 +24,13 @@
 //!
 //! - [`error`]     — `A3Error` enum
 //! - [`types`]     — data model structs and enums
-//! - [`normalize`] — pure helpers: sort, deduplicate, overlap check
-//! - [`validate`]  — two-stage validation (structural then contextual)
+//! - [`normalization`] — pure helpers: sort, deduplicate, overlap check
+//! - [`validation`]  — two-stage validation (structural then contextual)
 
 pub mod error;
-pub mod normalize;
+pub mod normalization;
 pub mod types;
-pub mod validate;
+pub mod validation;
 
 // Re-export the most commonly used items so users can write
 // `use rtemis_a3::A3` instead of `use rtemis_a3::types::A3`.
@@ -38,7 +38,7 @@ pub use error::A3Error;
 pub use types::{
     A3, A3Index, Annotations, FlexEntry, Metadata, RegionEntry, SiteEntry, VariantRecord,
 };
-pub use validate::validate;
+pub use validation::validate;
 
 use serde::Serialize as _;
 
@@ -50,7 +50,7 @@ use serde::Serialize as _;
 ///
 /// This function composes two steps:
 /// 1. `serde_json::from_str` — deserialize the JSON into a raw [`A3`] struct.
-/// 2. [`validate`] — normalize fields and enforce all A3 rules.
+/// 2. [`validate()`] — normalize fields and enforce all A3 rules (from [`validation`]).
 ///
 /// Both steps return `Result<_, A3Error>`. The `?` operator is Rust's concise
 /// way to propagate errors: if the expression on its left is `Err(e)`, the
