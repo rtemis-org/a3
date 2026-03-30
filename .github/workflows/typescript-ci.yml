@@ -1,4 +1,4 @@
-name: typescript-ci
+name: TypeScript CI
 
 on:
   workflow_dispatch:

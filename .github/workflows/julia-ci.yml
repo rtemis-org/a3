@@ -1,4 +1,4 @@
-name: julia-ci
+name: Julia CI
 
 on:
   workflow_dispatch:
