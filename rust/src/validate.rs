@@ -11,7 +11,9 @@ use std::collections::HashMap;
 
 use crate::error::A3Error;
 use crate::normalize::{normalize_positions, normalize_ranges, normalize_sequence};
-use crate::types::{A3, A3Index, Annotations, FlexEntry, Metadata, RegionEntry, SiteEntry, VariantRecord};
+use crate::types::{
+    A3, A3Index, Annotations, FlexEntry, Metadata, RegionEntry, SiteEntry, VariantRecord,
+};
 
 /// Validate and normalize a raw-deserialized [`A3`] value.
 ///
@@ -71,7 +73,13 @@ pub fn validate(raw: A3) -> Result<A3, A3Error> {
                 // `SiteEntry { index, kind: entry.kind }` is struct literal syntax.
                 // When the field name and variable name match, Rust allows the
                 // shorthand `{ index }` instead of `{ index: index }`.
-                site.insert(name, SiteEntry { index, kind: entry.kind });
+                site.insert(
+                    name,
+                    SiteEntry {
+                        index,
+                        kind: entry.kind,
+                    },
+                );
             }
             Err(e) => errors.push(e),
         }
@@ -90,7 +98,13 @@ pub fn validate(raw: A3) -> Result<A3, A3Error> {
 
         match normalize_ranges(entry.index, &field) {
             Ok(index) => {
-                region.insert(name, RegionEntry { index, kind: entry.kind });
+                region.insert(
+                    name,
+                    RegionEntry {
+                        index,
+                        kind: entry.kind,
+                    },
+                );
             }
             Err(e) => errors.push(e),
         }
@@ -139,17 +153,29 @@ pub fn validate(raw: A3) -> Result<A3, A3Error> {
     // is no borrow conflict.
 
     for (name, entry) in &site {
-        check_positions_bounds(&entry.index, seq_len, &format!("annotations.site.{name}"), &mut errors);
+        check_positions_bounds(
+            &entry.index,
+            seq_len,
+            &format!("annotations.site.{name}"),
+            &mut errors,
+        );
     }
 
     for (name, entry) in &region {
-        check_ranges_bounds(&entry.index, seq_len, &format!("annotations.region.{name}"), &mut errors);
+        check_ranges_bounds(
+            &entry.index,
+            seq_len,
+            &format!("annotations.region.{name}"),
+            &mut errors,
+        );
     }
 
     for (name, entry) in &ptm {
         let field = format!("annotations.ptm.{name}");
         match &entry.index {
-            A3Index::Positions(positions) => check_positions_bounds(positions, seq_len, &field, &mut errors),
+            A3Index::Positions(positions) => {
+                check_positions_bounds(positions, seq_len, &field, &mut errors)
+            }
             A3Index::Ranges(ranges) => check_ranges_bounds(ranges, seq_len, &field, &mut errors),
         }
     }
@@ -157,7 +183,9 @@ pub fn validate(raw: A3) -> Result<A3, A3Error> {
     for (name, entry) in &processing {
         let field = format!("annotations.processing.{name}");
         match &entry.index {
-            A3Index::Positions(positions) => check_positions_bounds(positions, seq_len, &field, &mut errors),
+            A3Index::Positions(positions) => {
+                check_positions_bounds(positions, seq_len, &field, &mut errors)
+            }
             A3Index::Ranges(ranges) => check_ranges_bounds(ranges, seq_len, &field, &mut errors),
         }
     }
@@ -182,7 +210,13 @@ pub fn validate(raw: A3) -> Result<A3, A3Error> {
 
     Ok(A3 {
         sequence,
-        annotations: Annotations { site, region, ptm, processing, variant },
+        annotations: Annotations {
+            site,
+            region,
+            ptm,
+            processing,
+            variant,
+        },
         // Metadata fields are plain strings — no normalization needed. We keep
         // whatever serde produced (the `default` attribute already filled in
         // empty strings for absent keys and `deny_unknown_fields` rejected extras).
@@ -239,7 +273,13 @@ fn normalize_flex_family(
             },
         };
 
-        out.insert(name, FlexEntry { index, kind: entry.kind });
+        out.insert(
+            name,
+            FlexEntry {
+                index,
+                kind: entry.kind,
+            },
+        );
     }
 
     out
@@ -325,7 +365,10 @@ mod tests {
         // Sequence length is 6; position 10 is out of bounds.
         raw.annotations.site.insert(
             "test".to_string(),
-            SiteEntry { index: vec![10], kind: String::new() },
+            SiteEntry {
+                index: vec![10],
+                kind: String::new(),
+            },
         );
         let err = validate(raw).unwrap_err();
         // Pattern match to confirm it is a Validate error, not a Parse error.
@@ -338,11 +381,17 @@ mod tests {
         // Two invalid site entries — both errors should appear.
         raw.annotations.site.insert(
             "a".to_string(),
-            SiteEntry { index: vec![99], kind: String::new() },
+            SiteEntry {
+                index: vec![99],
+                kind: String::new(),
+            },
         );
         raw.annotations.site.insert(
             "b".to_string(),
-            SiteEntry { index: vec![88], kind: String::new() },
+            SiteEntry {
+                index: vec![88],
+                kind: String::new(),
+            },
         );
         match validate(raw) {
             Err(A3Error::Validate(errs)) => assert_eq!(errs.len(), 2),

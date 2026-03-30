@@ -35,7 +35,9 @@ pub mod validate;
 // Re-export the most commonly used items so users can write
 // `use rtemis_a3::A3` instead of `use rtemis_a3::types::A3`.
 pub use error::A3Error;
-pub use types::{A3Index, Annotations, FlexEntry, Metadata, RegionEntry, SiteEntry, VariantRecord, A3};
+pub use types::{
+    A3, A3Index, Annotations, FlexEntry, Metadata, RegionEntry, SiteEntry, VariantRecord,
+};
 pub use validate::validate;
 
 use serde::Serialize as _;
@@ -188,7 +190,10 @@ mod tests {
         // `#[derive(Debug)]` is needed for `assert_eq!` to display the values
         // on failure. We compare the re-serialized form since field order may
         // differ — if both round-trip identically they are semantically equal.
-        assert_eq!(a3_to_json(&a3, None).unwrap(), a3_to_json(&a3_again, None).unwrap());
+        assert_eq!(
+            a3_to_json(&a3, None).unwrap(),
+            a3_to_json(&a3_again, None).unwrap()
+        );
     }
 
     #[test]
