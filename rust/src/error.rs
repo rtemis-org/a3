@@ -27,8 +27,20 @@ pub enum A3Error {
     ///
     /// `{0}` refers to the first (and only) field of this variant by position.
     /// `serde_json::Error` is the underlying parse error from the JSON library.
+    ///
+    /// `#[from]` implements `From<serde_json::Error> for A3Error` automatically,
+    /// enabling the `?` operator to convert deserialization errors into this
+    /// variant without an explicit `.map_err(...)` call.
     #[error("Failed to parse JSON: {0}")]
     Parse(#[from] serde_json::Error),
+
+    /// Returned when a validated [`crate::A3`] cannot be serialized to JSON.
+    ///
+    /// In practice this variant is unreachable for well-typed A3 values, but
+    /// it is kept distinct from [`A3Error::Parse`] so that error messages
+    /// accurately reflect the failure mode — serialization, not parsing.
+    #[error("Failed to serialize to JSON: {0}")]
+    Serialize(serde_json::Error),
 
     /// Returned when input is structurally valid JSON but violates A3 rules.
     ///
