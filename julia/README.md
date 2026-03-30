@@ -1,3 +1,5 @@
+[![julia-ci](https://github.com/rtemis-org/a3/actions/workflows/julia-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/julia-ci.yml)
+
 # RtemisA3 — Julia
 
 Julia implementation of the [A3 (Amino Acid Annotation) format](../specs/a3.md).
