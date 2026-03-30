@@ -1,0 +1,19 @@
+# Dev
+__dev/
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Zed
+.zed/
+
+# Rust / Cargo
+target/
+
+# Cargo.lock is committed for binaries, not libraries
+# (library consumers resolve their own dependency versions)
+Cargo.lock
