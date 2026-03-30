@@ -26,13 +26,10 @@
 /// knows exactly where the problem is.
 pub fn normalize_positions(positions: Vec<u32>, field: &str) -> Result<Vec<u32>, String> {
     // Check for zero values before sorting so we can report them clearly.
-    // `.iter()` borrows the vector without consuming it, producing references.
-    // `.filter()` keeps only elements matching the predicate.
-    // `.copied()` converts `&u32` references to `u32` values.
-    // `.collect()` gathers the iterator into a `Vec<u32>`.
-    let zeros: Vec<u32> = positions.iter().filter(|&&p| p == 0).copied().collect();
-
-    if !zeros.is_empty() {
+    // `.any()` short-circuits on the first match and allocates nothing —
+    // more idiomatic and efficient than collecting into a Vec just to check
+    // `.is_empty()`.
+    if positions.contains(&0) {
         return Err(format!(
             "{field}: positions must be ≥ 1 (1-based); found zero"
         ));
@@ -121,9 +118,11 @@ pub fn normalize_ranges(ranges: Vec<[u32; 2]>, field: &str) -> Result<Vec<[u32; 
 ///
 /// Returns `Ok(String)` on success or `Err(String)` on failure.
 pub fn normalize_sequence(sequence: &str) -> Result<String, String> {
-    // `.to_uppercase()` returns a new `String` — Rust strings are UTF-8 and
-    // immutable by default, so we always produce a fresh normalized copy.
-    let upper = sequence.to_uppercase();
+    // `.to_ascii_uppercase()` is correct here: the A3 spec restricts input to
+    // `[A-Za-z*]`, which is pure ASCII. The Unicode-aware `.to_uppercase()`
+    // can change string length for non-ASCII code points and may accept
+    // characters that map to valid ASCII letters — both undesirable.
+    let upper = sequence.to_ascii_uppercase();
 
     if upper.len() < 2 {
         return Err(format!(
