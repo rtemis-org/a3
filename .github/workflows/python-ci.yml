@@ -1,0 +1,51 @@
+name: python-ci
+
+on:
+  pull_request:
+    paths:
+      - python/**
+  push:
+    branches:
+      - main
+    paths:
+      - python/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: python/rtemis_a3
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
+          cache-dependency-glob: python/rtemis_a3/uv.lock
+
+      - name: Install
+        run: uv sync --frozen --all-groups
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Type Check
+        run: uv run ty check
+
+      - name: Test
+        run: uv run pytest

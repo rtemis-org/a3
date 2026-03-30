@@ -1,0 +1,38 @@
+name: julia-ci
+
+on:
+  pull_request:
+    paths:
+      - julia/**
+  push:
+    branches:
+      - main
+    paths:
+      - julia/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: julia-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  julia-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1'
+
+      - uses: julia-actions/cache@v3
+
+      - name: Instantiate
+        run: julia --project=julia/RtemisA3 -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Test
+        run: julia --project=julia/RtemisA3 -e 'using Pkg; Pkg.test()'
