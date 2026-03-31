@@ -1,5 +1,5 @@
 import type { ZodError } from "zod";
-import { A3_SCHEMA_URI, A3_VERSION, type A3Data, A3InputSchema, type VariantData } from "./schemas";
+import { type A3Data, A3InputSchema, A3_SCHEMA_URI, A3_VERSION, type VariantData } from "./schemas";
 
 // ── Error classes ─────────────────────────────────────────────────────────────
 

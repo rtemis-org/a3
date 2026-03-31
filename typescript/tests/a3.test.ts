@@ -157,7 +157,11 @@ describe("A3.toJSON and JSON.stringify", () => {
   });
 
   it("serialized JSON contains all annotation families", () => {
-    const a3 = new A3({ $schema: "https://schema.rtemis.org/a3/v1/schema.json", a3_version: "1.0.0", sequence: "MKTAY" });
+    const a3 = new A3({
+      $schema: "https://schema.rtemis.org/a3/v1/schema.json",
+      a3_version: "1.0.0",
+      sequence: "MKTAY",
+    });
     const parsed = JSON.parse(a3.toJSONString()) as { annotations: Record<string, unknown> };
     expect(parsed.annotations).toHaveProperty("site");
     expect(parsed.annotations).toHaveProperty("region");

@@ -64,7 +64,11 @@ describe("annotation validation", () => {
   });
 
   it("defaults missing annotations families to empty", () => {
-    const result = A3InputSchema.safeParse({ $schema: "https://schema.rtemis.org/a3/v1/schema.json", a3_version: "1.0.0", sequence: "MKTAYIAKQR" });
+    const result = A3InputSchema.safeParse({
+      $schema: "https://schema.rtemis.org/a3/v1/schema.json",
+      a3_version: "1.0.0",
+      sequence: "MKTAYIAKQR",
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.annotations.site).toEqual({});
@@ -286,7 +290,11 @@ describe("variant validation", () => {
 
 describe("metadata validation", () => {
   it("defaults all metadata fields to empty string", () => {
-    const result = A3InputSchema.safeParse({ $schema: "https://schema.rtemis.org/a3/v1/schema.json", a3_version: "1.0.0", sequence: "MKTAY" });
+    const result = A3InputSchema.safeParse({
+      $schema: "https://schema.rtemis.org/a3/v1/schema.json",
+      a3_version: "1.0.0",
+      sequence: "MKTAY",
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.metadata).toEqual({
