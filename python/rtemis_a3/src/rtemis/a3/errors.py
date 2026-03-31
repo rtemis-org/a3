@@ -26,10 +26,4 @@ class A3ValidationError(Exception):
 
 
 class A3ParseError(Exception):
-    """Raised when JSON parsing or file I/O fails.
-
-    Parameters
-    ----------
-    message : str
-        Human-readable description of the failure.
-    """
+    """Raised when JSON parsing or file I/O fails."""
