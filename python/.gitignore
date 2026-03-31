@@ -38,3 +38,5 @@ htmlcov/
 # Docs output
 site/
 
+# custom docs building
+build-docs.sh
