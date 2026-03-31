@@ -9,32 +9,32 @@ async function readExample(filename: string): Promise<string> {
   return readFile(join(EXAMPLES_DIR, filename), "utf-8");
 }
 
-describe("mapt_annot_a3.json (canonical format)", () => {
+describe("mapt.a3.json (canonical format)", () => {
   it("parses without error", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     expect(() => A3.fromJSONText(text)).not.toThrow();
   });
 
   it("has correct sequence length (441 residues)", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     expect(a3.length).toBe(441);
   });
 
   it("first residue is M", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     expect(a3.residueAt(1)).toBe("M");
   });
 
   it("last residue is L", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     expect(a3.residueAt(441)).toBe("L");
   });
 
   it("contains expected site annotations", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     const data = a3.toData();
     expect(data.annotations.site).toHaveProperty("Disease_associated_variant");
@@ -42,7 +42,7 @@ describe("mapt_annot_a3.json (canonical format)", () => {
   });
 
   it("contains expected region annotations", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     const data = a3.toData();
     expect(data.annotations.region).toHaveProperty("KXGS");
@@ -55,7 +55,7 @@ describe("mapt_annot_a3.json (canonical format)", () => {
   });
 
   it("contains expected PTM annotations", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     const data = a3.toData();
     expect(data.annotations.ptm).toHaveProperty("Phosphorylation");
@@ -63,7 +63,7 @@ describe("mapt_annot_a3.json (canonical format)", () => {
   });
 
   it("metadata is correct", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     const meta = a3.toData().metadata;
     expect(meta.uniprot_id).toBe("P10636");
@@ -71,7 +71,7 @@ describe("mapt_annot_a3.json (canonical format)", () => {
   });
 
   it("round-trips: parse → serialize → parse gives identical data", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     const json2 = a3.toJSONString();
     const a3b = A3.fromJSONText(json2);
@@ -85,7 +85,7 @@ describe("mapt_annot_a3.json (canonical format)", () => {
   });
 
   it("serialized output always has all five annotation families", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     const parsed = JSON.parse(a3.toJSONString()) as {
       annotations: Record<string, unknown>;
@@ -96,7 +96,7 @@ describe("mapt_annot_a3.json (canonical format)", () => {
   });
 
   it("serialized output preserves type field on all entries", async () => {
-    const text = await readExample("mapt_annot_a3.json");
+    const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     const data = a3.toData();
     for (const entry of Object.values(data.annotations.site)) {
