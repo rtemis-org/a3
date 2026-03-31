@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { A3InputSchema } from "../src/schemas";
+import { A3InputSchema, A3_SCHEMA_URI, A3_VERSION } from "../src/schemas";
 
 const MINIMAL_VALID = {
-  $schema: "https://schema.rtemis.org/a3/v1/schema.json",
-  a3_version: "1.0.0",
+  $schema: A3_SCHEMA_URI,
+  a3_version: A3_VERSION,
   sequence: "MKTAYIAKQR",
   annotations: { site: {}, region: {}, ptm: {}, processing: {}, variant: [] },
   metadata: { uniprot_id: "", description: "", reference: "", organism: "" },
@@ -65,8 +65,8 @@ describe("annotation validation", () => {
 
   it("defaults missing annotations families to empty", () => {
     const result = A3InputSchema.safeParse({
-      $schema: "https://schema.rtemis.org/a3/v1/schema.json",
-      a3_version: "1.0.0",
+      $schema: A3_SCHEMA_URI,
+      a3_version: A3_VERSION,
       sequence: "MKTAYIAKQR",
     });
     expect(result.success).toBe(true);
@@ -291,8 +291,8 @@ describe("variant validation", () => {
 describe("metadata validation", () => {
   it("defaults all metadata fields to empty string", () => {
     const result = A3InputSchema.safeParse({
-      $schema: "https://schema.rtemis.org/a3/v1/schema.json",
-      a3_version: "1.0.0",
+      $schema: A3_SCHEMA_URI,
+      a3_version: A3_VERSION,
       sequence: "MKTAY",
     });
     expect(result.success).toBe(true);
@@ -308,8 +308,8 @@ describe("metadata validation", () => {
 
   it("accepts partial metadata", () => {
     const result = A3InputSchema.safeParse({
-      $schema: "https://schema.rtemis.org/a3/v1/schema.json",
-      a3_version: "1.0.0",
+      $schema: A3_SCHEMA_URI,
+      a3_version: A3_VERSION,
       sequence: "MKTAY",
       metadata: { uniprot_id: "P10636" },
     });
