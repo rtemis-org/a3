@@ -91,8 +91,8 @@ export class A3 {
    * Called automatically by JSON.stringify — do not return a string here.
    * Envelope fields ($schema, a3_version) are always emitted first.
    */
-  toJSON(): { $schema: string; a3_version: string } & A3Data {
-    return { $schema: A3_SCHEMA_URI, a3_version: A3_VERSION, ...this.#data };
+  toJSON(): A3Data {
+    return { ...this.#data, $schema: A3_SCHEMA_URI, a3_version: A3_VERSION };
   }
 
   /**
