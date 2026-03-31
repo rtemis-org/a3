@@ -36,7 +36,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.build.json",
-    "test": "pnpm typecheck && vitest run",
+    "test": "pnpm typecheck && pnpm check && vitest run",
     "check": "biome check src tests",
     "lint": "biome lint src tests",
     "format": "biome format src tests",
