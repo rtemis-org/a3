@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { A3, A3ParseError, A3ValidationError } from "../src/a3";
+import { A3_SCHEMA_URI, A3_VERSION } from "../src/schemas";
 
 const MINI_SEQ = "MKTAYIAKQR";
 
 const SIMPLE_INPUT = {
+  $schema: A3_SCHEMA_URI,
+  a3_version: A3_VERSION,
   sequence: MINI_SEQ,
   annotations: {
     site: { "Active site": { index: [3, 5], type: "activeSite" } },
@@ -27,12 +30,14 @@ describe("A3 constructor", () => {
   });
 
   it("throws A3ValidationError for invalid input", () => {
-    expect(() => new A3({ sequence: "M" })).toThrow(A3ValidationError);
+    expect(() => new A3({ $schema: A3_SCHEMA_URI, a3_version: A3_VERSION, sequence: "M" })).toThrow(
+      A3ValidationError,
+    );
   });
 
   it("throws A3ValidationError with issues array", () => {
     try {
-      new A3({ sequence: "M" });
+      new A3({ $schema: A3_SCHEMA_URI, a3_version: A3_VERSION, sequence: "M" });
     } catch (e) {
       expect(e).toBeInstanceOf(A3ValidationError);
       expect((e as A3ValidationError).issues.length).toBeGreaterThan(0);
@@ -43,6 +48,8 @@ describe("A3 constructor", () => {
     expect(
       () =>
         new A3({
+          $schema: A3_SCHEMA_URI,
+          a3_version: A3_VERSION,
           sequence: "MKTAY",
           annotations: { site: { A: { index: [99], type: "" } } },
         }),
@@ -155,7 +162,11 @@ describe("A3.toJSON and JSON.stringify", () => {
   });
 
   it("serialized JSON contains all annotation families", () => {
-    const a3 = new A3({ sequence: "MKTAY" });
+    const a3 = new A3({
+      $schema: A3_SCHEMA_URI,
+      a3_version: A3_VERSION,
+      sequence: "MKTAY",
+    });
     const parsed = JSON.parse(a3.toJSONString()) as { annotations: Record<string, unknown> };
     expect(parsed.annotations).toHaveProperty("site");
     expect(parsed.annotations).toHaveProperty("region");
@@ -166,6 +177,8 @@ describe("A3.toJSON and JSON.stringify", () => {
 
   it("type field is always present on annotation entries", () => {
     const a3 = new A3({
+      $schema: A3_SCHEMA_URI,
+      a3_version: A3_VERSION,
       sequence: "MKTAY",
       annotations: {
         site: { A: { index: [1, 2] } }, // type omitted — defaults to ""

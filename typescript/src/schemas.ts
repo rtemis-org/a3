@@ -84,10 +84,25 @@ const MetadataSchema = z
   })
   .strict();
 
+// ── Envelope constants ────────────────────────────────────────────────────────
+
+const A3_SCHEMA_URI = "https://schema.rtemis.org/a3/v1/schema.json";
+const A3_VERSION = "1.0.0";
+
 // ── Root schema ───────────────────────────────────────────────────────────────
 
 export const A3InputSchema = z
   .object({
+    $schema: z.literal(A3_SCHEMA_URI, {
+      errorMap: () => ({
+        message: `'$schema' must be '${A3_SCHEMA_URI}'`,
+      }),
+    }),
+    a3_version: z.literal(A3_VERSION, {
+      errorMap: () => ({
+        message: `'a3_version' must be '${A3_VERSION}'`,
+      }),
+    }),
     sequence: z
       .string()
       .min(2, "sequence must be at least 2 characters")
@@ -148,6 +163,8 @@ export const A3InputSchema = z
       checkPos(v.position, ["annotations", "variant", i, "position"]);
     });
   });
+
+export { A3_SCHEMA_URI, A3_VERSION };
 
 // ── Exported types (inferred from schemas) ────────────────────────────────────
 

@@ -14,6 +14,9 @@
 #      └── organism:    character(1)
 # 2026- EDG rtemis.org
 
+.A3_SCHEMA_URI <- "https://schema.rtemis.org/a3/v1/schema.json"
+.A3_VERSION <- "1.0.0"
+
 # %% Level 1: A3Sequence ----
 A3Sequence <- new_class(
   "A3Sequence",
@@ -884,6 +887,8 @@ method(to_json, A3) <- function(x, pretty = TRUE, ...) {
   }
 
   lst <- list(
+    `$schema` = jsonlite::unbox(.A3_SCHEMA_URI),
+    a3_version = jsonlite::unbox(.A3_VERSION),
     sequence = jsonlite::unbox(x@sequence@data),
     annotations = list(
       site = force_named(lapply(x@annotations@site, feature_to_list)),
@@ -928,6 +933,26 @@ A3from_json <- function(x, ...) {
       simplifyVector = TRUE,
       simplifyDataFrame = FALSE,
       simplifyMatrix = FALSE
+    )
+  }
+
+  # Validate required envelope fields
+  schema_field <- x[["$schema"]]
+  if (is.null(schema_field)) {
+    cli::cli_abort("JSON input missing required field {.field $schema}.")
+  }
+  if (schema_field != .A3_SCHEMA_URI) {
+    cli::cli_abort(
+      "Field {.field $schema} must be {.val {.A3_SCHEMA_URI}}, got {.val {schema_field}}."
+    )
+  }
+  version_field <- x[["a3_version"]]
+  if (is.null(version_field)) {
+    cli::cli_abort("JSON input missing required field {.field a3_version}.")
+  }
+  if (version_field != .A3_VERSION) {
+    cli::cli_abort(
+      "Field {.field a3_version} must be {.val {.A3_VERSION}}, got {.val {version_field}}."
     )
   }
 

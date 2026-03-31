@@ -281,6 +281,11 @@ impl Metadata {
 // A3 — root type
 // ---------------------------------------------------------------------------
 
+/// Expected value for the `$schema` envelope field.
+pub(crate) const A3_SCHEMA_URI: &str = "https://schema.rtemis.org/a3/v1/schema.json";
+/// Expected value for the `a3_version` envelope field.
+pub(crate) const A3_VERSION: &str = "1.0.0";
+
 /// The root A3 object.
 ///
 /// Fields are `pub(crate)` — only [`crate::validate()`] (in [`crate::validation`]) may construct an `A3`,
@@ -289,6 +294,13 @@ impl Metadata {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct A3 {
+    /// JSON Schema URI — must equal [`A3_SCHEMA_URI`]. Required on input.
+    #[serde(rename = "$schema")]
+    pub(crate) schema: String,
+
+    /// A3 spec version — must equal [`A3_VERSION`]. Required on input.
+    pub(crate) a3_version: String,
+
     /// The amino acid sequence. Non-empty, ≥ 2 characters, `[A-Z*]` only.
     /// Lowercase input is normalized to uppercase during validation.
     pub(crate) sequence: String,
@@ -303,6 +315,16 @@ pub struct A3 {
 }
 
 impl A3 {
+    /// JSON Schema URI.
+    pub fn schema(&self) -> &str {
+        &self.schema
+    }
+
+    /// A3 spec version string.
+    pub fn a3_version(&self) -> &str {
+        &self.a3_version
+    }
+
     /// The amino acid sequence, normalized to uppercase.
     pub fn sequence(&self) -> &str {
         &self.sequence

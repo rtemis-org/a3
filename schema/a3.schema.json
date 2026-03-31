@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.rtemis.org/a3/v1/schema.json",
+  "title": "A3",
+  "description": "Amino Acid Annotation (A3) format — structured annotation of amino acid sequences.",
+  "type": "object",
+  "required": ["$schema", "a3_version", "sequence"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://schema.rtemis.org/a3/v1/schema.json",
+      "description": "JSON Schema URI for this A3 document."
+    },
+    "a3_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "A3 specification version."
+    },
+    "sequence": {
+      "type": "string",
+      "minLength": 2,
+      "pattern": "^[A-Za-z*]+$",
+      "description": "Amino acid sequence using IUPAC single-letter codes plus '*' (stop codon). Lowercase is accepted and uppercased on parse."
+    },
+    "annotations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "site": {
+          "type": "object",
+          "propertyNames": { "minLength": 1 },
+          "additionalProperties": { "$ref": "#/$defs/positionAnnotationEntry" },
+          "description": "Named sets of individual residue positions."
+        },
+        "region": {
+          "type": "object",
+          "propertyNames": { "minLength": 1 },
+          "additionalProperties": { "$ref": "#/$defs/rangeAnnotationEntry" },
+          "description": "Named sets of contiguous sequence spans."
+        },
+        "ptm": {
+          "type": "object",
+          "propertyNames": { "minLength": 1 },
+          "additionalProperties": { "$ref": "#/$defs/mixedAnnotationEntry" },
+          "description": "Post-translational modifications (positions or ranges)."
+        },
+        "processing": {
+          "type": "object",
+          "propertyNames": { "minLength": 1 },
+          "additionalProperties": { "$ref": "#/$defs/mixedAnnotationEntry" },
+          "description": "Signal peptides, cleavage sites, maturation events (positions or ranges)."
+        },
+        "variant": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/variantRecord" },
+          "description": "Ordered list of sequence variant records."
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Protein metadata.",
+      "properties": {
+        "uniprot_id": {
+          "type": "string",
+          "description": "UniProt accession."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable protein description."
+        },
+        "reference": {
+          "type": "string",
+          "description": "Citation or URL."
+        },
+        "organism": {
+          "type": "string",
+          "description": "Species name."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "1-based residue position."
+    },
+    "range": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 1 },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "Inclusive [start, end] range pair; start < end is enforced at validation time."
+    },
+    "positionIndex": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/position" },
+      "description": "Ordered array of 1-based residue positions."
+    },
+    "rangeIndex": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/range" },
+      "description": "Ordered array of [start, end] range pairs."
+    },
+    "mixedIndex": {
+      "anyOf": [
+        { "$ref": "#/$defs/positionIndex" },
+        { "$ref": "#/$defs/rangeIndex" }
+      ],
+      "description": "Either an array of positions or a homogeneous array of [start, end] range pairs."
+    },
+    "positionAnnotationEntry": {
+      "type": "object",
+      "required": ["index"],
+      "additionalProperties": false,
+      "properties": {
+        "index": { "$ref": "#/$defs/positionIndex" },
+        "type": { "type": "string", "default": "" }
+      }
+    },
+    "rangeAnnotationEntry": {
+      "type": "object",
+      "required": ["index"],
+      "additionalProperties": false,
+      "properties": {
+        "index": { "$ref": "#/$defs/rangeIndex" },
+        "type": { "type": "string", "default": "" }
+      }
+    },
+    "mixedAnnotationEntry": {
+      "type": "object",
+      "required": ["index"],
+      "additionalProperties": false,
+      "properties": {
+        "index": { "$ref": "#/$defs/mixedIndex" },
+        "type": { "type": "string", "default": "" }
+      }
+    },
+    "variantRecord": {
+      "type": "object",
+      "required": ["position"],
+      "properties": {
+        "position": { "$ref": "#/$defs/position" }
+      },
+      "description": "Sequence variant record. 'position' is required; all other fields are open (must be JSON-compatible)."
+    }
+  }
+}

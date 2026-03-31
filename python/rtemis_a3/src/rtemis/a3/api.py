@@ -14,6 +14,10 @@ from pydantic import ValidationError
 from ._models import A3, VariantRecord
 from .errors import A3ParseError, A3ValidationError
 
+_A3_SCHEMA_URI = "https://schema.rtemis.org/a3/v1/schema.json"
+_A3_VERSION = "1.0.0"
+_ENVELOPE_KEYS = frozenset({"$schema", "a3_version"})
+
 
 def create_a3(
     sequence: str,
@@ -104,6 +108,26 @@ def a3_from_json(text: str) -> A3:
     except (json.JSONDecodeError, TypeError) as exc:
         raise A3ParseError(f"invalid JSON: {exc}") from exc
 
+    if not isinstance(data, dict):
+        raise A3ParseError("JSON root must be an object")
+    schema_val = data.get("$schema")
+    if schema_val is None:
+        raise A3ParseError("missing required field '$schema'")
+    if schema_val != _A3_SCHEMA_URI:
+        raise A3ParseError(
+            f"'$schema' must be '{_A3_SCHEMA_URI}', got '{schema_val}'"
+        )
+    version_val = data.get("a3_version")
+    if version_val is None:
+        raise A3ParseError("missing required field 'a3_version'")
+    if version_val != _A3_VERSION:
+        raise A3ParseError(
+            f"'a3_version' must be '{_A3_VERSION}', got '{version_val}'"
+        )
+    # Strip envelope keys before passing to the data model
+    for key in _ENVELOPE_KEYS:
+        data.pop(key, None)
+
     try:
         return A3.model_validate(data)
     except ValidationError as exc:
@@ -125,7 +149,11 @@ def a3_to_json(a3: A3, *, indent: int | None = None) -> str:
     str
         JSON string.
     """
-    data = a3.model_dump(mode="json")
+    data: dict[str, Any] = {
+        "$schema": _A3_SCHEMA_URI,
+        "a3_version": _A3_VERSION,
+        **a3.model_dump(mode="json"),
+    }
     return json.dumps(data, indent=indent, ensure_ascii=False)
 
 
