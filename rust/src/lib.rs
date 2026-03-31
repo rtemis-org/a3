@@ -11,6 +11,8 @@
 //! use rtemis_a3::{a3_from_json, a3_to_json};
 //!
 //! let json = r#"{
+//!   "$schema": "https://schema.rtemis.org/a3/v1/schema.json",
+//!   "a3_version": "1.0.0",
 //!   "sequence": "MAEPRQ",
 //!   "annotations": { "site": {}, "region": {}, "ptm": {}, "processing": {}, "variant": [] },
 //!   "metadata": { "uniprot_id": "", "description": "", "reference": "", "organism": "" }
@@ -170,6 +172,8 @@ mod tests {
 
     // The minimal JSON the spec requires all five families to be present.
     const MINIMAL_JSON: &str = r#"{
+        "$schema": "https://schema.rtemis.org/a3/v1/schema.json",
+        "a3_version": "1.0.0",
         "sequence": "MAEPRQ",
         "annotations": {
             "site": {},
@@ -217,14 +221,32 @@ mod tests {
     }
 
     #[test]
+    fn rejects_missing_schema() {
+        let json = r#"{"a3_version":"1.0.0","sequence":"MAEPRQ","annotations":{"site":{},"region":{},"ptm":{},"processing":{},"variant":[]},"metadata":{}}"#;
+        assert!(a3_from_json(json).is_err());
+    }
+
+    #[test]
+    fn rejects_wrong_schema_uri() {
+        let json = r#"{"$schema":"https://example.com/wrong","a3_version":"1.0.0","sequence":"MAEPRQ","annotations":{"site":{},"region":{},"ptm":{},"processing":{},"variant":[]},"metadata":{}}"#;
+        assert!(a3_from_json(json).is_err());
+    }
+
+    #[test]
+    fn rejects_missing_version() {
+        let json = r#"{"$schema":"https://schema.rtemis.org/a3/v1/schema.json","sequence":"MAEPRQ","annotations":{"site":{},"region":{},"ptm":{},"processing":{},"variant":[]},"metadata":{}}"#;
+        assert!(a3_from_json(json).is_err());
+    }
+
+    #[test]
     fn rejects_unknown_top_level_key() {
-        let json = r#"{"sequence":"MAEPRQ","foo":"bar"}"#;
+        let json = r#"{"$schema":"https://schema.rtemis.org/a3/v1/schema.json","a3_version":"1.0.0","sequence":"MAEPRQ","foo":"bar"}"#;
         assert!(a3_from_json(json).is_err());
     }
 
     #[test]
     fn rejects_unknown_metadata_key() {
-        let json = r#"{"sequence":"MAEPRQ","metadata":{"gene":"MAPT"}}"#;
+        let json = r#"{"$schema":"https://schema.rtemis.org/a3/v1/schema.json","a3_version":"1.0.0","sequence":"MAEPRQ","metadata":{"gene":"MAPT"}}"#;
         assert!(a3_from_json(json).is_err());
     }
 

@@ -884,6 +884,8 @@ method(to_json, A3) <- function(x, pretty = TRUE, ...) {
   }
 
   lst <- list(
+    `$schema` = jsonlite::unbox("https://schema.rtemis.org/a3/v1/schema.json"),
+    a3_version = jsonlite::unbox("1.0.0"),
     sequence = jsonlite::unbox(x@sequence@data),
     annotations = list(
       site = force_named(lapply(x@annotations@site, feature_to_list)),
@@ -928,6 +930,28 @@ A3from_json <- function(x, ...) {
       simplifyVector = TRUE,
       simplifyDataFrame = FALSE,
       simplifyMatrix = FALSE
+    )
+  }
+
+  # Validate required envelope fields
+  .a3_schema_uri <- "https://schema.rtemis.org/a3/v1/schema.json"
+  .a3_version <- "1.0.0"
+  schema_field <- x[["$schema"]]
+  if (is.null(schema_field)) {
+    cli::cli_abort("JSON input missing required field {.field $schema}.")
+  }
+  if (schema_field != .a3_schema_uri) {
+    cli::cli_abort(
+      "Field {.field $schema} must be {.val {.a3_schema_uri}}, got {.val {schema_field}}."
+    )
+  }
+  version_field <- x[["a3_version"]]
+  if (is.null(version_field)) {
+    cli::cli_abort("JSON input missing required field {.field a3_version}.")
+  }
+  if (version_field != .a3_version) {
+    cli::cli_abort(
+      "Field {.field a3_version} must be {.val {.a3_version}}, got {.val {version_field}}."
     )
   }
 

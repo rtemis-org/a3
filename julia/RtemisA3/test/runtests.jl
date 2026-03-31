@@ -189,7 +189,7 @@ end
 # ─── Unknown keys rejected ────────────────────────────────────────────────────
 
 @testset "unknown keys" begin
-    val_err(() -> A3(Dict("sequence" => "MAEPRQ", "extra" => "bad")))
+    val_err(() -> A3(Dict("\$schema" => "https://schema.rtemis.org/a3/v1/schema.json", "a3_version" => "1.0.0", "sequence" => "MAEPRQ", "extra" => "bad")))
     val_err(() -> create_a3("MAEPRQ";
         site = Dict("x" => Dict("index" => [1], "type" => "", "extra" => "bad"))
     ))

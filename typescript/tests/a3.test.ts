@@ -4,6 +4,8 @@ import { A3, A3ParseError, A3ValidationError } from "../src/a3";
 const MINI_SEQ = "MKTAYIAKQR";
 
 const SIMPLE_INPUT = {
+  $schema: "https://schema.rtemis.org/a3/v1/schema.json",
+  a3_version: "1.0.0",
   sequence: MINI_SEQ,
   annotations: {
     site: { "Active site": { index: [3, 5], type: "activeSite" } },
@@ -155,7 +157,7 @@ describe("A3.toJSON and JSON.stringify", () => {
   });
 
   it("serialized JSON contains all annotation families", () => {
-    const a3 = new A3({ sequence: "MKTAY" });
+    const a3 = new A3({ $schema: "https://schema.rtemis.org/a3/v1/schema.json", a3_version: "1.0.0", sequence: "MKTAY" });
     const parsed = JSON.parse(a3.toJSONString()) as { annotations: Record<string, unknown> };
     expect(parsed.annotations).toHaveProperty("site");
     expect(parsed.annotations).toHaveProperty("region");
@@ -166,6 +168,8 @@ describe("A3.toJSON and JSON.stringify", () => {
 
   it("type field is always present on annotation entries", () => {
     const a3 = new A3({
+      $schema: "https://schema.rtemis.org/a3/v1/schema.json",
+      a3_version: "1.0.0",
       sequence: "MKTAY",
       annotations: {
         site: { A: { index: [1, 2] } }, // type omitted — defaults to ""

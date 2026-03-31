@@ -211,11 +211,28 @@ end
 
 # ─── A3 outer constructor ─────────────────────────────────────────────────────
 
+const _A3_SCHEMA_URI = "https://schema.rtemis.org/a3/v1/schema.json"
+const _A3_VERSION    = "1.0.0"
+const _A3_ENVELOPE   = ("\$schema", "a3_version")
+const _A3_DATA_KEYS  = ("sequence", "annotations", "metadata")
+
 function A3(raw::AbstractDict)
+    schema_val = get(raw, "\$schema", nothing)
+    schema_val !== nothing ||
+        throw(A3ValidationError("missing required field '\$schema'"))
+    schema_val == _A3_SCHEMA_URI ||
+        throw(A3ValidationError("'\$schema' must be '$_A3_SCHEMA_URI', got '$schema_val'"))
+
+    version_val = get(raw, "a3_version", nothing)
+    version_val !== nothing ||
+        throw(A3ValidationError("missing required field 'a3_version'"))
+    version_val == _A3_VERSION ||
+        throw(A3ValidationError("'a3_version' must be '$_A3_VERSION', got '$version_val'"))
+
     for k in keys(raw)
-        k in ("sequence", "annotations", "metadata") ||
+        k in _A3_DATA_KEYS || k in _A3_ENVELOPE ||
             throw(A3ValidationError("unknown top-level field '$k' " *
-                "(must be one of: sequence, annotations, metadata)"))
+                "(must be one of: \$schema, a3_version, sequence, annotations, metadata)"))
     end
     haskey(raw, "sequence") ||
         throw(A3ValidationError("missing required field 'sequence'"))

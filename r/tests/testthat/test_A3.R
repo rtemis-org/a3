@@ -581,6 +581,8 @@ test_that("A3from_json round-trips to_json with zero loss", {
 
 test_that("A3from_json rejects legacy bare-array format", {
   legacy_json <- '{
+    "$schema": "https://schema.rtemis.org/a3/v1/schema.json",
+    "a3_version": "1.0.0",
     "sequence": "MKTAYIAKQRQISFVK",
     "annotations": {
       "site": {
@@ -597,6 +599,8 @@ test_that("A3from_json rejects legacy bare-array format", {
 
 test_that("A3from_json handles missing metadata gracefully", {
   json <- '{
+    "$schema": "https://schema.rtemis.org/a3/v1/schema.json",
+    "a3_version": "1.0.0",
     "sequence": "MKTAYIAKQRQISFVK",
     "annotations": {
       "site": {},
@@ -614,6 +618,8 @@ test_that("A3from_json handles missing metadata gracefully", {
 
 test_that("A3from_json accepts pre-parsed list", {
   lst <- list(
+    `$schema` = "https://schema.rtemis.org/a3/v1/schema.json",
+    a3_version = "1.0.0",
     sequence = "MKTAYIAKQRQISFVK",
     annotations = list(
       site = list(

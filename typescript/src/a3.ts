@@ -1,5 +1,5 @@
 import type { ZodError } from "zod";
-import { type A3Data, A3InputSchema, type VariantData } from "./schemas";
+import { A3_SCHEMA_URI, A3_VERSION, type A3Data, A3InputSchema, type VariantData } from "./schemas";
 
 // ── Error classes ─────────────────────────────────────────────────────────────
 
@@ -89,9 +89,10 @@ export class A3 {
   /**
    * Return the canonical data object for JSON serialization.
    * Called automatically by JSON.stringify — do not return a string here.
+   * Envelope fields ($schema, a3_version) are always emitted first.
    */
-  toJSON(): A3Data {
-    return this.#data;
+  toJSON(): { $schema: string; a3_version: string } & A3Data {
+    return { $schema: A3_SCHEMA_URI, a3_version: A3_VERSION, ...this.#data };
   }
 
   /**
