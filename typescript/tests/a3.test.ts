@@ -30,7 +30,9 @@ describe("A3 constructor", () => {
   });
 
   it("throws A3ValidationError for invalid input", () => {
-    expect(() => new A3({ $schema: A3_SCHEMA_URI, a3_version: A3_VERSION, sequence: "M" })).toThrow(A3ValidationError);
+    expect(() => new A3({ $schema: A3_SCHEMA_URI, a3_version: A3_VERSION, sequence: "M" })).toThrow(
+      A3ValidationError,
+    );
   });
 
   it("throws A3ValidationError with issues array", () => {
