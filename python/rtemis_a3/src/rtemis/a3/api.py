@@ -125,7 +125,8 @@ def a3_from_json(text: str) -> A3:
             f"'a3_version' must be '{_A3_VERSION}', got '{version_val}'"
         )
     # Strip envelope keys before passing to the data model
-    data = {k: v for k, v in data.items() if k not in _ENVELOPE_KEYS}
+    for key in _ENVELOPE_KEYS:
+        data.pop(key, None)
 
     try:
         return A3.model_validate(data)
