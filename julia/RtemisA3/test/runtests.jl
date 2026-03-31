@@ -1,5 +1,6 @@
 using Test
 using RtemisA3
+using RtemisA3: sort_dedup, sort_ranges, check_no_overlap, is_json_compatible
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 
