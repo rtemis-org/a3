@@ -12,7 +12,7 @@ use std::collections::HashMap;
 use crate::error::A3Error;
 use crate::normalization::{normalize_positions, normalize_ranges, normalize_sequence};
 use crate::types::{
-    A3, A3Index, A3_SCHEMA_URI, A3_VERSION, Annotations, FlexEntry, Metadata, RegionEntry,
+    A3, A3_SCHEMA_URI, A3_VERSION, A3Index, Annotations, FlexEntry, Metadata, RegionEntry,
     SiteEntry, VariantRecord,
 };
 
