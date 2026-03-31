@@ -16,3 +16,6 @@ Manifest.toml
 
 # Zed
 .zed/
+
+# Docs
+build-docs.sh
