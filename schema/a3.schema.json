@@ -4,7 +4,7 @@
   "title": "A3",
   "description": "Amino Acid Annotation (A3) format — structured annotation of amino acid sequences.",
   "type": "object",
-  "required": ["$schema", "a3_version", "sequence", "annotations", "metadata"],
+  "required": ["$schema", "a3_version", "sequence"],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -25,7 +25,6 @@
     },
     "annotations": {
       "type": "object",
-      "required": ["site", "region", "ptm", "processing", "variant"],
       "additionalProperties": false,
       "properties": {
         "site": {
