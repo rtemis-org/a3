@@ -262,8 +262,8 @@ end
 
 # ─── Round-trip with example file ────────────────────────────────────────────
 
-@testset "round-trip: mapt_annot_a3.json" begin
-    example_path = joinpath(@__DIR__, "..", "..", "..", "examples", "mapt_annot_a3.json")
+@testset "round-trip: mapt.a3.json" begin
+    example_path = joinpath(@__DIR__, "..", "..", "..", "examples", "mapt.a3.json")
     if isfile(example_path)
         a = read_a3json(example_path)
         @test length(a.sequence) == 441
