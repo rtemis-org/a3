@@ -24,7 +24,9 @@ python = ".venv"
 [dependency-groups]
 dev = [
     "ipykernel>=7.2.0",
+    "mkdocstrings-python>=2.0.3",
     "pytest>=9.0.2",
     "ruff>=0.15.8",
     "ty>=0.0.26",
+    "zensical>=0.0.30",
 ]
