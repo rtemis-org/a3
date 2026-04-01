@@ -40,7 +40,7 @@ Pass `-` as `<FILE>` to read from stdin.
 
 | Flag | Description |
 |---|---|
-| `-l, --limit <N>` | Max sequence residues to display (default: 10) |
+| `-l, --limit <N>` | Max sequence residues to display (default: 20) |
 | `-q, --quiet` | Suppress all output; use exit code only |
 | `-j, --json` | Output results in JSON format |
 | `-h, --help` | Print help |
@@ -50,23 +50,35 @@ Pass `-` as `<FILE>` to read from stdin.
 
 ```
 $ a3 tau.json
-✓ valid A3 schema version 1.0.0 (https://schema.rtemis.org/a3/v1/schema.json)
-UniProt ID:   P10636
-Description:  Microtubule-associated protein tau
-Reference:
-Organism:     Homo sapiens
-Sequence:     MAEPRQEFEV... (758)
-Annotations:  site: 2  region: 1  ptm: 3  processing: 0  variant: 5
+✓ valid  A3 1.0.0  https://schema.rtemis.org/a3/v1/schema.json
+
+  Sequence  MAEPRQEFEVMEDHAGTYGL… (length = 441)
+
+  Annotations
+  ├── site        2
+  ├── region      1
+  ├── ptm         3
+  ├── processing  0
+  └── variant     5
+
+  Metadata
+  ├── UniProt ID     P10636
+  ├── Description    Microtubule-associated protein tau
+  ├── Reference      
+  └── Organism       Homo sapiens
 ```
 
 **Example — invalid file:**
 
 ```
 $ a3 bad.json
-✗ invalid:
-  - annotations.site.foo: position 999 is out of bounds for sequence of length 6 (must be 1–6)
-UniProt ID:   P10636
-...
+✗ invalid
+
+  ├── annotations.site.foo: position 999 is out of bounds for sequence of length 6 (must be 1–6)
+  └── annotations.region: annotation name must not be empty
+
+  Sequence  MAEPRQ (length = 6)
+  ...
 ```
 
 **Exit codes:**
