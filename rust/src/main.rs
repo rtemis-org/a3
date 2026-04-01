@@ -4,8 +4,8 @@
 //! Pass `-` as `<FILE>` to read from stdin.
 
 use clap::Parser;
-use rtemis_a3::{validate, A3, A3Error};
-use serde_json::{json, Value};
+use rtemis_a3::{A3, A3Error, validate};
+use serde_json::{Value, json};
 use std::io::{self, Read};
 use std::process;
 
@@ -46,9 +46,7 @@ struct Cli {
 /// In both cases we print whatever metadata and stats are available.
 fn print_human(a3: &A3, errors: &[String], limit: usize) {
     if errors.is_empty() {
-        println!(
-            "✓ valid A3 schema version 1.0.0 (https://schema.rtemis.org/a3/v1/schema.json)"
-        );
+        println!("✓ valid A3 schema version 1.0.0 (https://schema.rtemis.org/a3/v1/schema.json)");
     } else {
         println!("✗ invalid:");
         for e in errors {
