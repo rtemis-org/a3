@@ -18,6 +18,73 @@ Add to your `Cargo.toml`:
 rtemis-a3 = "0.1"
 ```
 
+## CLI
+
+The `a3` binary validates an A3 JSON file and prints a summary.
+
+**Install:**
+
+```sh
+cargo install --path .
+```
+
+**Usage:**
+
+```sh
+a3 [OPTIONS] <FILE>
+```
+
+Pass `-` as `<FILE>` to read from stdin.
+
+**Options:**
+
+| Flag | Description |
+|---|---|
+| `-l, --limit <N>` | Max sequence residues to display (default: 10) |
+| `-q, --quiet` | Suppress all output; use exit code only |
+| `-j, --json` | Output results in JSON format |
+| `-h, --help` | Print help |
+| `-V, --version` | Print version |
+
+**Example — valid file:**
+
+```
+$ a3 tau.json
+✓ valid A3 schema version 1.0.0 (https://schema.rtemis.org/a3/v1/schema.json)
+UniProt ID:   P10636
+Description:  Microtubule-associated protein tau
+Reference:
+Organism:     Homo sapiens
+Sequence:     MAEPRQEFEV... (758)
+Annotations:  site: 2  region: 1  ptm: 3  processing: 0  variant: 5
+```
+
+**Example — invalid file:**
+
+```
+$ a3 bad.json
+✗ invalid:
+  - annotations.site.foo: position 999 is out of bounds for sequence of length 6 (must be 1–6)
+UniProt ID:   P10636
+...
+```
+
+**Exit codes:**
+
+| Code | Meaning |
+|---|---|
+| `0` | Valid |
+| `1` | Invalid (A3 validation errors) |
+| `2` | Error (bad arguments, file not found, JSON parse failure) |
+
+Use `--quiet` for scripting:
+
+```sh
+if a3 -q protein.json; then
+  echo "valid"
+fi
+```
+
 ## Quick Start
 
 ```rust
