@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { A3InputSchema } from "../src/schemas";
+import { A3InputSchema, A3_SCHEMA_URI, A3_VERSION } from "../src/schemas";
 
 const MINIMAL_VALID = {
+  $schema: A3_SCHEMA_URI,
+  a3_version: A3_VERSION,
   sequence: "MKTAYIAKQR",
   annotations: { site: {}, region: {}, ptm: {}, processing: {}, variant: [] },
   metadata: { uniprot_id: "", description: "", reference: "", organism: "" },
@@ -62,7 +64,11 @@ describe("annotation validation", () => {
   });
 
   it("defaults missing annotations families to empty", () => {
-    const result = A3InputSchema.safeParse({ sequence: "MKTAYIAKQR" });
+    const result = A3InputSchema.safeParse({
+      $schema: A3_SCHEMA_URI,
+      a3_version: A3_VERSION,
+      sequence: "MKTAYIAKQR",
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.annotations.site).toEqual({});
@@ -284,7 +290,11 @@ describe("variant validation", () => {
 
 describe("metadata validation", () => {
   it("defaults all metadata fields to empty string", () => {
-    const result = A3InputSchema.safeParse({ sequence: "MKTAY" });
+    const result = A3InputSchema.safeParse({
+      $schema: A3_SCHEMA_URI,
+      a3_version: A3_VERSION,
+      sequence: "MKTAY",
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.metadata).toEqual({
@@ -298,6 +308,8 @@ describe("metadata validation", () => {
 
   it("accepts partial metadata", () => {
     const result = A3InputSchema.safeParse({
+      $schema: A3_SCHEMA_URI,
+      a3_version: A3_VERSION,
       sequence: "MKTAY",
       metadata: { uniprot_id: "P10636" },
     });

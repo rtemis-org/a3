@@ -15,6 +15,8 @@ end
 
 function to_dict(a3::A3)::Dict{String,Any}
     Dict{String,Any}(
+        "\$schema"   => _A3_SCHEMA_URI,
+        "a3_version" => _A3_VERSION,
         "sequence" => a3.sequence,
         "annotations" => Dict{String,Any}(
             "site"       => Dict(k => _to_dict(v) for (k, v) in a3.annotations.site),

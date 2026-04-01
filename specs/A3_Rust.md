@@ -1,6 +1,6 @@
-# A3 Serde Specification
+# A3 Rust Specification
 
-Amino Acid Annotation (A3) format — Rust/Serde implementation design.
+Amino Acid Annotation (A3) format — Rust implementation design.
 
 ## Requirements
 

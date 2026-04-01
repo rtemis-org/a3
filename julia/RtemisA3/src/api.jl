@@ -21,7 +21,12 @@ function create_a3(
     processing !== nothing && (annot["processing"] = processing)
     variant    !== nothing && (annot["variant"]    = variant)
 
-    raw = Dict{String,Any}("sequence" => sequence, "annotations" => annot)
+    raw = Dict{String,Any}(
+        "\$schema"   => _A3_SCHEMA_URI,
+        "a3_version" => _A3_VERSION,
+        "sequence"   => sequence,
+        "annotations" => annot,
+    )
     metadata !== nothing && (raw["metadata"] = metadata)
     A3(raw)
 end

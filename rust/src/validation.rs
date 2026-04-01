@@ -12,7 +12,8 @@ use std::collections::HashMap;
 use crate::error::A3Error;
 use crate::normalization::{normalize_positions, normalize_ranges, normalize_sequence};
 use crate::types::{
-    A3, A3Index, Annotations, FlexEntry, Metadata, RegionEntry, SiteEntry, VariantRecord,
+    A3, A3_SCHEMA_URI, A3_VERSION, A3Index, Annotations, FlexEntry, Metadata, RegionEntry,
+    SiteEntry, VariantRecord,
 };
 
 /// Validate and normalize a raw-deserialized [`A3`] value.
@@ -30,6 +31,23 @@ pub fn validate(raw: A3) -> Result<A3, A3Error> {
     // `Vec::new()` creates an empty growable list.
     // `mut` is required because we will call `.push()` on it.
     let mut errors: Vec<String> = Vec::new();
+
+    // -----------------------------------------------------------------------
+    // Envelope field validation
+    // -----------------------------------------------------------------------
+
+    if raw.schema != A3_SCHEMA_URI {
+        errors.push(format!(
+            "'$schema' must be '{A3_SCHEMA_URI}', got '{}'",
+            raw.schema
+        ));
+    }
+    if raw.a3_version != A3_VERSION {
+        errors.push(format!(
+            "'a3_version' must be '{A3_VERSION}', got '{}'",
+            raw.a3_version
+        ));
+    }
 
     // -----------------------------------------------------------------------
     // Stage 1 — Structural validation and normalization
@@ -211,6 +229,8 @@ pub fn validate(raw: A3) -> Result<A3, A3Error> {
     }
 
     Ok(A3 {
+        schema: raw.schema,
+        a3_version: raw.a3_version,
         sequence,
         annotations: Annotations {
             site,
@@ -334,6 +354,8 @@ mod tests {
     /// does not need `self` for functions that are not methods on a type.
     fn minimal_raw() -> A3 {
         A3 {
+            schema: A3_SCHEMA_URI.to_string(),
+            a3_version: A3_VERSION.to_string(),
             sequence: "MAEPRQ".to_string(),
             annotations: Annotations::default(),
             metadata: Metadata::default(),
