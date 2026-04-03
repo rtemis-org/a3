@@ -37,7 +37,7 @@ On failure, errors are listed first (with tree connectors), followed by
 whatever metadata and stats are available from the partial parse:
 
 ```
-✗ invalid
+  ✗ invalid
 
   ├── annotations.site.foo: position 999 is out of bounds for sequence of length 6 (must be 1–6)
   └── annotations.region: annotation name must not be empty
@@ -84,6 +84,7 @@ fields are absent.
 - `-l, --limit <NUMBER>`: Limit the number of sequence residues displayed (default: 20)
 - `-q, --quiet`: Suppress all output; use exit code only
 - `-j, --json`: Output results in JSON format
+- `-D, --diagnose`: Run full step-by-step diagnostic validation (accumulates all errors)
 - `-h, --help`: Print help information
 - `-V, --version`: Print version information
 
@@ -97,7 +98,8 @@ fields are absent.
 
 `clap` emits exit code 2 for argument errors automatically. I/O and parse
 failures also exit 2 so callers can distinguish "invalid A3" from "tool could
-not run."
+not run." In `--diagnose` mode the same contract applies: fatal parse failures
+exit 2, A3 validation errors exit 1.
 
 ## Styling
 
