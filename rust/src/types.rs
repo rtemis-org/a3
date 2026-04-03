@@ -305,12 +305,10 @@ pub struct A3 {
     /// Lowercase input is normalized to uppercase during validation.
     pub(crate) sequence: String,
 
-    /// All annotation families. Defaults to all-empty if omitted from JSON.
-    #[serde(default)]
+    /// All annotation families. Required; use an empty object `{}` if none.
     pub(crate) annotations: Annotations,
 
-    /// Sequence metadata. Defaults to all-empty strings if omitted from JSON.
-    #[serde(default)]
+    /// Sequence metadata. Required; use an empty object `{}` if none.
     pub(crate) metadata: Metadata,
 }
 
