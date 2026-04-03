@@ -1,4 +1,4 @@
-# rtemis.a3 0.5.1
+# rtemis.a3 0.5.2
 
 ## New features
 
