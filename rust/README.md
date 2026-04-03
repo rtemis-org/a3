@@ -42,19 +42,21 @@ Pass `-` as `<FILE>` to read from stdin.
 
 **Options:**
 
-| Flag              | Description                                    |
-| ----------------- | ---------------------------------------------- |
-| `-l, --limit <N>` | Max sequence residues to display (default: 20) |
-| `-q, --quiet`     | Suppress all output; use exit code only        |
-| `-j, --json`      | Output results in JSON format                  |
-| `-h, --help`      | Print help                                     |
-| `-V, --version`   | Print version                                  |
+| Flag              | Description                                              |
+| ----------------- | -------------------------------------------------------- |
+| `-l, --limit <N>` | Max sequence residues to display (default: 20)           |
+| `-q, --quiet`     | Suppress all output; use exit code only                  |
+| `-j, --json`      | Output results in JSON format                            |
+| `-D, --diagnose`  | Full step-by-step diagnostic validation (all errors)     |
+| `-h, --help`      | Print help                                               |
+| `-V, --version`   | Print version                                            |
 
 **Example — valid file:**
 
 ```
 $ a3 tau.json
-✓ valid  A3 1.0.0  https://schema.rtemis.org/a3/v1/schema.json
+
+  ✓ valid  A3 1.0.0  https://schema.rtemis.org/a3/v1/schema.json
 
   Sequence  MAEPRQEFEVMEDHAGTYGL… (length = 441)
 
@@ -62,13 +64,13 @@ $ a3 tau.json
   ├── site        2
   ├── region      1
   ├── ptm         3
-  ├── processing  0
+  ├── processing  —
   └── variant     5
 
   Metadata
   ├── UniProt ID     P10636
   ├── Description    Microtubule-associated protein tau
-  ├── Reference
+  ├── Reference      —
   └── Organism       Homo sapiens
 ```
 
@@ -76,7 +78,8 @@ $ a3 tau.json
 
 ```
 $ a3 bad.json
-✗ invalid
+
+  ✗ invalid
 
   ├── annotations.site.foo: position 999 is out of bounds for sequence of length 6 (must be 1–6)
   └── annotations.region: annotation name must not be empty
