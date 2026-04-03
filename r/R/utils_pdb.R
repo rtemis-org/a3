@@ -81,7 +81,8 @@ pdb_annotations <- function(
     msg(
       "Selected PDB structure:",
       highlight(toupper(pdb_id)),
-      "(PDBe top-ranked)"
+      "(PDBe top-ranked)",
+      verbosity = verbosity
     )
   } else {
     pdb_id <- tolower(pdb_id)

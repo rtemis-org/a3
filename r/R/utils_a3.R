@@ -62,10 +62,10 @@ aa_sub <- function(x, substitutions, verbosity = 1L) {
       highlight(pos),
       "with",
       highlight(to),
-      versbosity = verbosity
+      verbosity = verbosity
     )
     x[pos] <- to
   }
-  msg("All done.", versbosity = verbosity)
+  msg("All done.", verbosity = verbosity)
   x
 }
