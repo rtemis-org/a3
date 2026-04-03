@@ -1,14 +1,16 @@
 Package: rtemis.a3
-Title: Amino Acid Annotation (A3) format
-Version: 0.5.1
-Date: 2026-03-29
-Authors@R: 
-    person(given = "E.D.", family = "Gennatas", role = c("aut", "cre"),
+Title: Amino Acid Annotation (A3) Format
+Version: 0.5.2
+Date: 2026-04-03
+Authors@R:
+    person(given = "E.D.", family = "Gennatas", role = c("aut", "cre", "cph"),
            email = "gennatas@gmail.com",
            comment = c(ORCID = "0000-0001-9280-3609"))
-Description: Defines the annotated amino acid (A3) format using S7 classes. Provides functions to 
-    create A3 objects, read and write A3 JSON files.
-URL: https://rtemis.a3.rtemis.org
+Description: Implements the Amino Acid Annotation (A3) format using 'S7' classes.
+    The A3 format is a structured 'JSON' schema for annotating amino acid sequences
+    with site, region, post-translational modification (PTMs), processing event,
+    and sequence variant annotations. Provides functions to create, read, and write A3 objects.
+URL: https://a3.rtemis.org
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -22,8 +24,6 @@ Imports:
     utils
 Suggests:
     biomaRt,
-    colorspace,
-    dplyr,
     httr,
     jsonlite,
     seqinr,

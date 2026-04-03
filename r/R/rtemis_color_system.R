@@ -27,39 +27,10 @@ rt_teal <- rtemis_teal
 rt_purple <- rtemis_purple
 rt_magenta <- rtemis_light_magenta
 highlight_col <- coastside_orange
-
 col_object <- rt_green
 
 
-#' rtemis Color System
-#'
-#' A named list of colors used consistently across all packages
-#' in the rtemis ecosystem.
-#'
-#' Colors are provided as hex strings.
-#'
-#' @format A named list with the following elements:
-#' \describe{
-#'   \item{red}{"kaimana red"}
-#'   \item{blue}{"kaimana light blue"}
-#'   \item{green}{"kaimana medium green"}
-#'   \item{orange}{"coastside orange"}
-#'   \item{teal}{"rtemis teal"}
-#'   \item{purple}{"rtemis purple"}
-#'   \item{magenta}{"rtemis magenta"}
-#'   \item{highlight_col}{"highlight color"}
-#'   \item{object}{"rtemis teal"}
-#'   \item{info}{"lmd burgundy"}
-#'   \item{outer}{"kaimana red"}
-#'   \item{tuner}{"coastside orange"}
-#' }
-#'
-#' @author EDG
-#'
-#' @noRd
-#'
-#' @examples
-#' rtemis_colors[["teal"]]
+# %% rtemis_colors ----
 rtemis_colors <- list(
   red = kaimana_red,
   light_blue = kaimana_light_blue,

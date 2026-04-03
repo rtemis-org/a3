@@ -11,11 +11,11 @@ Amino Acid Annotation format utilities
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://rtemis.a3.rtemis.org}
+  \item \url{https://a3.rtemis.org}
 }
 
 }
 \author{
-\strong{Maintainer}: E.D. Gennatas \email{gennatas@gmail.com} (\href{https://orcid.org/0000-0001-9280-3609}{ORCID})
+\strong{Maintainer}: E.D. Gennatas \email{gennatas@gmail.com} (\href{https://orcid.org/0000-0001-9280-3609}{ORCID}) [copyright holder]
 
 }

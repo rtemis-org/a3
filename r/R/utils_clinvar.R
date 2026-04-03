@@ -84,19 +84,20 @@ clinvar_variants <- function(
 
   uids <- search_dat[["esearchresult"]][["idlist"]]
   if (length(uids) == 0L) {
-    if (verbosity > 0L) {
-      msg("No ClinVar records found for gene:", highlight(gene))
-    }
+    msg(
+      "No ClinVar records found for gene:",
+      highlight(gene),
+      verbosity = verbosity
+    )
     return(list())
   }
-  if (verbosity > 0L) {
-    msg(
-      "Found",
-      highlight(length(uids)),
-      "ClinVar records for gene:",
-      highlight(gene)
-    )
-  }
+  msg(
+    "Found",
+    highlight(length(uids)),
+    "ClinVar records for gene:",
+    highlight(gene),
+    verbosity = verbosity
+  )
 
   # -- Summarize: fetch variant details in batches ----
   batches <- split(uids, ceiling(seq_along(uids) / batch_size))
@@ -199,9 +200,7 @@ clinvar_variants <- function(
   }
 
   if (length(variant_list) == 0L) {
-    if (verbosity > 0L) {
-      msg("No protein-level variants parsed.")
-    }
+    msg("No protein-level variants parsed.", verbosity = verbosity)
     return(list())
   }
 
@@ -230,13 +229,12 @@ clinvar_variants <- function(
   )
   names(variant_list) <- final_names
 
-  if (verbosity > 0L) {
-    msg(
-      "Parsed",
-      highlight(length(variant_list)),
-      "protein-level variants."
-    )
-  }
+  msg(
+    "Parsed",
+    highlight(length(variant_list)),
+    "protein-level variants.",
+    verbosity = verbosity
+  )
 
   variant_list
 }
