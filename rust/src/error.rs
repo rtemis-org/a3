@@ -3,8 +3,9 @@
 //! All fallible operations return `Result<T, A3Error>`. The two variants
 //! map onto the two failure modes described in the A3 spec:
 //!
-//! - [`A3Error::Parse`]    — the input was not valid JSON
-//! - [`A3Error::Validate`] — the JSON parsed but violated A3 rules
+//! - [`A3Error::Parse`]     — the input was not valid JSON
+//! - [`A3Error::Serialize`] — a valid A3 value could not be serialized to JSON
+//! - [`A3Error::Validate`]  — the JSON parsed but violated A3 rules
 
 // `thiserror::Error` is a derive macro that generates the boilerplate needed
 // to make our enum implement the standard `std::error::Error` trait.

@@ -38,7 +38,8 @@ pub mod validation;
 // `use rtemis_a3::A3` instead of `use rtemis_a3::types::A3`.
 pub use error::A3Error;
 pub use types::{
-    A3, A3Index, Annotations, FlexEntry, Metadata, RegionEntry, SiteEntry, VariantRecord,
+    A3, A3_SCHEMA_URI, A3_VERSION, A3Index, Annotations, FlexEntry, Metadata, RegionEntry,
+    SiteEntry, VariantRecord,
 };
 pub use validation::validate;
 
@@ -93,9 +94,9 @@ pub fn a3_from_json(text: &str) -> Result<A3, A3Error> {
 pub fn a3_to_json(a3: &A3, indent: Option<usize>) -> Result<String, A3Error> {
     match indent {
         // Compact output — single line, no extra whitespace.
-        // `.map_err(A3Error::Serialize)` converts the serde_json::Error into
-        // the correct variant. We cannot use `?` here because `#[from]` is
-        // only implemented for A3Error::Parse, not A3Error::Serialize.
+        // `.map_err(A3Error::Serialize)` is required before `?` because
+        // `#[from]` is only on A3Error::Parse, so serde_json::Error does not
+        // auto-convert into A3Error::Serialize.
         None => Ok(serde_json::to_string(a3).map_err(A3Error::Serialize)?),
 
         // Pretty output with a custom indent width.
@@ -129,9 +130,9 @@ pub fn a3_to_json(a3: &A3, indent: Option<usize>) -> Result<String, A3Error> {
 ///
 /// Returns `None` if `position` is 0 or beyond the sequence length.
 ///
-/// `Option<T>` is Rust's null-safe alternative to nullable values — there is
-/// no `null` or `None` that can sneak in unexpectedly; you must explicitly
-/// handle the `None` case wherever you use the result.
+/// `Option<T>` is Rust's null-safe alternative to nullable values — unlike
+/// `null` in other languages, the compiler forces callers to handle both
+/// `Some(value)` and `None` before they can use the result.
 pub fn residue_at(a3: &A3, position: u32) -> Option<char> {
     if position == 0 || position > a3.sequence.len() as u32 {
         return None;

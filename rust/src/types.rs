@@ -282,9 +282,9 @@ impl Metadata {
 // ---------------------------------------------------------------------------
 
 /// Expected value for the `$schema` envelope field.
-pub(crate) const A3_SCHEMA_URI: &str = "https://schema.rtemis.org/a3/v1/schema.json";
+pub const A3_SCHEMA_URI: &str = "https://schema.rtemis.org/a3/v1/schema.json";
 /// Expected value for the `a3_version` envelope field.
-pub(crate) const A3_VERSION: &str = "1.0.0";
+pub const A3_VERSION: &str = "1.0.0";
 
 /// The root A3 object.
 ///

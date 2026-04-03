@@ -9,6 +9,10 @@ processing, and variant annotations.
 Part of the [rtemis-org/a3](https://github.com/rtemis-org/a3) monorepo,
 which provides A3 implementations in Python, TypeScript, R, Julia, and Rust.
 
+> [!NOTE]
+> The Rust code contains extensive comments and documentation as an educational tool to help learn
+> Rust.
+
 ## Installation
 
 Add to your `Cargo.toml`:
@@ -38,13 +42,13 @@ Pass `-` as `<FILE>` to read from stdin.
 
 **Options:**
 
-| Flag | Description |
-|---|---|
+| Flag              | Description                                    |
+| ----------------- | ---------------------------------------------- |
 | `-l, --limit <N>` | Max sequence residues to display (default: 20) |
-| `-q, --quiet` | Suppress all output; use exit code only |
-| `-j, --json` | Output results in JSON format |
-| `-h, --help` | Print help |
-| `-V, --version` | Print version |
+| `-q, --quiet`     | Suppress all output; use exit code only        |
+| `-j, --json`      | Output results in JSON format                  |
+| `-h, --help`      | Print help                                     |
+| `-V, --version`   | Print version                                  |
 
 **Example — valid file:**
 
@@ -64,7 +68,7 @@ $ a3 tau.json
   Metadata
   ├── UniProt ID     P10636
   ├── Description    Microtubule-associated protein tau
-  ├── Reference      
+  ├── Reference
   └── Organism       Homo sapiens
 ```
 
@@ -83,11 +87,11 @@ $ a3 bad.json
 
 **Exit codes:**
 
-| Code | Meaning |
-|---|---|
-| `0` | Valid |
-| `1` | Invalid (A3 validation errors) |
-| `2` | Error (bad arguments, file not found, JSON parse failure) |
+| Code | Meaning                                                   |
+| ---- | --------------------------------------------------------- |
+| `0`  | Valid                                                     |
+| `1`  | Invalid (A3 validation errors)                            |
+| `2`  | Error (bad arguments, file not found, JSON parse failure) |
 
 Use `--quiet` for scripting:
 
@@ -162,17 +166,17 @@ let vars = variants_at(&a3, 3);
 {
   "sequence": "MKTAYIAKQR",
   "annotations": {
-    "site":       { "Active site": { "index": [3, 5],   "type": "activeSite" } },
-    "region":     { "Repeat 1":    { "index": [[1, 4]], "type": "" } },
-    "ptm":        { "Phospho":     { "index": [7],      "type": "" } },
+    "site": { "Active site": { "index": [3, 5], "type": "activeSite" } },
+    "region": { "Repeat 1": { "index": [[1, 4]], "type": "" } },
+    "ptm": { "Phospho": { "index": [7], "type": "" } },
     "processing": {},
-    "variant":    [{ "position": 3, "from": "K", "to": "R" }]
+    "variant": [{ "position": 3, "from": "K", "to": "R" }]
   },
   "metadata": {
-    "uniprot_id":  "P12345",
+    "uniprot_id": "P12345",
     "description": "Example protein",
-    "reference":   "",
-    "organism":    "Homo sapiens"
+    "reference": "",
+    "organism": "Homo sapiens"
   }
 }
 ```
@@ -186,17 +190,17 @@ entry is `{ index, type }` — bare arrays are rejected. Positions are
 
 ### Parsing and serialization
 
-| Function | Description |
-|---|---|
-| `a3_from_json(text: &str)` | Parse a JSON string into a validated `A3` |
+| Function                                     | Description                                                     |
+| -------------------------------------------- | --------------------------------------------------------------- |
+| `a3_from_json(text: &str)`                   | Parse a JSON string into a validated `A3`                       |
 | `a3_to_json(a3: &A3, indent: Option<usize>)` | Serialize to JSON; `None` = compact, `Some(n)` = n-space indent |
 
 ### Queries
 
-| Function | Description |
-|---|---|
-| `residue_at(a3: &A3, position: u32)` | Residue at a 1-based position; `None` if out of bounds |
-| `variants_at<'a>(a3: &'a A3, position: u32)` | All variant records at a 1-based position |
+| Function                                     | Description                                            |
+| -------------------------------------------- | ------------------------------------------------------ |
+| `residue_at(a3: &A3, position: u32)`         | Residue at a 1-based position; `None` if out of bounds |
+| `variants_at<'a>(a3: &'a A3, position: u32)` | All variant records at a 1-based position              |
 
 ### Type hierarchy
 
