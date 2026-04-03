@@ -56,7 +56,7 @@ gene2sequence <- function(
     " transcripts for gene ",
     highlight(gene),
     ".",
-    verbosity =
+    verbosity = verbosity
   )
 
   # Get sequence ----
