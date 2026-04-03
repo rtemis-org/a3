@@ -31,14 +31,26 @@ const METADATA_KEYS: &[&str] = &["uniprot_id", "description", "reference", "orga
 // Public entry point
 // ---------------------------------------------------------------------------
 
+/// Typed diagnostic failure — distinguishes a fatal parse error (exit 2)
+/// from A3 validation errors (exit 1).
+pub enum DiagnoseError {
+    /// Step 1 failed: the input is not valid JSON or not a JSON object.
+    /// Callers should exit with code 2 (system/parse error).
+    Fatal(Vec<String>),
+    /// One or more A3 validation errors. Callers should exit with code 1.
+    Invalid(Vec<String>),
+}
+
 /// Full diagnostic validation of an A3 JSON string.
 ///
 /// Follows the 6-step plan in `specs/diagnostic.md`. Returns `Ok(A3)` when
-/// every check passes, or `Err(errors)` with every violation collected.
+/// every check passes, or `Err(DiagnoseError)` with every violation collected.
+/// `DiagnoseError::Fatal` signals a JSON parse failure (exit 2);
+/// `DiagnoseError::Invalid` signals A3 validation errors (exit 1).
 ///
 /// On success the standard `a3_from_json` path is used to construct the `A3`,
 /// so the returned value is identical to what the fast path would produce.
-pub fn a3_diagnose(text: &str) -> Result<A3, Vec<String>> {
+pub fn a3_diagnose(text: &str) -> Result<A3, DiagnoseError> {
     let mut errors: Vec<String> = Vec::new();
 
     // -----------------------------------------------------------------------
@@ -47,12 +59,16 @@ pub fn a3_diagnose(text: &str) -> Result<A3, Vec<String>> {
 
     let value: Value = match serde_json::from_str(text) {
         Ok(v) => v,
-        Err(e) => return Err(vec![format!("Invalid JSON: {e}")]),
+        Err(e) => return Err(DiagnoseError::Fatal(vec![format!("Invalid JSON: {e}")])),
     };
 
     let obj = match value.as_object() {
         Some(o) => o,
-        None => return Err(vec!["Expected a JSON object at the top level".to_string()]),
+        None => {
+            return Err(DiagnoseError::Fatal(vec![
+                "Expected a JSON object at the top level".to_string(),
+            ]));
+        }
     };
 
     // -----------------------------------------------------------------------
@@ -70,10 +86,9 @@ pub fn a3_diagnose(text: &str) -> Result<A3, Vec<String>> {
 
     let seq_raw = require_string_field(obj, "sequence", &mut errors);
 
-    // `annotations` and `metadata` are optional (they default to empty when
-    // absent). Only report an error if they are present but the wrong type.
-    let ann_obj = optional_object_field(obj, "annotations", &mut errors);
-    let meta_obj = optional_object_field(obj, "metadata", &mut errors);
+    // `annotations` and `metadata` are required even when empty (`{}`).
+    let ann_obj = required_object_field(obj, "annotations", &mut errors);
+    let meta_obj = required_object_field(obj, "metadata", &mut errors);
 
     for key in obj.keys() {
         if !TOP_LEVEL_KEYS.contains(&key.as_str()) {
@@ -123,7 +138,7 @@ pub fn a3_diagnose(text: &str) -> Result<A3, Vec<String>> {
         // checks have a gap that needs fixing.
         Ok(a3_from_json(text).expect("diagnostic passed but standard parse failed"))
     } else {
-        Err(errors)
+        Err(DiagnoseError::Invalid(errors))
     }
 }
 
@@ -428,16 +443,18 @@ fn require_string_field<'a>(
     }
 }
 
-/// Extract an optional object field. Returns `None` silently when absent
-/// (caller treats absence as the empty default), or pushes an error and
-/// returns `None` when present but not an object.
-fn optional_object_field<'a>(
+/// Require an object field in `obj`. Pushes an error and returns `None` if
+/// absent or not an object.
+fn required_object_field<'a>(
     obj: &'a Map<String, Value>,
     key: &str,
     errors: &mut Vec<String>,
 ) -> Option<&'a Map<String, Value>> {
     match obj.get(key) {
-        None => None,
+        None => {
+            errors.push(format!("'{key}' is required"));
+            None
+        }
         Some(v) => match v.as_object() {
             Some(o) => Some(o),
             None => {
