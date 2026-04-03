@@ -733,7 +733,7 @@ format_caller <- function(call_stack, call_depth, caller_id, max_char = 30L) {
 #' @param sep Character: Use to separate objects in `...`
 #' @param verbosity Integer: Verbosity level.
 #'
-#' @return Invisibly: List with call, message, and date
+#' @return Invisibly: `NULL`
 #'
 #' @author EDG
 #' @noRd
