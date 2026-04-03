@@ -52,20 +52,25 @@ struct Cli {
 /// Words that individually exceed `width` are placed on their own line
 /// unbroken. If `text` fits within `width`, returns a single-element vec.
 fn wrap_words(text: &str, width: usize) -> Vec<String> {
-    if width == 0 || text.len() <= width {
+    if width == 0 || text.chars().count() <= width {
         return vec![text.to_string()];
     }
     let mut lines: Vec<String> = Vec::new();
     let mut current = String::new();
+    let mut current_width = 0usize;
     for word in text.split_whitespace() {
+        let word_width = word.chars().count();
         if current.is_empty() {
             current.push_str(word);
-        } else if current.len() + 1 + word.len() <= width {
+            current_width = word_width;
+        } else if current_width + 1 + word_width <= width {
             current.push(' ');
             current.push_str(word);
+            current_width += 1 + word_width;
         } else {
             lines.push(current.clone());
             current = word.to_string();
+            current_width = word_width;
         }
     }
     if !current.is_empty() {
@@ -126,7 +131,7 @@ fn print_human(a3: &A3, errors: &[String], limit: usize) {
         println!(
             "  {} {} {}",
             "✓ valid".green().bold(),
-            format!("{{A3 {}}}", a3.a3_version())
+            format!("A3 {}", a3.a3_version())
                 .bold()
                 .truecolor(71, 156, 255),
             a3.schema().dimmed(),
@@ -189,7 +194,7 @@ fn print_human(a3: &A3, errors: &[String], limit: usize) {
     let last = entries.len() - 1;
     for (i, (name, count, names)) in entries.iter().enumerate() {
         let connector = if i == last { "└──" } else { "├──" };
-        let padded = format!("{:<12}", name).dimmed();
+        let padded = format!("{:<12}", name);
         let count_str = if *count == 0 {
             "—".dimmed().to_string()
         } else {
@@ -218,41 +223,43 @@ fn print_human(a3: &A3, errors: &[String], limit: usize) {
     println!("  {}", "Metadata".bold());
 
     let meta = a3.metadata();
-    // Only include fields that have a value.
-    let meta_rows: Vec<(&str, &str)> = [
+    let meta_rows: [(&str, &str); 4] = [
         ("UniProt ID", meta.uniprot_id()),
         ("Description", meta.description()),
         ("Reference", meta.reference()),
         ("Organism", meta.organism()),
-    ]
-    .into_iter()
-    .filter(|(_, v)| !v.is_empty())
-    .collect();
-
-    if meta_rows.is_empty() {
-        println!("  {}", "(empty)".dimmed());
-    } else {
-        let label_width = meta_rows.iter().map(|(l, _)| l.len()).max().unwrap_or(0);
-        // 2 (indent) + 3 (connector) + 1 (space) + label_width + 2 (gap)
-        let value_col = 8 + label_width;
-        let value_width = 90usize.saturating_sub(value_col);
-        let last = meta_rows.len() - 1;
-        for (i, (label, value)) in meta_rows.iter().enumerate() {
-            let is_last = i == last;
-            let connector = if is_last { "└──" } else { "├──" };
-            // Non-last items get a │ at the connector column to keep the list
-            // visually uninterrupted across wrapped value lines.
-            let continuation = if is_last {
-                " ".repeat(value_col)
-            } else {
-                format!("  {}{}", "│".dimmed(), " ".repeat(value_col - 3))
-            };
+    ];
+    let label_width = meta_rows.iter().map(|(l, _)| l.len()).max().unwrap_or(0);
+    // 2 (indent) + 3 (connector) + 1 (space) + label_width + 2 (gap)
+    let value_col = 8 + label_width;
+    let value_width = 90usize.saturating_sub(value_col);
+    let last = meta_rows.len() - 1;
+    for (i, (label, value)) in meta_rows.iter().enumerate() {
+        let is_last = i == last;
+        let connector = if is_last { "└──" } else { "├──" };
+        // Non-last items get a │ at the connector column to keep the list
+        // visually uninterrupted across wrapped value lines.
+        let continuation = if is_last {
+            " ".repeat(value_col)
+        } else {
+            format!("  {}{}", "│".dimmed(), " ".repeat(value_col - 3))
+        };
+        if value.is_empty() {
+            println!(
+                "  {} {:<label_width$}  {}",
+                connector.dimmed(),
+                label,
+                "—".dimmed(),
+                label_width = label_width,
+            );
+        } else {
             let lines = wrap_words(value, value_width);
             print!(
-                "  {} {}  {}",
+                "  {} {:<label_width$}  {}",
                 connector.dimmed(),
-                format!("{:<width$}", label, width = label_width).dimmed(),
+                label,
                 lines[0].truecolor(220, 150, 86),
+                label_width = label_width,
             );
             for line in &lines[1..] {
                 print!("\n{}{}", continuation, line.truecolor(220, 150, 86));
@@ -344,7 +351,11 @@ fn main() {
                 }
                 process::exit(0);
             }
-            Err(errors) => {
+            Err(err) => {
+                let (errors, exit_code) = match &err {
+                    diagnostic::DiagnoseError::Fatal(e) => (e.as_slice(), 2i32),
+                    diagnostic::DiagnoseError::Invalid(e) => (e.as_slice(), 1i32),
+                };
                 if !cli.quiet {
                     if cli.json {
                         println!(
@@ -366,7 +377,7 @@ fn main() {
                         println!();
                     }
                 }
-                process::exit(1);
+                process::exit(exit_code);
             }
         }
     }
@@ -376,7 +387,7 @@ fn main() {
         Ok(r) => r,
         Err(e) => {
             if !cli.quiet {
-                let mut errors = vec![format!("Failed to parse JSON: {e}")];
+                let mut errors = vec![format!("Invalid A3: {e}")];
 
                 // Even though full deserialization failed, try parsing to a
                 // generic Value so we can check envelope fields and surface
