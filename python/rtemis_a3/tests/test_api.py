@@ -56,7 +56,7 @@ class TestCreateA3:
 # a3_from_json / a3_to_json
 # ---------------------------------------------------------------------------
 
-MINIMAL_JSON = '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ"}'
+MINIMAL_JSON = '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ", "annotations": {}, "metadata": {}}'
 
 FULL_JSON = """{
   "$schema": "https://schema.rtemis.org/a3/v1/schema.json",
@@ -104,8 +104,20 @@ class TestA3FromJson:
     def test_valid_json_invalid_a3(self):
         with pytest.raises(A3ValidationError):
             a3_from_json(
-                '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "M"}'
+                '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "M", "annotations": {}, "metadata": {}}'
             )  # too short
+
+    def test_missing_annotations_field(self):
+        with pytest.raises(A3ParseError, match="annotations"):
+            a3_from_json(
+                '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ", "metadata": {}}'
+            )
+
+    def test_missing_metadata_field(self):
+        with pytest.raises(A3ParseError, match="metadata"):
+            a3_from_json(
+                '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ", "annotations": {}}'
+            )
 
     def test_missing_schema_field(self):
         with pytest.raises(A3ParseError, match=r"\$schema"):
