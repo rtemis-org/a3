@@ -45,12 +45,13 @@
     "fix": "biome check --write src tests"
   },
   "dependencies": {
-    "zod": "^3.23.0"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.0",
-    "@types/node": "^25.5.0",
-    "typescript": "^5.5.0",
-    "vitest": "^2.0.0"
+    "@biomejs/biome": "^2.4.10",
+    "@types/node": "^25.5.2",
+    "typescript": "^6.0.2",
+    "vite": "^6",
+    "vitest": "^4.1.2"
   }
 }

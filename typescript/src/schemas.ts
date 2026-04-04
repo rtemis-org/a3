@@ -94,14 +94,10 @@ const A3_VERSION = "1.0.0";
 export const A3InputSchema = z
   .object({
     $schema: z.literal(A3_SCHEMA_URI, {
-      errorMap: () => ({
-        message: `'$schema' must be '${A3_SCHEMA_URI}'`,
-      }),
+      error: () => ({ message: `'$schema' must be '${A3_SCHEMA_URI}'` }),
     }),
     a3_version: z.literal(A3_VERSION, {
-      errorMap: () => ({
-        message: `'a3_version' must be '${A3_VERSION}'`,
-      }),
+      error: () => ({ message: `'a3_version' must be '${A3_VERSION}'` }),
     }),
     sequence: z
       .string()

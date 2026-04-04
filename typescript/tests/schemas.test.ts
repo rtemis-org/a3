@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { A3InputSchema, A3_SCHEMA_URI, A3_VERSION } from "../src/schemas";
+import { A3_SCHEMA_URI, A3_VERSION, A3InputSchema } from "../src/schemas";
 
 const MINIMAL_VALID = {
   $schema: A3_SCHEMA_URI,
