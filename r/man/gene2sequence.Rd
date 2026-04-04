@@ -34,7 +34,7 @@ Get the sequence of a gene
 }
 \examples{
 \dontrun{
-  mapt_seqs <- gene2sequence("MAPT")
+  mapt_seq <- gene2sequence("MAPT")
 }
 }
 \author{

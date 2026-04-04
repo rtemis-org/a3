@@ -78,13 +78,12 @@ pdb_annotations <- function(
   if (is.null(pdb_id)) {
     # First entry is PDBe's top-ranked structure
     pdb_id <- tolower(all_segs[[1L]][["pdb_id"]])
-    if (verbosity > 0L) {
-      msg(
-        "Selected PDB structure:",
-        highlight(toupper(pdb_id)),
-        "(PDBe top-ranked)"
-      )
-    }
+    msg(
+      "Selected PDB structure:",
+      highlight(toupper(pdb_id)),
+      "(PDBe top-ranked)",
+      verbosity = verbosity
+    )
   } else {
     pdb_id <- tolower(pdb_id)
     seg_ids <- vapply(
@@ -258,16 +257,15 @@ pdb_annotations <- function(
   region_list <- name_by_type(region_list)
   site_list <- name_by_type(site_list)
 
-  if (verbosity > 0L) {
-    msg(
-      "Parsed",
-      highlight(length(region_list)),
-      "secondary structure regions and",
-      highlight(length(site_list)),
-      "binding sites from",
-      highlight(toupper(pdb_id))
-    )
-  }
+  msg(
+    "Parsed",
+    highlight(length(region_list)),
+    "secondary structure regions and",
+    highlight(length(site_list)),
+    "binding sites from",
+    highlight(toupper(pdb_id)),
+    verbosity = verbosity
+  )
 
   list(region = region_list, site = site_list)
 }

@@ -124,6 +124,12 @@ def a3_from_json(text: str) -> A3:
         raise A3ParseError(
             f"'a3_version' must be '{_A3_VERSION}', got '{version_val}'"
         )
+    if "sequence" not in data:
+        raise A3ParseError("missing required field 'sequence'")
+    if "annotations" not in data:
+        raise A3ParseError("missing required field 'annotations'")
+    if "metadata" not in data:
+        raise A3ParseError("missing required field 'metadata'")
     # Strip envelope keys before passing to the data model
     for key in _ENVELOPE_KEYS:
         data.pop(key, None)

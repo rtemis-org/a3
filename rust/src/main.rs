@@ -3,10 +3,13 @@
 //! Usage: `a3 [OPTIONS] <FILE>`
 //! Pass `-` as `<FILE>` to read from stdin.
 
+mod diagnostic;
+
 use clap::Parser;
-use rtemis_a3::{A3, A3Error, validate};
+use colored::Colorize;
+use rtemis_a3::{A3, A3_SCHEMA_URI, A3_VERSION, A3Error, validate};
 use serde_json::{Value, json};
-use std::io::{self, Read};
+use std::io::{self, IsTerminal, Read};
 use std::process;
 
 // ---------------------------------------------------------------------------
@@ -24,7 +27,7 @@ struct Cli {
     file: String,
 
     /// Maximum number of sequence residues to display
-    #[arg(short, long, default_value_t = 10)]
+    #[arg(short, long, default_value_t = 20)]
     limit: usize,
 
     /// Suppress all output; use exit code only
@@ -34,49 +37,236 @@ struct Cli {
     /// Output results in JSON format
     #[arg(short, long)]
     json: bool,
+
+    /// Run full diagnostic validation (accumulates all errors)
+    #[arg(short = 'D', long)]
+    diagnose: bool,
 }
 
 // ---------------------------------------------------------------------------
 // Output helpers
 // ---------------------------------------------------------------------------
 
+/// Word-wrap `text` to `width` columns, returning one string per line.
+///
+/// Words that individually exceed `width` are placed on their own line
+/// unbroken. If `text` fits within `width`, returns a single-element vec.
+fn wrap_words(text: &str, width: usize) -> Vec<String> {
+    if width == 0 || text.chars().count() <= width {
+        return vec![text.to_string()];
+    }
+    let mut lines: Vec<String> = Vec::new();
+    let mut current = String::new();
+    let mut current_width = 0usize;
+    for word in text.split_whitespace() {
+        let word_width = word.chars().count();
+        if current.is_empty() {
+            current.push_str(word);
+            current_width = word_width;
+        } else if current_width + 1 + word_width <= width {
+            current.push(' ');
+            current.push_str(word);
+            current_width += 1 + word_width;
+        } else {
+            lines.push(current.clone());
+            current = word.to_string();
+            current_width = word_width;
+        }
+    }
+    if !current.is_empty() {
+        lines.push(current);
+    }
+    if lines.is_empty() {
+        vec![text.to_string()]
+    } else {
+        lines
+    }
+}
+
+/// Build the parenthetical name hint for an annotation row.
+///
+/// Shows up to 3 names. Appends `…` if there are more than 3 total, or if
+/// any name had to be cropped to stay within `available` display columns.
+/// `available` is the space for the content *inside* the parentheses.
+fn build_hint(names: &[String], available: usize) -> String {
+    if names.is_empty() || available < 2 {
+        return String::new();
+    }
+    let more_than_three = names.len() > 3;
+    let mut result = String::new();
+
+    for (i, name) in names.iter().take(3).enumerate() {
+        let sep = if i == 0 { "" } else { ", " };
+        let candidate = format!("{}{}", sep, name);
+        let after_cols = result.chars().count() + candidate.chars().count();
+        // Reserve 1 display column for "…" unless this is provably the last item.
+        let is_last = i + 1 == names.len() && !more_than_three;
+        let reserve = if is_last { 0 } else { 1 };
+
+        if after_cols + reserve <= available {
+            result.push_str(&candidate);
+        } else {
+            // Crop: append "…" to whatever we've accumulated so far.
+            if result.chars().count() < available {
+                result.push('…');
+            }
+            return result;
+        }
+    }
+
+    if more_than_three && result.chars().count() < available {
+        result.push('…');
+    }
+    result
+}
+
 /// Print human-readable output.
 ///
 /// `errors` is empty when the file is valid, non-empty when validation failed.
 /// In both cases we print whatever metadata and stats are available.
 fn print_human(a3: &A3, errors: &[String], limit: usize) {
+    println!();
+    // --- Status line ---
     if errors.is_empty() {
-        println!("✓ valid A3 schema version 1.0.0 (https://schema.rtemis.org/a3/v1/schema.json)");
+        println!(
+            "  {} {} {}",
+            "✓ valid".green().bold(),
+            format!("A3 {}", a3.a3_version())
+                .bold()
+                .truecolor(71, 156, 255),
+            a3.schema().dimmed(),
+        );
     } else {
-        println!("✗ invalid:");
-        for e in errors {
-            println!("  - {e}");
+        println!("  {}", "✗ invalid".red().bold());
+        println!();
+        let last = errors.len() - 1;
+        for (i, e) in errors.iter().enumerate() {
+            let connector = if i == last { "└──" } else { "├──" };
+            println!("  {} {}", connector.dimmed(), e.red());
         }
     }
 
-    let meta = a3.metadata();
-    let ann = a3.annotations();
+    println!();
+
+    // --- Sequence ---
     let seq = a3.sequence();
     let n = limit.min(seq.len());
-    let seq_line = if seq.len() > n {
-        format!("{}... ({})", &seq[..n], seq.len())
+    let seq_display = if seq.len() > n {
+        format!("{}… (length = {})", &seq[..n], seq.len())
     } else {
-        format!("{} ({})", seq, seq.len())
+        format!("{} (length = {})", seq, seq.len())
     };
-
-    println!("UniProt ID:   {}", meta.uniprot_id());
-    println!("Description:  {}", meta.description());
-    println!("Reference:    {}", meta.reference());
-    println!("Organism:     {}", meta.organism());
-    println!("Sequence:     {}", seq_line);
     println!(
-        "Annotations:  site: {}  region: {}  ptm: {}  processing: {}  variant: {}",
-        ann.site().len(),
-        ann.region().len(),
-        ann.ptm().len(),
-        ann.processing().len(),
-        ann.variant().len(),
+        "  {}  {}",
+        "Sequence".bold(),
+        seq_display.truecolor(220, 150, 86)
     );
+
+    // --- Annotations ---
+    println!();
+    println!("  {}", "Annotations".bold());
+
+    let ann = a3.annotations();
+
+    // Sorted names per family (all of them — build_hint decides how many fit).
+    // Variant has no names; show positions instead.
+    let mut site_names: Vec<String> = ann.site().keys().cloned().collect();
+    site_names.sort();
+    let mut region_names: Vec<String> = ann.region().keys().cloned().collect();
+    region_names.sort();
+    let mut ptm_names: Vec<String> = ann.ptm().keys().cloned().collect();
+    ptm_names.sort();
+    let mut proc_names: Vec<String> = ann.processing().keys().cloned().collect();
+    proc_names.sort();
+    let var_names: Vec<String> = ann
+        .variant()
+        .iter()
+        .map(|v| format!("pos {}", v.position()))
+        .collect();
+
+    let entries = [
+        ("site", ann.site().len(), site_names),
+        ("region", ann.region().len(), region_names),
+        ("ptm", ann.ptm().len(), ptm_names),
+        ("processing", ann.processing().len(), proc_names),
+        ("variant", ann.variant().len(), var_names),
+    ];
+    let last = entries.len() - 1;
+    for (i, (name, count, names)) in entries.iter().enumerate() {
+        let connector = if i == last { "└──" } else { "├──" };
+        let padded = format!("{:<12}", name);
+        let count_str = if *count == 0 {
+            "—".dimmed().to_string()
+        } else {
+            count.to_string().truecolor(220, 150, 86).to_string()
+        };
+        // Columns consumed before the opening paren:
+        // 2 (indent) + 3 (connector) + 1 (space) + 12 (padded name) + count digits + 2 (gap) + 1 '('
+        let prefix_cols = 21
+            + if *count == 0 {
+                1
+            } else {
+                count.to_string().len()
+            };
+        let available = 90usize.saturating_sub(prefix_cols + 1); // +1 for ')'
+        let hint_content = build_hint(names, available);
+        let hint = if hint_content.is_empty() {
+            String::new()
+        } else {
+            format!("  {}", format!("({})", hint_content).dimmed())
+        };
+        println!("  {} {}{}{}", connector.dimmed(), padded, count_str, hint);
+    }
+
+    // --- Metadata ---
+    println!();
+    println!("  {}", "Metadata".bold());
+
+    let meta = a3.metadata();
+    let meta_rows: [(&str, &str); 4] = [
+        ("UniProt ID", meta.uniprot_id()),
+        ("Description", meta.description()),
+        ("Reference", meta.reference()),
+        ("Organism", meta.organism()),
+    ];
+    let label_width = meta_rows.iter().map(|(l, _)| l.len()).max().unwrap_or(0);
+    // 2 (indent) + 3 (connector) + 1 (space) + label_width + 2 (gap)
+    let value_col = 8 + label_width;
+    let value_width = 90usize.saturating_sub(value_col);
+    let last = meta_rows.len() - 1;
+    for (i, (label, value)) in meta_rows.iter().enumerate() {
+        let is_last = i == last;
+        let connector = if is_last { "└──" } else { "├──" };
+        // Non-last items get a │ at the connector column to keep the list
+        // visually uninterrupted across wrapped value lines.
+        let continuation = if is_last {
+            " ".repeat(value_col)
+        } else {
+            format!("  {}{}", "│".dimmed(), " ".repeat(value_col - 3))
+        };
+        if value.is_empty() {
+            println!(
+                "  {} {:<label_width$}  {}",
+                connector.dimmed(),
+                label,
+                "—".dimmed(),
+                label_width = label_width,
+            );
+        } else {
+            let lines = wrap_words(value, value_width);
+            print!(
+                "  {} {:<label_width$}  {}",
+                connector.dimmed(),
+                label,
+                lines[0].truecolor(220, 150, 86),
+                label_width = label_width,
+            );
+            for line in &lines[1..] {
+                print!("\n{}{}", continuation, line.truecolor(220, 150, 86));
+            }
+            println!();
+        }
+    }
 }
 
 /// Build the JSON output value.
@@ -132,6 +322,11 @@ fn read_input(file: &str) -> Result<String, String> {
 fn main() {
     let cli = Cli::parse();
 
+    // Disable colors when stdout is not a terminal (pipe, redirect, --quiet).
+    if !std::io::stdout().is_terminal() {
+        colored::control::set_override(false);
+    }
+
     // Read input — exit 2 on I/O error.
     let content = read_input(&cli.file).unwrap_or_else(|e| {
         if !cli.quiet {
@@ -140,24 +335,105 @@ fn main() {
         process::exit(2);
     });
 
+    // --diagnose: full step-by-step validation that accumulates all errors.
+    if cli.diagnose {
+        match diagnostic::a3_diagnose(&content) {
+            Ok(a3) => {
+                if !cli.quiet {
+                    if cli.json {
+                        println!(
+                            "{}",
+                            serde_json::to_string_pretty(&build_json(&a3, &[], cli.limit)).unwrap()
+                        );
+                    } else {
+                        print_human(&a3, &[], cli.limit);
+                    }
+                }
+                process::exit(0);
+            }
+            Err(err) => {
+                let (errors, exit_code) = match &err {
+                    diagnostic::DiagnoseError::Fatal(e) => (e.as_slice(), 2i32),
+                    diagnostic::DiagnoseError::Invalid(e) => (e.as_slice(), 1i32),
+                };
+                if !cli.quiet {
+                    if cli.json {
+                        println!(
+                            "{}",
+                            serde_json::to_string_pretty(&json!({
+                                "valid": false,
+                                "errors": errors,
+                            }))
+                            .unwrap()
+                        );
+                    } else {
+                        println!("\n  {}", "✗ invalid".red().bold());
+                        println!();
+                        let last = errors.len() - 1;
+                        for (i, msg) in errors.iter().enumerate() {
+                            let connector = if i == last { "└──" } else { "├──" };
+                            println!("  {} {}", connector.dimmed(), msg.red());
+                        }
+                        println!();
+                    }
+                }
+                process::exit(exit_code);
+            }
+        }
+    }
+
     // Stage 1: JSON parse — exit 2 on failure.
     let raw: A3 = match serde_json::from_str(&content) {
         Ok(r) => r,
         Err(e) => {
             if !cli.quiet {
-                let msg = format!("Failed to parse JSON: {e}");
+                let mut errors = vec![format!("Invalid A3: {e}")];
+
+                // Even though full deserialization failed, try parsing to a
+                // generic Value so we can check envelope fields and surface
+                // *all* errors at once instead of just the first serde failure.
+                if let Ok(value) = serde_json::from_str::<serde_json::Value>(&content) {
+                    match value.get("$schema").and_then(|v| v.as_str()) {
+                        Some(s) if s != A3_SCHEMA_URI => {
+                            errors.push(format!("'$schema' must be '{A3_SCHEMA_URI}', got '{s}'"));
+                        }
+                        None => {
+                            errors.push(format!(
+                                "'$schema' is required and must be '{A3_SCHEMA_URI}'"
+                            ));
+                        }
+                        _ => {}
+                    }
+                    match value.get("a3_version").and_then(|v| v.as_str()) {
+                        Some(v) if v != A3_VERSION => {
+                            errors.push(format!("'a3_version' must be '{A3_VERSION}', got '{v}'"));
+                        }
+                        None => {
+                            errors.push(format!(
+                                "'a3_version' is required and must be '{A3_VERSION}'"
+                            ));
+                        }
+                        _ => {}
+                    }
+                }
+
                 if cli.json {
                     println!(
                         "{}",
                         serde_json::to_string_pretty(&json!({
                             "valid": false,
-                            "errors": [msg],
+                            "errors": errors,
                         }))
                         .unwrap()
                     );
                 } else {
-                    println!("✗ invalid:");
-                    println!("  - {msg}");
+                    println!("\n  {}", "✗ invalid".red().bold());
+                    println!();
+                    let last = errors.len() - 1;
+                    for (i, msg) in errors.iter().enumerate() {
+                        let connector = if i == last { "└──" } else { "├──" };
+                        println!("  {} {}", connector.dimmed(), msg.red());
+                    }
                 }
             }
             process::exit(2);

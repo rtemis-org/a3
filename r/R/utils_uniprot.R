@@ -27,9 +27,7 @@ uniprot_sequence <- function(
 
   path <- paste0(base_url, "/", accession, ".fasta")
   dat <- seqinr::read.fasta(path, seqtype = "AA")
-  if (verbosity > 0L) {
-    msg("Got:", highlight(attr(dat[[1L]], "Annot")))
-  }
+  msg("Got:", highlight(attr(dat[[1L]], "Annot")), verbosity = verbosity)
   paste(as.character(dat[[1L]]), collapse = "")
 }
 

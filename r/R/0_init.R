@@ -724,7 +724,6 @@ format_caller <- function(call_stack, call_depth, caller_id, max_char = 30L) {
 # \code{current <- as.list(sys.call())[[1]]}
 #'
 #' @param ... Message to print
-#' @param date Logical: if TRUE, include date and time in the prefix
 #' @param caller Character: Name of calling function
 #' @param call_depth Integer: Print the system call path of this depth.
 #' @param caller_id Integer: Which function in the call stack to print
@@ -732,8 +731,9 @@ format_caller <- function(call_stack, call_depth, caller_id, max_char = 30L) {
 #' @param newline Logical: If TRUE end with a new line.
 #' @param format_fn Function: Formatting function to use on the message text.
 #' @param sep Character: Use to separate objects in `...`
+#' @param verbosity Integer: Verbosity level.
 #'
-#' @return Invisibly: List with call, message, and date
+#' @return Invisibly: `NULL`
 #'
 #' @author EDG
 #' @noRd
@@ -742,27 +742,28 @@ format_caller <- function(call_stack, call_depth, caller_id, max_char = 30L) {
 #' msg("Hello, world!")
 msg <- function(
   ...,
-  date = TRUE,
   caller = NULL,
   call_depth = 1L,
   caller_id = 1L,
   newline_pre = FALSE,
   newline = TRUE,
   format_fn = plain,
-  sep = " "
+  sep = " ",
+  verbosity = 1L
 ) {
+  if (verbosity == 0L) {
+    return(invisible(NULL))
+  }
   if (is.null(caller)) {
     call_stack <- as.list(sys.calls())
     caller <- format_caller(call_stack, call_depth, caller_id)
-  }
+  } # / get caller
 
   txt <- Filter(Negate(is.null), list(...))
   if (newline_pre) {
     message("")
   }
-  if (date) {
-    msgdatetime()
-  }
+  msgdatetime()
   message(
     format_fn(paste(txt, collapse = sep)),
     appendLF = FALSE
@@ -791,8 +792,12 @@ msg0 <- function(
   newline_pre = FALSE,
   newline = TRUE,
   format_fn = plain,
-  sep = ""
+  sep = "",
+  verbosity = 1L
 ) {
+  if (verbosity == 0L) {
+    return(invisible(NULL))
+  }
   if (is.null(caller)) {
     call_stack <- as.list(sys.calls())
     caller <- format_caller(call_stack, call_depth, caller_id)
@@ -828,13 +833,9 @@ msg0 <- function(
 #' @noRd
 #'
 #' @examples
-#' \dontrun{
-#' {
-#'   msg("Hello")
-#'   pcat("super", "wow")
-#'   pcat(NULL, "oooo")
-#' }
-#' }
+#' msg("Hello")
+#' pcat("super", "potato")
+#' pcat(NULL, "oooo")
 pcat <- function(left, right, pad = 17, newline = TRUE) {
   lpad <- max(0, pad - 1 - max(0, nchar(left)))
   cat(pad_string(left), right)

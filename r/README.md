@@ -12,8 +12,14 @@ which provides A3 implementations in R, TypeScript, Python, Julia, and Rust.
 ## Installation
 
 ```r
-# From r-universe
 install.packages("rtemis.a3", repos = "https://rtemis-org.r-universe.dev")
+```
+
+or using pak:
+
+```r
+pak::repo_add(myuniverse = "https://rtemis-org.r-universe.dev")
+pak::pak("rtemis.a3")
 ```
 
 ## Quick Start
@@ -43,18 +49,9 @@ a3 <- create_A3(
 print(a3)
 ```
 
-## Parsing JSON
+## Read / Write JSON
 
 ```r
-a3 <- A3from_json("path/to/protein.json")
-# or from a JSON string
-a3 <- A3from_json(json_string)
-```
-
-## Serialization
-
-```r
-json_string <- to_json(a3)
 write_A3json(a3, "path/to/output.json")
 a3 <- read_A3json("path/to/protein.json")
 ```
@@ -101,8 +98,6 @@ entry is `{ index, type }` — bare arrays are rejected. Positions are
 
 | Function | Description |
 |---|---|
-| `to_json(x)` | Serialize an A3 object to a JSON string |
-| `A3from_json(x)` | Parse a JSON string or pre-parsed list into an A3 object |
 | `write_A3json(x, path)` | Write an A3 object to a JSON file |
 | `read_A3json(path)` | Read an A3 object from a JSON file |
 

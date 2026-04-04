@@ -22,12 +22,12 @@ function create_a3(
     variant    !== nothing && (annot["variant"]    = variant)
 
     raw = Dict{String,Any}(
-        "\$schema"   => _A3_SCHEMA_URI,
-        "a3_version" => _A3_VERSION,
-        "sequence"   => sequence,
+        "\$schema"    => _A3_SCHEMA_URI,
+        "a3_version"  => _A3_VERSION,
+        "sequence"    => sequence,
         "annotations" => annot,
+        "metadata"    => metadata !== nothing ? metadata : Dict{String,Any}(),
     )
-    metadata !== nothing && (raw["metadata"] = metadata)
     A3(raw)
 end
 

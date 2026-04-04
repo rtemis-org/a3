@@ -55,20 +55,17 @@ aa_sub <- function(x, substitutions, verbosity = 1L) {
     from <- strngs[1]
     to <- strngs[length(strngs)]
     pos <- as.numeric(strngs[2:(length(strngs) - 1)] |> paste(collapse = ""))
-    if (verbosity > 0) {
-      msg(
-        "Substituting",
-        highlight(from),
-        "at position",
-        highlight(pos),
-        "with",
-        highlight(to)
-      )
-    }
+    msg(
+      "Substituting",
+      highlight(from),
+      "at position",
+      highlight(pos),
+      "with",
+      highlight(to),
+      verbosity = verbosity
+    )
     x[pos] <- to
   }
-  if (verbosity > 0) {
-    msg("All done.")
-  }
+  msg("All done.", verbosity = verbosity)
   x
 }

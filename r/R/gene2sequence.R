@@ -14,7 +14,7 @@
 #'
 #' @examples
 #' \dontrun{
-#'   mapt_seqs <- gene2sequence("MAPT")
+#'   mapt_seq <- gene2sequence("MAPT")
 #' }
 gene2sequence <- function(
   gene,
@@ -50,15 +50,14 @@ gene2sequence <- function(
     mart = mart
   )
 
-  if (verbosity > 0) {
-    msg0(
-      "Found ",
-      bold(nrow(transcripts)),
-      " transcripts for gene ",
-      highlight(gene),
-      "."
-    )
-  }
+  msg0(
+    "Found ",
+    bold(nrow(transcripts)),
+    " transcripts for gene ",
+    highlight(gene),
+    ".",
+    verbosity = verbosity
+  )
 
   # Get sequence ----
   # Retrieve sequence(s) using transcript ID
