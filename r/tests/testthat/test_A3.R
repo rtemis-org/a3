@@ -592,12 +592,13 @@ test_that("A3from_json rejects legacy bare-array format", {
       "ptm": {},
       "processing": {},
       "variant": []
-    }
+    },
+    "metadata": {}
   }'
   expect_error(A3from_json(legacy_json), "index")
 })
 
-test_that("A3from_json handles missing metadata gracefully", {
+test_that("A3from_json rejects missing metadata", {
   json <- '{
     "$schema": "https://schema.rtemis.org/a3/v1/schema.json",
     "a3_version": "1.0.0",
@@ -610,10 +611,7 @@ test_that("A3from_json handles missing metadata gracefully", {
       "variant": []
     }
   }'
-  x <- A3from_json(json)
-  expect_s7_class(x, A3)
-  expect_identical(x@metadata@uniprot_id, "")
-  expect_identical(x@metadata@description, "")
+  expect_error(A3from_json(json), "metadata")
 })
 
 test_that("A3from_json accepts pre-parsed list", {

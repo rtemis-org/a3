@@ -955,6 +955,15 @@ A3from_json <- function(x, ...) {
       "Field {.field a3_version} must be {.val {.A3_VERSION}}, got {.val {version_field}}."
     )
   }
+  if (is.null(x[["sequence"]])) {
+    cli::cli_abort("JSON input missing required field {.field sequence}.")
+  }
+  if (is.null(x[["annotations"]])) {
+    cli::cli_abort("JSON input missing required field {.field annotations}.")
+  }
+  if (is.null(x[["metadata"]])) {
+    cli::cli_abort("JSON input missing required field {.field metadata}.")
+  }
 
   sequence <- x[["sequence"]]
   annotations <- x[["annotations"]]
