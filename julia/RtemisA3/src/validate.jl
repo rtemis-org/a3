@@ -236,10 +236,14 @@ function A3(raw::AbstractDict)
     end
     haskey(raw, "sequence") ||
         throw(A3ValidationError("missing required field 'sequence'"))
+    haskey(raw, "annotations") ||
+        throw(A3ValidationError("missing required field 'annotations'"))
+    haskey(raw, "metadata") ||
+        throw(A3ValidationError("missing required field 'metadata'"))
 
     seq         = validate_sequence(raw["sequence"], "sequence")
-    annotations = parse_annotations(get(raw, "annotations", Dict{String,Any}()), "annotations")
-    metadata    = parse_metadata(get(raw, "metadata", Dict{String,Any}()), "metadata")
+    annotations = parse_annotations(raw["annotations"], "annotations")
+    metadata    = parse_metadata(raw["metadata"], "metadata")
 
     validate_bounds(seq, annotations)
     A3(seq, annotations, metadata)
