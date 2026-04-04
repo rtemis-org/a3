@@ -63,11 +63,23 @@ describe("annotation validation", () => {
     expect(result.success).toBe(false);
   });
 
-  it("defaults missing annotations families to empty", () => {
+  it("rejects missing annotations object", () => {
     const result = A3InputSchema.safeParse({
       $schema: A3_SCHEMA_URI,
       a3_version: A3_VERSION,
       sequence: "MKTAYIAKQR",
+      metadata: {},
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts empty annotations object and defaults families to empty", () => {
+    const result = A3InputSchema.safeParse({
+      $schema: A3_SCHEMA_URI,
+      a3_version: A3_VERSION,
+      sequence: "MKTAYIAKQR",
+      annotations: {},
+      metadata: {},
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -289,11 +301,23 @@ describe("variant validation", () => {
 });
 
 describe("metadata validation", () => {
-  it("defaults all metadata fields to empty string", () => {
+  it("rejects missing metadata object", () => {
     const result = A3InputSchema.safeParse({
       $schema: A3_SCHEMA_URI,
       a3_version: A3_VERSION,
       sequence: "MKTAY",
+      annotations: {},
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("defaults all metadata fields to empty string when metadata is {}", () => {
+    const result = A3InputSchema.safeParse({
+      $schema: A3_SCHEMA_URI,
+      a3_version: A3_VERSION,
+      sequence: "MKTAY",
+      annotations: {},
+      metadata: {},
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -311,6 +335,7 @@ describe("metadata validation", () => {
       $schema: A3_SCHEMA_URI,
       a3_version: A3_VERSION,
       sequence: "MKTAY",
+      annotations: {},
       metadata: { uniprot_id: "P10636" },
     });
     expect(result.success).toBe(true);

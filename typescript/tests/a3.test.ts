@@ -52,6 +52,7 @@ describe("A3 constructor", () => {
           a3_version: A3_VERSION,
           sequence: "MKTAY",
           annotations: { site: { A: { index: [99], type: "" } } },
+          metadata: {},
         }),
     ).toThrow(A3ValidationError);
   });
@@ -166,6 +167,8 @@ describe("A3.toJSON and JSON.stringify", () => {
       $schema: A3_SCHEMA_URI,
       a3_version: A3_VERSION,
       sequence: "MKTAY",
+      annotations: {},
+      metadata: {},
     });
     const parsed = JSON.parse(a3.toJSONString()) as { annotations: Record<string, unknown> };
     expect(parsed.annotations).toHaveProperty("site");
@@ -183,6 +186,7 @@ describe("A3.toJSON and JSON.stringify", () => {
       annotations: {
         site: { A: { index: [1, 2] } }, // type omitted — defaults to ""
       },
+      metadata: {},
     });
     const parsed = JSON.parse(a3.toJSONString()) as {
       annotations: { site: { A: { type: string } } };

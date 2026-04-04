@@ -108,14 +108,8 @@ export const A3InputSchema = z
       .min(2, "sequence must be at least 2 characters")
       .regex(/^[A-Za-z*]+$/, "sequence must contain only amino acid letters [A-Za-z] or '*'")
       .transform((s) => s.toUpperCase()),
-    annotations: AnnotationsSchema.default({
-      site: {},
-      region: {},
-      ptm: {},
-      processing: {},
-      variant: [],
-    }),
-    metadata: MetadataSchema.default({}),
+    annotations: AnnotationsSchema,
+    metadata: MetadataSchema,
   })
   .strict()
   .superRefine((data, ctx) => {
