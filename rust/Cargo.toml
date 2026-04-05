@@ -2,6 +2,14 @@
 name = "rtemis-a3"
 version = "0.1.0"
 edition = "2024"
+description = "Rust implementation of the A3 (Amino Acid Annotation) format — parse, validate, and inspect A3 JSON files"
+license = "MPL-2.0"
+repository = "https://github.com/rtemis-org/a3"
+homepage = "https://a3.rtemis.org"
+documentation = "https://docs.rs/rtemis-a3"
+readme = "README.md"
+keywords = ["bioinformatics", "protein", "amino-acid", "proteomics", "json"]
+categories = ["science::bioinformatics::proteomics", "parser-implementations", "command-line-utilities"]
 
 [[bin]]
 name = "a3"
