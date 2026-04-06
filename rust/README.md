@@ -110,6 +110,8 @@ fi
 use rtemis_a3::{a3_from_json, a3_to_json};
 
 let json = r#"{
+  "$schema": "https://schema.rtemis.org/a3/v1/schema.json",
+  "a3_version": "1.0.0",
   "sequence": "MKTAYIAKQR",
   "annotations": {
     "site":       { "Active site": { "index": [3, 5], "type": "activeSite" } },
@@ -128,7 +130,7 @@ let json = r#"{
 
 let a3 = a3_from_json(json).unwrap();
 
-println!("{}", a3.sequence.len());        // 10
+println!("{}", a3.sequence().len());      // 10
 println!("{}", a3_to_json(&a3, None).unwrap());         // compact JSON
 println!("{}", a3_to_json(&a3, Some(2)).unwrap());      // pretty-printed
 ```
@@ -167,6 +169,8 @@ let vars = variants_at(&a3, 3);
 
 ```json
 {
+  "$schema": "https://schema.rtemis.org/a3/v1/schema.json",
+  "a3_version": "1.0.0",
   "sequence": "MKTAYIAKQR",
   "annotations": {
     "site": { "Active site": { "index": [3, 5], "type": "activeSite" } },
@@ -227,8 +231,9 @@ used as the index type inside `FlexEntry`.
 
 ```rust
 pub enum A3Error {
-    Parse(serde_json::Error),   // malformed JSON
-    Validate(Vec<String>),      // all A3 rule violations, collected before returning
+    Parse(serde_json::Error),        // malformed JSON
+    Validate(Vec<String>),           // all A3 rule violations, collected before returning
+    Serialize(serde_json::Error),    // serialization failure (unreachable in practice)
 }
 ```
 
@@ -237,7 +242,7 @@ not just the first one.
 
 ## Canonical Schema
 
-See [specs/a3.md](../specs/a3.md) for the language-agnostic specification and
+See [specs/A3.md](../specs/A3.md) for the language-agnostic specification and
 [specs/A3_Rust.md](../specs/A3_Rust.md) for Rust/serde-specific design notes.
 
 ## License
