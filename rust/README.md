@@ -240,11 +240,6 @@ pub enum A3Error {
 All violations are collected before returning — you see every problem at once,
 not just the first one.
 
-## Canonical Schema
-
-See [specs/A3.md](../specs/A3.md) for the language-agnostic specification and
-[specs/A3_Rust.md](../specs/A3_Rust.md) for Rust/serde-specific design notes.
-
 ## License
 
 [MPL-2.0](https://www.mozilla.org/en-US/MPL/2.0/)

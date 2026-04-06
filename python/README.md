@@ -143,11 +143,6 @@ A3
 All models are immutable (`frozen=True`). Users never construct them directly —
 use `create_a3` or `a3_from_json` instead.
 
-## Canonical Schema
-
-See [specs/a3.md](../specs/a3.md) for the language-agnostic specification and
-[specs/A3_Pydantic.md](../specs/A3_Pydantic.md) for Pydantic-specific design notes.
-
 ## License
 
 [MPL-2.0](https://www.mozilla.org/en-US/MPL/2.0/)

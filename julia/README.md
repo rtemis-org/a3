@@ -98,7 +98,3 @@ Errors raise `A3ValidationError` with a message that includes the field path and
 using Pkg
 Pkg.test("RtemisA3")
 ```
-
-## Canonical Schema
-
-See [specs/a3.md](../specs/a3.md) for the full language-agnostic specification.
