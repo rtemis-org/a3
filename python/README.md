@@ -1,3 +1,4 @@
+[![PyPI version](https://img.shields.io/pypi/v/rtemis_a3.svg)](https://pypi.org/project/rtemis_a3/)
 [![python-ci](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml)
 
 # rtemis-a3
