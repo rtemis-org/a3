@@ -107,25 +107,35 @@ class TestA3FromJson:
                 '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "M", "annotations": {}, "metadata": {}}'
             )  # too short
 
-    def test_missing_annotations_field(self):
-        with pytest.raises(A3ParseError, match="annotations"):
-            a3_from_json(
-                '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ", "metadata": {}}'
-            )
+    def test_missing_annotations_field_defaults(self):
+        # annotations has a model default — omitting it from JSON is valid
+        a3 = a3_from_json(
+            '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ", "metadata": {}}'
+        )
+        assert a3.annotations.site == {}
 
-    def test_missing_metadata_field(self):
-        with pytest.raises(A3ParseError, match="metadata"):
-            a3_from_json(
-                '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ", "annotations": {}}'
-            )
+    def test_missing_metadata_field_defaults(self):
+        # metadata has a model default — omitting it from JSON is valid
+        a3 = a3_from_json(
+            '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ", "annotations": {}}'
+        )
+        assert a3.metadata.uniprot_id == ""
 
     def test_missing_schema_field(self):
-        with pytest.raises(A3ParseError, match=r"\$schema"):
+        with pytest.raises(A3ValidationError, match=r"\$schema"):
             a3_from_json('{"a3_version": "1.0.0", "sequence": "MAEPRQ"}')
 
     def test_missing_version_field(self):
-        with pytest.raises(A3ParseError, match="a3_version"):
+        with pytest.raises(A3ValidationError, match="a3_version"):
             a3_from_json('{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "sequence": "MAEPRQ"}')
+
+    def test_wrong_schema_uri(self):
+        with pytest.raises(A3ValidationError, match=r"\$schema"):
+            a3_from_json('{"$schema": "https://wrong.example.com/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ"}')
+
+    def test_wrong_version(self):
+        with pytest.raises(A3ValidationError, match="a3_version"):
+            a3_from_json('{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "9.9.9", "sequence": "MAEPRQ"}')
 
 
 class TestA3ToJson:

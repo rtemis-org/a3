@@ -12,6 +12,8 @@ from rtemis.a3._models import (
     SiteEntry,
     VariantRecord,
 )
+from rtemis.a3 import create_a3
+from rtemis.a3.errors import A3ValidationError
 
 
 # ---------------------------------------------------------------------------
@@ -44,6 +46,10 @@ class TestSiteEntry:
     def test_negative_rejected(self):
         with pytest.raises(ValidationError):
             SiteEntry(index=[-1, 2])
+
+    def test_bool_rejected(self):
+        with pytest.raises(ValidationError, match="boolean"):
+            SiteEntry(index=[True, 2])
 
     def test_frozen(self):
         entry = SiteEntry(index=[1, 2])
@@ -90,6 +96,10 @@ class TestRegionEntry:
         with pytest.raises(ValidationError):
             RegionEntry(index=[(0, 5)])
 
+    def test_bool_rejected(self):
+        with pytest.raises(ValidationError, match="boolean"):
+            RegionEntry(index=[(True, 5)])
+
 
 # ---------------------------------------------------------------------------
 # FlexEntry
@@ -112,6 +122,14 @@ class TestFlexEntry:
     def test_range_overlap_rejected(self):
         with pytest.raises(ValidationError, match="overlapping"):
             FlexEntry(index=[(1, 5), (3, 8)])
+
+    def test_bool_position_rejected(self):
+        with pytest.raises(ValidationError, match="boolean"):
+            FlexEntry(index=[True, 2])
+
+    def test_bool_range_rejected(self):
+        with pytest.raises(ValidationError, match="boolean"):
+            FlexEntry(index=[(True, 5)])
 
 
 # ---------------------------------------------------------------------------
@@ -139,6 +157,10 @@ class TestVariantRecord:
     def test_non_positive_position_rejected(self):
         with pytest.raises(ValidationError):
             VariantRecord(position=0)
+
+    def test_bool_position_rejected(self):
+        with pytest.raises(ValidationError, match="boolean"):
+            VariantRecord(position=True)
 
     def test_non_json_extra_rejected(self):
         with pytest.raises(ValidationError, match="not JSON-compatible"):
@@ -228,59 +250,36 @@ class TestA3:
             A3.model_validate({"sequence": "MA", "extra_field": "nope"})
 
     def test_bounds_check_site_out_of_range(self):
-        with pytest.raises(ValidationError, match="out of bounds"):
-            A3.model_validate(
-                {
-                    "sequence": "MAEPRQ",
-                    "annotations": {
-                        "site": {"bad": {"index": [100], "type": ""}},
-                    },
-                }
-            )
+        with pytest.raises(A3ValidationError, match="out of bounds"):
+            create_a3("MAEPRQ", site={"bad": {"index": [100], "type": ""}})
 
     def test_bounds_check_region_out_of_range(self):
-        with pytest.raises(ValidationError, match="out of bounds"):
-            A3.model_validate(
-                {
-                    "sequence": "MAEPRQ",
-                    "annotations": {
-                        "region": {"bad": {"index": [[1, 100]], "type": ""}},
-                    },
-                }
-            )
+        with pytest.raises(A3ValidationError, match="out of bounds"):
+            create_a3("MAEPRQ", region={"bad": {"index": [[1, 100]], "type": ""}})
 
     def test_bounds_check_variant_out_of_range(self):
-        with pytest.raises(ValidationError, match="out of bounds"):
-            A3.model_validate(
-                {
-                    "sequence": "MAEPRQ",
-                    "annotations": {
-                        "variant": [{"position": 100}],
-                    },
-                }
-            )
+        with pytest.raises(A3ValidationError, match="out of bounds"):
+            create_a3("MAEPRQ", variant=[{"position": 100}])
 
     def test_bounds_check_ptm_positions(self):
-        with pytest.raises(ValidationError, match="out of bounds"):
-            A3.model_validate(
-                {
-                    "sequence": "MAEPRQ",
-                    "annotations": {
-                        "ptm": {"bad": {"index": [100], "type": ""}},
-                    },
-                }
-            )
+        with pytest.raises(A3ValidationError, match="out of bounds"):
+            create_a3("MAEPRQ", ptm={"bad": {"index": [100], "type": ""}})
 
     def test_bounds_check_ptm_ranges(self):
-        with pytest.raises(ValidationError, match="out of bounds"):
-            A3.model_validate(
-                {
-                    "sequence": "MAEPRQ",
-                    "annotations": {
-                        "ptm": {"bad": {"index": [[1, 100]], "type": ""}},
-                    },
-                }
+        with pytest.raises(A3ValidationError, match="out of bounds"):
+            create_a3("MAEPRQ", ptm={"bad": {"index": [[1, 100]], "type": ""}})
+
+    def test_bounds_check_multi_error(self):
+        with pytest.raises(A3ValidationError) as exc_info:
+            create_a3(
+                "MAEPRQ",
+                site={"s1": {"index": [99], "type": ""}, "s2": {"index": [100], "type": ""}},
+                variant=[{"position": 88}],
             )
+        err = exc_info.value
+        assert len(err.errors) == 3
+        assert len(err.messages) == 3
+        assert all("out of bounds" in m for m in err.messages)
 
     def test_full_valid(self):
         a3 = A3.model_validate(

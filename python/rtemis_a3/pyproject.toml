@@ -1,15 +1,29 @@
 [project]
 name = "rtemis-a3"
 version = "0.1.0"
-description = "Add your description here"
+description = "Python implementation of the Amino Acid Annotation (A3) format"
 readme = "README.md"
+license = "MPL-2.0"
+license-files = ["LICENSE"]
 authors = [
-    { name = "Stathis Gennatas", email = "gennatas@gmail.com" }
+    { name = "E.D. Gennatas", email = "gennatas@gmail.com" }
+]
+keywords = ["bioinformatics", "proteomics", "amino acid", "annotation", "protein"]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Typing :: Typed",
 ]
 requires-python = ">=3.13"
 dependencies = [
     "pydantic>=2.12.5",
 ]
+
+[project.urls]
+Homepage = "https://github.com/rtemis-org/a3"
+Repository = "https://github.com/rtemis-org/a3"
+Issues = "https://github.com/rtemis-org/a3/issues"
 
 [build-system]
 requires = ["uv_build>=0.11.2,<0.12.0"]

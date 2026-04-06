@@ -77,7 +77,9 @@ json_string = a3_to_json(a3, indent=2) # pretty-printed
 
 ```json
 {
-  "sequence": "MKTAYIAKQR",
+  "$schema":    "https://schema.rtemis.org/a3/v1/schema.json",
+  "a3_version": "1.0.0",
+  "sequence":   "MKTAYIAKQR",
   "annotations": {
     "site":       { "Active site": { "index": [3, 5],   "type": "activeSite" } },
     "region":     { "Repeat 1":    { "index": [[1, 4]], "type": "" } },
