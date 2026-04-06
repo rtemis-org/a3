@@ -16,6 +16,7 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+from pydantic.functional_validators import BeforeValidator
 
 from ._normalize import (
     check_no_overlap,
@@ -24,11 +25,26 @@ from ._normalize import (
     sort_ranges,
 )
 
+
+class _BoundsErrors(Exception):
+    """Internal: carries individual bounds-check messages out of the model validator."""
+
+    def __init__(self, messages: list[str]) -> None:
+        self.messages = messages
+
+
 # ---------------------------------------------------------------------------
 # Constrained types
 # ---------------------------------------------------------------------------
 
-Position = Annotated[int, Field(gt=0)]
+
+def _reject_bool(v: Any) -> Any:
+    if isinstance(v, bool):
+        raise ValueError("boolean values are not valid positions")
+    return v
+
+
+Position = Annotated[int, BeforeValidator(_reject_bool), Field(gt=0)]
 
 # ---------------------------------------------------------------------------
 # Annotation entry models
@@ -71,6 +87,8 @@ class RegionEntry(BaseModel):
         for item in v:
             if isinstance(item, (list, tuple)) and len(item) == 2:
                 s, e = item
+                if isinstance(s, bool) or isinstance(e, bool):
+                    raise ValueError("boolean values are not valid positions")
                 if not (isinstance(s, int) and isinstance(e, int)):
                     raise ValueError(
                         f"range elements must be integers, got [{type(s).__name__}, "
@@ -108,12 +126,16 @@ class FlexEntry(BaseModel):
             return []
         # Determine geometry from first element
         first = v[0]
+        if isinstance(first, bool):
+            raise ValueError("boolean values are not valid positions")
         if isinstance(first, (list, tuple)):
             # Ranges path
             coerced: list[tuple[int, int]] = []
             for item in v:
                 if isinstance(item, (list, tuple)) and len(item) == 2:
                     s, e = item
+                    if isinstance(s, bool) or isinstance(e, bool):
+                        raise ValueError("boolean values are not valid positions")
                     if not (isinstance(s, int) and isinstance(e, int)):
                         raise ValueError(
                             f"range elements must be integers, got "
@@ -132,10 +154,10 @@ class FlexEntry(BaseModel):
             sorted_ranges = sort_ranges(coerced)
             check_no_overlap(sorted_ranges)
             return sorted_ranges
-        elif isinstance(first, int):
+        elif isinstance(first, int) and not isinstance(first, bool):
             # Positions path
             for item in v:
-                if not isinstance(item, int):
+                if isinstance(item, bool) or not isinstance(item, int):
                     raise ValueError(
                         "cannot mix integers and non-integers in index"
                     )
@@ -283,7 +305,7 @@ class A3(BaseModel):
                 )
 
         if errors:
-            raise ValueError("\n".join(errors))
+            raise _BoundsErrors(errors)
 
         return self
 
