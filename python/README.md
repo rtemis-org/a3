@@ -63,8 +63,8 @@ except A3ParseError as e:
 ```python
 from rtemis.a3 import read_a3json, write_a3json
 
-a3 = read_a3json("protein.json")
-write_a3json(a3, "output.json", indent=2)
+a3 = read_a3json("protein.a3.json")
+write_a3json(a3, "output.a3.json", indent=2)
 ```
 
 ## Serialization
