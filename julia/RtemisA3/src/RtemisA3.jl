@@ -1,3 +1,6 @@
+# RtemisA3.jl
+# 2026- EDG a3.rtemis.org
+
 module RtemisA3
 
 using JSON
