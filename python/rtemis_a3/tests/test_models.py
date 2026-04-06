@@ -6,10 +6,10 @@ from pydantic import ValidationError
 from rtemis.a3._models import (
     A3,
     A3Annotations,
+    A3Flex,
     A3Metadata,
-    FlexEntry,
-    RegionEntry,
-    SiteEntry,
+    A3Position,
+    A3Range,
     VariantRecord,
 )
 from rtemis.a3 import create_a3
@@ -17,119 +17,119 @@ from rtemis.a3.errors import A3ValidationError
 
 
 # ---------------------------------------------------------------------------
-# SiteEntry
+# A3Position (site)
 # ---------------------------------------------------------------------------
 
 
-class TestSiteEntry:
+class TestA3Position:
     def test_basic(self):
-        entry = SiteEntry(index=[3, 1, 5], type="activeSite")
+        entry = A3Position(index=[3, 1, 5], type="activeSite")
         assert entry.index == [1, 3, 5]  # sorted
         assert entry.type == "activeSite"
 
     def test_dedup(self):
-        entry = SiteEntry(index=[3, 3, 1])
+        entry = A3Position(index=[3, 3, 1])
         assert entry.index == [1, 3]
 
     def test_default_type(self):
-        entry = SiteEntry(index=[1, 2])
+        entry = A3Position(index=[1, 2])
         assert entry.type == ""
 
     def test_empty_index(self):
-        entry = SiteEntry(index=[])
+        entry = A3Position(index=[])
         assert entry.index == []
 
     def test_non_positive_rejected(self):
         with pytest.raises(ValidationError):
-            SiteEntry(index=[0, 1, 2])
+            A3Position(index=[0, 1, 2])
 
     def test_negative_rejected(self):
         with pytest.raises(ValidationError):
-            SiteEntry(index=[-1, 2])
+            A3Position(index=[-1, 2])
 
     def test_bool_rejected(self):
         with pytest.raises(ValidationError, match="boolean"):
-            SiteEntry(index=[True, 2])
+            A3Position(index=[True, 2])
 
     def test_frozen(self):
-        entry = SiteEntry(index=[1, 2])
+        entry = A3Position(index=[1, 2])
         with pytest.raises(ValidationError):
             entry.index = [3, 4]
 
 
 # ---------------------------------------------------------------------------
-# RegionEntry
+# A3Range (region)
 # ---------------------------------------------------------------------------
 
 
-class TestRegionEntry:
+class TestA3Range:
     def test_basic(self):
-        entry = RegionEntry(index=[(6, 10), (1, 5)], type="domain")
+        entry = A3Range(index=[(6, 10), (1, 5)], type="domain")
         assert entry.index == [(1, 5), (6, 10)]  # sorted
         assert entry.type == "domain"
 
     def test_default_type(self):
-        entry = RegionEntry(index=[(1, 5)])
+        entry = A3Range(index=[(1, 5)])
         assert entry.type == ""
 
     def test_empty_index(self):
-        entry = RegionEntry(index=[])
+        entry = A3Range(index=[])
         assert entry.index == []
 
     def test_start_equals_end_rejected(self):
         with pytest.raises(ValidationError, match="start must be less than end"):
-            RegionEntry(index=[(5, 5)])
+            A3Range(index=[(5, 5)])
 
     def test_start_greater_than_end_rejected(self):
         with pytest.raises(ValidationError, match="start must be less than end"):
-            RegionEntry(index=[(10, 5)])
+            A3Range(index=[(10, 5)])
 
     def test_overlapping_rejected(self):
         with pytest.raises(ValidationError, match="overlapping"):
-            RegionEntry(index=[(1, 5), (3, 8)])
+            A3Range(index=[(1, 5), (3, 8)])
 
     def test_adjacent_permitted(self):
-        entry = RegionEntry(index=[(1, 5), (6, 10)])
+        entry = A3Range(index=[(1, 5), (6, 10)])
         assert entry.index == [(1, 5), (6, 10)]
 
     def test_non_positive_rejected(self):
         with pytest.raises(ValidationError):
-            RegionEntry(index=[(0, 5)])
+            A3Range(index=[(0, 5)])
 
     def test_bool_rejected(self):
         with pytest.raises(ValidationError, match="boolean"):
-            RegionEntry(index=[(True, 5)])
+            A3Range(index=[(True, 5)])
 
 
 # ---------------------------------------------------------------------------
-# FlexEntry
+# A3Flex (ptm / processing)
 # ---------------------------------------------------------------------------
 
 
-class TestFlexEntry:
+class TestA3Flex:
     def test_positions(self):
-        entry = FlexEntry(index=[5, 1, 3])
+        entry = A3Flex(index=[5, 1, 3])
         assert entry.index == [1, 3, 5]
 
     def test_ranges(self):
-        entry = FlexEntry(index=[(6, 10), (1, 5)])
+        entry = A3Flex(index=[(6, 10), (1, 5)])
         assert entry.index == [(1, 5), (6, 10)]
 
     def test_empty(self):
-        entry = FlexEntry(index=[])
+        entry = A3Flex(index=[])
         assert entry.index == []
 
     def test_range_overlap_rejected(self):
         with pytest.raises(ValidationError, match="overlapping"):
-            FlexEntry(index=[(1, 5), (3, 8)])
+            A3Flex(index=[(1, 5), (3, 8)])
 
     def test_bool_position_rejected(self):
         with pytest.raises(ValidationError, match="boolean"):
-            FlexEntry(index=[True, 2])
+            A3Flex(index=[True, 2])
 
     def test_bool_range_rejected(self):
         with pytest.raises(ValidationError, match="boolean"):
-            FlexEntry(index=[(True, 5)])
+            A3Flex(index=[(True, 5)])
 
 
 # ---------------------------------------------------------------------------

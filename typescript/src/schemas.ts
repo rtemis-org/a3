@@ -38,17 +38,17 @@ const RangesSchema = z
 // PTM / Processing: either positions or ranges (never mixed within one entry).
 // Union order matters — ranges branch is tried first (more specific).
 
-const SiteEntrySchema = z.object({
+const A3PositionSchema = z.object({
   index: PositionsSchema,
   type: z.string().default(""),
 });
 
-const RegionEntrySchema = z.object({
+const A3RangeSchema = z.object({
   index: RangesSchema,
   type: z.string().default(""),
 });
 
-const FlexEntrySchema = z.object({
+const A3FlexSchema = z.object({
   index: z.union([RangesSchema, PositionsSchema]),
   type: z.string().default(""),
 });
@@ -65,10 +65,10 @@ const VariantSchema = z
 
 const AnnotationsSchema = z
   .object({
-    site: z.record(z.string().min(1), SiteEntrySchema).default({}),
-    region: z.record(z.string().min(1), RegionEntrySchema).default({}),
-    ptm: z.record(z.string().min(1), FlexEntrySchema).default({}),
-    processing: z.record(z.string().min(1), FlexEntrySchema).default({}),
+    site: z.record(z.string().min(1), A3PositionSchema).default({}),
+    region: z.record(z.string().min(1), A3RangeSchema).default({}),
+    ptm: z.record(z.string().min(1), A3FlexSchema).default({}),
+    processing: z.record(z.string().min(1), A3FlexSchema).default({}),
     variant: z.array(VariantSchema).default([]),
   })
   .strict();
@@ -161,6 +161,6 @@ export { A3_SCHEMA_URI, A3_VERSION };
 export type A3Data = z.infer<typeof A3InputSchema>;
 export type MetadataData = z.infer<typeof MetadataSchema>;
 export type VariantData = z.infer<typeof VariantSchema>;
-export type SiteEntryData = z.infer<typeof SiteEntrySchema>;
-export type RegionEntryData = z.infer<typeof RegionEntrySchema>;
-export type FlexEntryData = z.infer<typeof FlexEntrySchema>;
+export type A3PositionData = z.infer<typeof A3PositionSchema>;
+export type A3RangeData = z.infer<typeof A3RangeSchema>;
+export type A3FlexData = z.infer<typeof A3FlexSchema>;

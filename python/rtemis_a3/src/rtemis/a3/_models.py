@@ -53,8 +53,8 @@ Position = Annotated[int, BeforeValidator(_reject_bool), Field(gt=0)]
 _SEQUENCE_RE = re.compile(r"^[A-Za-z*]+$")
 
 
-class SiteEntry(BaseModel):
-    """A site annotation entry: positions + type label."""
+class A3Position(BaseModel):
+    """A position-indexed annotation entry: positions + type label."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -69,8 +69,8 @@ class SiteEntry(BaseModel):
         return sort_dedup(v)
 
 
-class RegionEntry(BaseModel):
-    """A region annotation entry: ranges + type label."""
+class A3Range(BaseModel):
+    """A range-indexed annotation entry: ranges + type label."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -109,7 +109,7 @@ class RegionEntry(BaseModel):
         return sorted_ranges
 
 
-class FlexEntry(BaseModel):
+class A3Flex(BaseModel):
     """A PTM or Processing annotation entry: positions or ranges + type label."""
 
     model_config = ConfigDict(frozen=True)
@@ -197,10 +197,10 @@ class A3Annotations(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    site: dict[str, SiteEntry] = Field(default_factory=dict)
-    region: dict[str, RegionEntry] = Field(default_factory=dict)
-    ptm: dict[str, FlexEntry] = Field(default_factory=dict)
-    processing: dict[str, FlexEntry] = Field(default_factory=dict)
+    site: dict[str, A3Position] = Field(default_factory=dict)
+    region: dict[str, A3Range] = Field(default_factory=dict)
+    ptm: dict[str, A3Flex] = Field(default_factory=dict)
+    processing: dict[str, A3Flex] = Field(default_factory=dict)
     variant: list[VariantRecord] = Field(default_factory=list)
 
     @model_validator(mode="after")
@@ -311,9 +311,9 @@ class A3(BaseModel):
 
 
 def _check_flex_bounds(
-    errors: list[str], path: str, entry: FlexEntry, seq_len: int
+    errors: list[str], path: str, entry: A3Flex, seq_len: int
 ) -> None:
-    """Check bounds for a FlexEntry (positions or ranges)."""
+    """Check bounds for an A3Flex entry (positions or ranges)."""
     for item in entry.index:
         if isinstance(item, tuple):
             start, end = item
