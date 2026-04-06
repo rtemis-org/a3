@@ -1,11 +1,7 @@
 # ─── Serialization ────────────────────────────────────────────────────────────
 
-_idx_to_json(idx::Vector{Int})            = idx
-_idx_to_json(idx::Vector{Tuple{Int,Int}}) = [collect(r) for r in idx]
-
-_to_dict(e::SiteEntry)   = Dict("index" => e.index,               "type" => e.type)
-_to_dict(e::RegionEntry) = Dict("index" => _idx_to_json(e.index), "type" => e.type)
-_to_dict(e::FlexEntry)   = Dict("index" => _idx_to_json(e.index), "type" => e.type)
+_to_dict(e::A3Position) = Dict("index" => e.index,                           "type" => e.type)
+_to_dict(e::A3Range)    = Dict("index" => [collect(r) for r in e.index],      "type" => e.type)
 
 function _to_dict(v::VariantRecord)
     d = Dict{String,Any}("position" => v.position)

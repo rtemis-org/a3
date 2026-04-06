@@ -79,19 +79,20 @@ function _parse_entry_base(raw, path::String)
     return index_raw, String(type_val)
 end
 
-function parse_site_entry(raw, path::String)::SiteEntry
+function parse_position_entry(raw, path::String)::A3Position
     ir, t = _parse_entry_base(raw, path)
-    SiteEntry(validate_positions(ir, "$path.index"), t)
+    A3Position(validate_positions(ir, "$path.index"), t)
 end
 
-function parse_region_entry(raw, path::String)::RegionEntry
+function parse_range_entry(raw, path::String)::A3Range
     ir, t = _parse_entry_base(raw, path)
-    RegionEntry(validate_ranges(ir, "$path.index"), t)
+    A3Range(validate_ranges(ir, "$path.index"), t)
 end
 
-function parse_flex_entry(raw, path::String)::FlexEntry
+function parse_flex_entry(raw, path::String)::A3Index
     ir, t = _parse_entry_base(raw, path)
-    FlexEntry(validate_flex_index(ir, "$path.index"), t)
+    idx = validate_flex_index(ir, "$path.index")
+    idx isa Vector{Tuple{Int,Int}} ? A3Range(idx, t) : A3Position(idx, t)
 end
 
 function parse_variant(raw, path::String)::VariantRecord
@@ -137,10 +138,10 @@ function parse_annotations(raw, path::String)::A3Annotations
 
     empty_dict() = Dict{String,Any}()
 
-    site       = parse_named_map(get(raw, "site",       empty_dict()), "$path.site",       parse_site_entry,   SiteEntry)
-    region     = parse_named_map(get(raw, "region",     empty_dict()), "$path.region",     parse_region_entry, RegionEntry)
-    ptm        = parse_named_map(get(raw, "ptm",        empty_dict()), "$path.ptm",        parse_flex_entry,   FlexEntry)
-    processing = parse_named_map(get(raw, "processing", empty_dict()), "$path.processing", parse_flex_entry,   FlexEntry)
+    site       = parse_named_map(get(raw, "site",       empty_dict()), "$path.site",       parse_position_entry, A3Position)
+    region     = parse_named_map(get(raw, "region",     empty_dict()), "$path.region",     parse_range_entry,   A3Range)
+    ptm        = parse_named_map(get(raw, "ptm",        empty_dict()), "$path.ptm",        parse_flex_entry,    A3Index)
+    processing = parse_named_map(get(raw, "processing", empty_dict()), "$path.processing", parse_flex_entry,    A3Index)
 
     variant_raw = get(raw, "variant", Any[])
     variant_raw isa AbstractVector ||
@@ -191,14 +192,14 @@ function validate_bounds(seq::String, annotations::A3Annotations)
         end
     end
     for (name, entry) in annotations.ptm
-        if entry.index isa Vector{Int}
+        if entry isa A3Position
             for (i, p) in enumerate(entry.index); chk(p, "annotations.ptm.$name.index[$i]"); end
         else
             for (i, r) in enumerate(entry.index); chk_range(r, "annotations.ptm.$name.index[$i]"); end
         end
     end
     for (name, entry) in annotations.processing
-        if entry.index isa Vector{Int}
+        if entry isa A3Position
             for (i, p) in enumerate(entry.index); chk(p, "annotations.processing.$name.index[$i]"); end
         else
             for (i, r) in enumerate(entry.index); chk_range(r, "annotations.processing.$name.index[$i]"); end

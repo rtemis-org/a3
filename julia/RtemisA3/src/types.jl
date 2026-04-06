@@ -5,19 +5,15 @@ struct A3Metadata
     organism::String
 end
 
-struct SiteEntry
+abstract type A3Index end
+
+struct A3Position <: A3Index
     index::Vector{Int}
     type::String
 end
 
-struct RegionEntry
+struct A3Range <: A3Index
     index::Vector{Tuple{Int,Int}}
-    type::String
-end
-
-# FlexEntry: index is either a list of positions or a list of ranges
-struct FlexEntry
-    index::Union{Vector{Int},Vector{Tuple{Int,Int}}}
     type::String
 end
 
@@ -27,10 +23,10 @@ struct VariantRecord
 end
 
 struct A3Annotations
-    site::Dict{String,SiteEntry}
-    region::Dict{String,RegionEntry}
-    ptm::Dict{String,FlexEntry}
-    processing::Dict{String,FlexEntry}
+    site::Dict{String,A3Position}
+    region::Dict{String,A3Range}
+    ptm::Dict{String,A3Index}
+    processing::Dict{String,A3Index}
     variant::Vector{VariantRecord}
 end
 
@@ -45,7 +41,6 @@ Base.:(==)(a::A3Metadata, b::A3Metadata) =
     a.uniprot_id == b.uniprot_id && a.description == b.description &&
     a.reference  == b.reference  && a.organism    == b.organism
 
-Base.:(==)(a::SiteEntry,     b::SiteEntry)     = a.index == b.index && a.type == b.type
-Base.:(==)(a::RegionEntry,   b::RegionEntry)   = a.index == b.index && a.type == b.type
-Base.:(==)(a::FlexEntry,     b::FlexEntry)     = a.index == b.index && a.type == b.type
+Base.:(==)(a::A3Position,    b::A3Position)    = a.index == b.index && a.type == b.type
+Base.:(==)(a::A3Range,       b::A3Range)       = a.index == b.index && a.type == b.type
 Base.:(==)(a::VariantRecord, b::VariantRecord) = a.position == b.position && a.extra == b.extra

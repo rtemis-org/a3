@@ -11,6 +11,9 @@ __dev/
 # Zed
 .zed/
 
+# Julia
+julia/RtemisA3/Manifest.toml
+
 # Agents
 .claude/
 CLAUDE.md

@@ -122,20 +122,21 @@ end
     a = create_a3("MAEPRQ";
         ptm = Dict("Phospho" => Dict("index" => [2, 4], "type" => ""))
     )
-    @test a.annotations.ptm["Phospho"].index isa Vector{Int}
+    @test a.annotations.ptm["Phospho"] isa A3Position
     @test a.annotations.ptm["Phospho"].index == [2, 4]
 
     # ranges
     b = create_a3("MAEPRQFEV";
         processing = Dict("Signal" => Dict("index" => [[1,5]], "type" => "signal peptide"))
     )
-    @test b.annotations.processing["Signal"].index isa Vector{Tuple{Int,Int}}
+    @test b.annotations.processing["Signal"] isa A3Range
     @test b.annotations.processing["Signal"].index == [(1,5)]
 
     # empty index
     c = create_a3("MAEPRQ";
         ptm = Dict("empty" => Dict("index" => [], "type" => ""))
     )
+    @test c.annotations.ptm["empty"] isa A3Position
     @test c.annotations.ptm["empty"].index == Int[]
 end
 
