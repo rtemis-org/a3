@@ -10,8 +10,6 @@ authors = [
 keywords = ["bioinformatics", "proteomics", "amino acid", "annotation", "protein"]
 classifiers = [
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
-    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Typing :: Typed",
