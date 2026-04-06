@@ -3,7 +3,8 @@ name = "rtemis-a3"
 version = "0.1.0"
 description = "Python implementation of the Amino Acid Annotation (A3) format"
 readme = "README.md"
-license = { text = "MPL-2.0" }
+license = "MPL-2.0"
+license-files = ["LICENSE"]
 authors = [
     { name = "E.D. Gennatas", email = "gennatas@gmail.com" }
 ]
