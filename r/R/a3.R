@@ -968,8 +968,45 @@ A3from_json <- function(x, ...) {
   sequence <- x[["sequence"]]
   annotations <- x[["annotations"]]
 
+  parse_position_index <- function(idx_data, path) {
+    idx <- as.integer(idx_data)
+    dup <- unique(idx[duplicated(idx)])
+    if (length(dup) > 0L) {
+      cli::cli_abort(
+        "Field {.field {path}} has duplicate positions: {.val {dup}}. Remove duplicates."
+      )
+    }
+
+    tryCatch(
+      A3Position(data = idx),
+      error = function(err) {
+        cli::cli_abort(
+          "Invalid position index in {.field {path}}: {conditionMessage(err)}"
+        )
+      }
+    )
+  }
+
+  parse_range_index <- function(idx_data, path) {
+    mat <- do.call(rbind, lapply(idx_data, as.integer))
+
+    tryCatch(
+      A3Range(data = mat),
+      error = function(err) {
+        cli::cli_abort(
+          "Invalid range index in {.field {path}}: {conditionMessage(err)}"
+        )
+      }
+    )
+  }
+
   # Parse a single annotation entry (canonical {index, type} form only)
-  parse_feature <- function(entry, feature_class) {
+  parse_feature <- function(
+    entry,
+    feature_class,
+    annotation_group,
+    annotation_name
+  ) {
     if (!is.list(entry) || is.null(entry[["index"]])) {
       cli::cli_abort(
         "Each annotation entry must be an object with 'index' and 'type' fields."
@@ -977,41 +1014,75 @@ A3from_json <- function(x, ...) {
     }
     idx_data <- entry[["index"]]
     type <- if (is.null(entry[["type"]])) "" else entry[["type"]]
+    index_path <- paste0(
+      "annotations.",
+      annotation_group,
+      ".",
+      annotation_name,
+      ".index"
+    )
 
     # List of 2-element vectors → range pairs; plain vector → positions
     if (is.list(idx_data)) {
-      mat <- do.call(rbind, lapply(idx_data, as.integer))
-      index <- A3Range(data = mat)
+      index <- parse_range_index(idx_data, index_path)
     } else {
-      index <- A3Position(data = as.integer(idx_data))
+      index <- parse_position_index(idx_data, index_path)
     }
 
     feature_class(index = index, type = type)
   }
 
   site <- if (!is.null(annotations[["site"]])) {
-    lapply(annotations[["site"]], parse_feature, feature_class = A3Site)
+    Map(
+      parse_feature,
+      entry = annotations[["site"]],
+      annotation_name = names(annotations[["site"]]),
+      MoreArgs = list(
+        feature_class = A3Site,
+        annotation_group = "site"
+      )
+    )
   } else {
     list()
   }
 
   region <- if (!is.null(annotations[["region"]])) {
-    lapply(annotations[["region"]], parse_feature, feature_class = A3Region)
+    Map(
+      parse_feature,
+      entry = annotations[["region"]],
+      annotation_name = names(annotations[["region"]]),
+      MoreArgs = list(
+        feature_class = A3Region,
+        annotation_group = "region"
+      )
+    )
   } else {
     list()
   }
 
   ptm <- if (!is.null(annotations[["ptm"]])) {
-    lapply(annotations[["ptm"]], parse_feature, feature_class = A3PTM)
+    Map(
+      parse_feature,
+      entry = annotations[["ptm"]],
+      annotation_name = names(annotations[["ptm"]]),
+      MoreArgs = list(
+        feature_class = A3PTM,
+        annotation_group = "ptm"
+      )
+    )
   } else {
     list()
   }
 
   processing <- if (!is.null(annotations[["processing"]])) {
-    lapply(
-      annotations[["processing"]],
+    Map(
       parse_feature,
-      feature_class = A3Processing
+      entry = annotations[["processing"]],
+      annotation_name = names(annotations[["processing"]]),
+      MoreArgs = list(
+        feature_class = A3Processing,
+        annotation_group = "processing"
+      )
     )
   } else {
     list()
@@ -1105,7 +1176,7 @@ write_A3json <- function(x, filepath, overwrite = FALSE) {
 #' write_A3json(mapt, "P10636_A3.json")
 #' mapt2 <- read_A3json("P10636_A3.json")
 #' }
-read_A3json <- function(filepath, verbosity = 0L) {
+read_A3json <- function(filepath, verbosity = 1L) {
   check_inherits(filepath, "character")
   filepath <- normalizePath(filepath)
   if (!file.exists(filepath)) {
@@ -1113,9 +1184,16 @@ read_A3json <- function(filepath, verbosity = 0L) {
   }
   json_str <- paste(readLines(filepath, warn = FALSE), collapse = "\n")
   obj <- A3from_json(json_str)
-  if (verbosity > 0) {
-    cat("Read ", filepath, ":\n", sep = "")
-    print(obj)
+  if (verbosity > 0L) {
+    msg(
+      "Read ",
+      basename(filepath),
+      ": ",
+      green("\u2714 "),
+      "valid A3 ",
+      .A3_VERSION,
+      sep = ""
+    )
   }
   obj
 }
