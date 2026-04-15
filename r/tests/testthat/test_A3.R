@@ -614,6 +614,31 @@ test_that("A3from_json rejects missing metadata", {
   expect_error(A3from_json(json), "metadata")
 })
 
+test_that("A3from_json reports duplicate positions with annotation path", {
+  json <- '{
+    "$schema": "https://schema.rtemis.org/a3/v1/schema.json",
+    "a3_version": "1.0.0",
+    "sequence": "MKTAYIAKQRQISFVK",
+    "annotations": {
+      "site": {},
+      "region": {},
+      "ptm": {
+        "Phosphorylation": {
+          "index": [7, 9, 7],
+          "type": ""
+        }
+      },
+      "processing": {},
+      "variant": []
+    },
+    "metadata": {}
+  }'
+  expect_error(
+    A3from_json(json),
+    "annotations\\.ptm\\.Phosphorylation\\.index.*duplicate positions.*7"
+  )
+})
+
 test_that("A3from_json accepts pre-parsed list", {
   lst <- list(
     `$schema` = "https://schema.rtemis.org/a3/v1/schema.json",
@@ -634,4 +659,21 @@ test_that("A3from_json accepts pre-parsed list", {
   expect_s7_class(x, A3)
   expect_identical(x@annotations@site$`Active site`@type, "activeSite")
   expect_identical(x@metadata@uniprot_id, "P12345")
+})
+
+test_that("read_A3json reports valid A3 version", {
+  x <- create_A3(
+    sequence = "MKTAYIAKQRQISFVK",
+    site = list(
+      `Active site` = annotation_position(c(3, 5), type = "activeSite")
+    ),
+    uniprot_id = "P12345"
+  )
+  filepath <- tempfile(fileext = ".json")
+  write_A3json(x, filepath, overwrite = TRUE)
+
+  expect_message(
+    read_A3json(filepath, verbosity = 1L),
+    "valid A3 1\\.0\\.0"
+  )
 })
