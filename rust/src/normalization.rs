@@ -13,38 +13,27 @@
 /// Steps, in order:
 /// 1. Reject any position that is zero (positions are 1-based).
 /// 2. Sort ascending.
-/// 3. Remove duplicates.
+/// 3. Reject duplicate positions.
 ///
 /// Returns `Ok(Vec<u32>)` on success, or `Err(String)` describing the problem.
-///
-/// In Rust, `Result<T, E>` is the standard return type for fallible operations.
-/// `Ok(value)` means success; `Err(message)` means failure. The caller decides
-/// what to do — there are no exceptions.
 ///
 /// The `field` parameter is the dot-separated JSON path (e.g.
 /// `"annotations.site.catalytic"`) used in error messages so the caller
 /// knows exactly where the problem is.
 pub fn normalize_positions(positions: Vec<u32>, field: &str) -> Result<Vec<u32>, String> {
-    // Check for zero values before sorting so we can report them clearly.
-    // `.any()` short-circuits on the first match and allocates nothing —
-    // more idiomatic and efficient than collecting into a Vec just to check
-    // `.is_empty()`.
     if positions.contains(&0) {
         return Err(format!(
             "{field}: positions must be ≥ 1 (1-based); found zero"
         ));
     }
 
-    // `mut` makes the binding mutable — Rust variables are immutable by default.
     let mut sorted = positions;
-
-    // Sort in-place. `.sort_unstable()` is slightly faster than `.sort()` and
-    // fine here because we deduplicate immediately after.
     sorted.sort_unstable();
 
-    // Remove consecutive duplicates. `dedup()` only removes *adjacent* equal
-    // values, which is why we sort first.
-    sorted.dedup();
+    // Reject duplicates — adjacent after sorting.
+    if let Some(dup) = sorted.windows(2).find(|w| w[0] == w[1]) {
+        return Err(format!("{field}: duplicate position: {}", dup[0]));
+    }
 
     Ok(sorted)
 }
@@ -157,9 +146,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn positions_sorted_and_deduped() {
-        let result = normalize_positions(vec![3, 1, 2, 1], "test").unwrap();
+    fn positions_sorted() {
+        let result = normalize_positions(vec![3, 1, 2], "test").unwrap();
         assert_eq!(result, vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn positions_rejects_duplicates() {
+        assert!(normalize_positions(vec![3, 1, 2, 1], "test").is_err());
     }
 
     #[test]

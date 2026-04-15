@@ -11,6 +11,7 @@ parse_err(f) = begin e = err(f); @test e isa A3ParseError; e end
 # ─── Normalization ────────────────────────────────────────────────────────────
 
 @testset "sort_dedup" begin
+    # sort_dedup is a normalization utility (future clean API), not a validator
     @test sort_dedup([3, 1, 2, 2, 1]) == [1, 2, 3]
     @test sort_dedup(Int[]) == Int[]
     @test sort_dedup([5]) == [5]
@@ -64,9 +65,14 @@ end
 
 @testset "site entries" begin
     a = create_a3("MAEPRQ";
-        site = Dict("test" => Dict("index" => [3, 1, 2, 2], "type" => ""))
+        site = Dict("test" => Dict("index" => [3, 1, 2], "type" => ""))
     )
-    @test a.annotations.site["test"].index == [1, 2, 3]  # sorted + deduped
+    @test a.annotations.site["test"].index == [1, 2, 3]  # sorted
+
+    # duplicate positions rejected
+    val_err(() -> create_a3("MAEPRQ";
+        site = Dict("test" => Dict("index" => [3, 1, 2, 2], "type" => ""))
+    ))
 
     # out of bounds
     val_err(() -> create_a3("MAEPRQ";

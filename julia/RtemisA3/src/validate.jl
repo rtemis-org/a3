@@ -24,7 +24,12 @@ function validate_positions(raw::AbstractVector, path::String)::Vector{Int}
             throw(A3ValidationError("$path[$i]: position $v must be >= 1"))
         push!(positions, Int(v))
     end
-    return sort_dedup(positions)
+    sorted = sort(positions)
+    for (prev, curr) in zip(sorted, @view sorted[2:end])
+        prev == curr &&
+            throw(A3ValidationError("$path: duplicate position $curr"))
+    end
+    return sorted
 end
 
 function validate_ranges(raw::AbstractVector, path::String)::Vector{Tuple{Int,Int}}
