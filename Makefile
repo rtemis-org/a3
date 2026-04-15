@@ -1,7 +1,14 @@
-.PHONY: test test-r test-python test-typescript test-julia test-rust \
+.PHONY: install-r \
+				test test-r test-python test-typescript test-julia test-rust \
         docs docs-r docs-python docs-typescript docs-julia docs-rust
 
-# ── Tests ──────────────────────────────────────────────────────────────────────
+# ── Install ──────────────────────────────────────────────────────────────────
+
+install-r:
+	@echo "==> R"
+	cd r && Rscript -e "pak::local_install()"
+
+# ── Test ─────────────────────────────────────────────────────────────────────
 
 test-r:
 	@echo "==> R"
@@ -40,7 +47,7 @@ test:
 	echo "─────────────────────────────────────────────────────"; \
 	[ $$((r+p+ts+jl+rs)) -eq 0 ]
 
-# ── Docs ───────────────────────────────────────────────────────────────────────
+# ── Document ─────────────────────────────────────────────────────────────────
 
 docs-r:
 	@echo "==> R"
