@@ -1,12 +1,45 @@
-.PHONY: install-r \
+.PHONY: format format-r format-python format-typescript format-julia format-rust \
+				document document-r \
+				docs docs-r docs-python docs-typescript docs-julia docs-rust \
+				install-r install-rust \
 				test test-r test-python test-typescript test-julia test-rust \
-        docs docs-r docs-python docs-typescript docs-julia docs-rust
+        
+
+# ── Format ───────────────────────────────────────────────────────────────────
+format: format-r format-python format-typescript format-julia format-rust
+
+format-r:
+	@echo "==> R: Formatting rtemis.a3"
+	cd r && air format .
+
+format-python:
+	@echo "==> Python: Formatting rtemis-a3"
+	ruff format python
+
+format-julia:
+	@echo "==> Julia: Formatting RtemisA3"
+	julia --project=julia/__dev -m JuliaFormatter --inplace julia/RtemisA3
+
+format-typescript:
+	@echo "==> TypeScript: Formatting rtemis-a3"
+	cd typescript && pnpm format:write
+
+format-rust:
+	@echo "==> Rust: Formatting rtemis-a3"
+	cd rust && cargo fmt
 
 # ── Document ─────────────────────────────────────────────────────────────────
+document: document-r
+
+document-r:
+	@echo "==> R"
+	cd r && Rscript -e "devtools::document()"
+
+# ── Docs Site ────────────────────────────────────────────────────────────────
 
 docs-r:
 	@echo "==> R"
-	cd r && Rscript -e "devtools::document()"
+	cd r && Rscript -e "pkgdown::build_site()"
 
 docs-python:
 	@echo "==> Python"
@@ -46,6 +79,10 @@ docs:
 install-r:
 	@echo "==> R"
 	cd r && Rscript -e "pak::local_install()"
+
+install-rust:
+	@echo "==> Rust"
+	cd rust && cargo install --path .
 
 # ── Test ─────────────────────────────────────────────────────────────────────
 
