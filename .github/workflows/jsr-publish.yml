@@ -10,8 +10,16 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    defaults:
+      run:
+        working-directory: typescript
     steps:
       - uses: actions/checkout@v6
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+          cache: true
+      - name: Install dependencies
+        run: deno install --frozen
       - name: Publish package
-        working-directory: typescript
-        run: npx jsr publish
+        run: deno publish
