@@ -44,6 +44,13 @@ def check_no_duplicate_positions(values: list[int]) -> list[int]:
     ValueError
         If any position appears more than once.
     """
+    for item in values:
+        if isinstance(item, bool):
+            raise ValueError("boolean values are not valid positions")
+        if not isinstance(item, int):
+            raise ValueError(
+                f"index must be a list of positive integers, got {type(item).__name__!r}"
+            )
     sorted_v = sorted(values)
     for i in range(1, len(sorted_v)):
         if sorted_v[i] == sorted_v[i - 1]:
