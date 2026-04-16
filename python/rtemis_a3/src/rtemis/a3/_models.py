@@ -101,8 +101,7 @@ class A3Range(BaseModel):
                 coerced.append((s, e))
             else:
                 raise ValueError(
-                    f"each range must be a 2-element [start, end] pair, "
-                    f"got {item!r}"
+                    f"each range must be a 2-element [start, end] pair, got {item!r}"
                 )
         sorted_ranges = sort_ranges(coerced)
         check_no_overlap(sorted_ranges)
@@ -158,9 +157,7 @@ class A3Flex(BaseModel):
             # Positions path
             for item in v:
                 if isinstance(item, bool) or not isinstance(item, int):
-                    raise ValueError(
-                        "cannot mix integers and non-integers in index"
-                    )
+                    raise ValueError("cannot mix integers and non-integers in index")
             return check_no_duplicate_positions(v)
         else:
             raise ValueError(
@@ -242,14 +239,10 @@ class A3(BaseModel):
         if not isinstance(v, str):
             raise ValueError("sequence must be a string")
         if len(v) < 2:
-            raise ValueError(
-                f"sequence must be at least 2 characters, got {len(v)}"
-            )
+            raise ValueError(f"sequence must be at least 2 characters, got {len(v)}")
         if not _SEQUENCE_RE.match(v):
             invalid = set(re.findall(r"[^A-Za-z*]", v))
-            raise ValueError(
-                f"sequence contains invalid characters: {invalid}"
-            )
+            raise ValueError(f"sequence contains invalid characters: {invalid}")
         return v.upper()
 
     @model_validator(mode="after")
@@ -291,9 +284,7 @@ class A3(BaseModel):
 
         # Processing (positions or ranges)
         for name, entry in self.annotations.processing.items():
-            _check_flex_bounds(
-                errors, f"annotations.processing.{name}", entry, seq_len
-            )
+            _check_flex_bounds(errors, f"annotations.processing.{name}", entry, seq_len)
 
         # Variant positions
         for i, variant in enumerate(self.annotations.variant):

@@ -273,7 +273,10 @@ class TestA3:
         with pytest.raises(A3ValidationError) as exc_info:
             create_a3(
                 "MAEPRQ",
-                site={"s1": {"index": [99], "type": ""}, "s2": {"index": [100], "type": ""}},
+                site={
+                    "s1": {"index": [99], "type": ""},
+                    "s2": {"index": [100], "type": ""},
+                },
                 variant=[{"position": 88}],
             )
         err = exc_info.value

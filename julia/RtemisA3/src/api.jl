@@ -7,26 +7,26 @@ All annotation values use the same wire format as JSON: e.g.
 """
 function create_a3(
     sequence;
-    site       = nothing,
-    region     = nothing,
-    ptm        = nothing,
+    site = nothing,
+    region = nothing,
+    ptm = nothing,
     processing = nothing,
-    variant    = nothing,
-    metadata   = nothing,
+    variant = nothing,
+    metadata = nothing,
 )::A3
     annot = Dict{String,Any}()
-    site       !== nothing && (annot["site"]       = site)
-    region     !== nothing && (annot["region"]     = region)
-    ptm        !== nothing && (annot["ptm"]        = ptm)
+    site !== nothing && (annot["site"] = site)
+    region !== nothing && (annot["region"] = region)
+    ptm !== nothing && (annot["ptm"] = ptm)
     processing !== nothing && (annot["processing"] = processing)
-    variant    !== nothing && (annot["variant"]    = variant)
+    variant !== nothing && (annot["variant"] = variant)
 
     raw = Dict{String,Any}(
-        "\$schema"    => _A3_SCHEMA_URI,
-        "a3_version"  => _A3_VERSION,
-        "sequence"    => sequence,
+        "\$schema" => _A3_SCHEMA_URI,
+        "a3_version" => _A3_VERSION,
+        "sequence" => sequence,
         "annotations" => annot,
-        "metadata"    => metadata !== nothing ? metadata : Dict{String,Any}(),
+        "metadata" => metadata !== nothing ? metadata : Dict{String,Any}(),
     )
     A3(raw)
 end

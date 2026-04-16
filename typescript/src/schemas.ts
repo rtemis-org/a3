@@ -1,6 +1,56 @@
 import { z } from "zod";
 import { isJsonCompatible, sortRanges } from "./normalize";
 
+// ── Envelope constants ────────────────────────────────────────────────────────
+
+const A3_SCHEMA_URI = "https://schema.rtemis.org/a3/v1/schema.json";
+const A3_VERSION = "1.0.0";
+
+export { A3_SCHEMA_URI, A3_VERSION };
+
+// ── Exported TypeScript interfaces ────────────────────────────────────────────
+
+export interface MetadataData {
+  uniprot_id: string;
+  description: string;
+  reference: string;
+  organism: string;
+}
+
+export interface VariantData {
+  position: number;
+  [key: string]: unknown;
+}
+
+export interface A3PositionData {
+  index: number[];
+  type: string;
+}
+
+export interface A3RangeData {
+  index: [number, number][];
+  type: string;
+}
+
+export interface A3FlexData {
+  index: number[] | [number, number][];
+  type: string;
+}
+
+export interface A3Data {
+  $schema: typeof A3_SCHEMA_URI;
+  a3_version: typeof A3_VERSION;
+  sequence: string;
+  annotations: {
+    site: Record<string, A3PositionData>;
+    region: Record<string, A3RangeData>;
+    ptm: Record<string, A3FlexData>;
+    processing: Record<string, A3FlexData>;
+    variant: VariantData[];
+  };
+  metadata: MetadataData;
+}
+
 // ── Primitives ────────────────────────────────────────────────────────────────
 
 // 1-based positive integer position
@@ -14,7 +64,7 @@ const PositionsSchema = z
     for (let i = 1; i < sorted.length; i++) {
       if (sorted[i] === sorted[i - 1]) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: `duplicate position: ${sorted[i]}`,
         });
       }
@@ -35,7 +85,7 @@ const RangesSchema = z
     for (const curr of ranges) {
       if (prev !== undefined && curr[0] <= prev[1]) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: `ranges [${prev[0]},${prev[1]}] and [${curr[0]},${curr[1]}] overlap`,
         });
       }
@@ -96,14 +146,9 @@ const MetadataSchema = z
   })
   .strict();
 
-// ── Envelope constants ────────────────────────────────────────────────────────
-
-const A3_SCHEMA_URI = "https://schema.rtemis.org/a3/v1/schema.json";
-const A3_VERSION = "1.0.0";
-
 // ── Root schema ───────────────────────────────────────────────────────────────
 
-export const A3InputSchema = z
+export const A3InputSchema: z.ZodType<A3Data> = z
   .object({
     $schema: z.literal(A3_SCHEMA_URI, {
       error: () => ({ message: `'$schema' must be '${A3_SCHEMA_URI}'` }),
@@ -127,8 +172,7 @@ export const A3InputSchema = z
       `position ${pos} is out of bounds for sequence of length ${len} (must be 1–${len})`;
 
     const checkPos = (pos: number, path: (string | number)[]) => {
-      if (pos < 1 || pos > len)
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: boundsMsg(pos), path });
+      if (pos < 1 || pos > len) ctx.addIssue({ code: "custom", message: boundsMsg(pos), path });
     };
 
     const checkIndex = (index: number[] | [number, number][], basePath: (string | number)[]) => {
@@ -164,15 +208,4 @@ export const A3InputSchema = z
     data.annotations.variant.forEach((v, i) => {
       checkPos(v.position, ["annotations", "variant", i, "position"]);
     });
-  });
-
-export { A3_SCHEMA_URI, A3_VERSION };
-
-// ── Exported types (inferred from schemas) ────────────────────────────────────
-
-export type A3Data = z.infer<typeof A3InputSchema>;
-export type MetadataData = z.infer<typeof MetadataSchema>;
-export type VariantData = z.infer<typeof VariantSchema>;
-export type A3PositionData = z.infer<typeof A3PositionSchema>;
-export type A3RangeData = z.infer<typeof A3RangeSchema>;
-export type A3FlexData = z.infer<typeof A3FlexSchema>;
+  }) as z.ZodType<A3Data>;

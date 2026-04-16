@@ -25,7 +25,7 @@ Amino Acid Annotation (A3) format — Rust implementation design.
 
 // Annotation entry types
 SiteEntry
-  index: Vec<u32>           // sorted ascending, deduplicated
+  index: Vec<u32>           // sorted ascending; duplicates rejected
   kind:  String             // JSON key: "type" (reserved in Rust); default ""
 
 RegionEntry
@@ -67,7 +67,7 @@ A3  (#[serde(deny_unknown_fields)])
 
 ### `SiteEntry`
 
-- `index`: normalized by `normalize_positions` — sorted ascending, deduplicated, all values ≥ 1.
+- `index`: normalized by `normalize_positions` — sorted ascending; duplicates rejected; all values ≥ 1.
 - `kind`: field name for the JSON `"type"` key (`#[serde(rename = "type", default)]`).
   `String::default()` is `""`, so absent `"type"` keys deserialize to `""`.
 
@@ -115,7 +115,7 @@ dot-separated JSON path used in error messages (e.g. `"annotations.site.catalyti
 normalize_positions(positions: Vec<u32>, field: &str) -> Result<Vec<u32>, String>
 // 1. Reject any position == 0 (positions are 1-based)
 // 2. Sort ascending (sort_unstable)
-// 3. Remove consecutive duplicates (dedup)
+// 3. Reject any consecutive duplicates
 
 normalize_ranges(ranges: Vec<[u32; 2]>, field: &str) -> Result<Vec<[u32; 2]>, String>
 // 1. Reject any endpoint == 0

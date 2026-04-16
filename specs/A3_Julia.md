@@ -28,7 +28,7 @@ struct A3Metadata
 end
 
 struct SiteEntry
-    index::Vector{Int}               # sorted, deduplicated positions
+    index::Vector{Int}               # sorted positions; duplicates rejected
     type::String                     # default ""
 end
 
@@ -70,8 +70,8 @@ all entry types because Julia's default `==` for structs with mutable fields
 
 ### `SiteEntry`
 
-- `index`: validated by `validate_positions` — checks all elements are positive
-  integers, then calls `sort_dedup()`.
+- `index`: validated by `validate_positions` — checks all elements are positive integers,
+  sorts ascending, then rejects any duplicate (throws `A3ValidationError`).
 - `type`: string, defaults to `""`.
 
 ### `RegionEntry`
@@ -121,7 +121,8 @@ Pure functions used inside validators:
 
 ```julia
 sort_dedup(v::Vector{Int}) -> Vector{Int}
-# Deduplicate and sort ascending: sort(unique(v))
+# Deduplicate and sort ascending: sort(unique(v)).
+# Utility for a future lenient/clean API — not called by validators.
 
 sort_ranges(v::Vector{Tuple{Int,Int}}) -> Vector{Tuple{Int,Int}}
 # Sort by start, then end for ties. No merging.

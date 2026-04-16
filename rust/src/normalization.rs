@@ -4,7 +4,7 @@
 //! or an error string describing exactly what is wrong. No side effects.
 //!
 //! Normalization rules (from the A3 spec):
-//! - Positions: sorted ascending, duplicates removed, all values ≥ 1
+//! - Positions: sorted ascending, duplicates rejected, all values ≥ 1
 //! - Ranges: sorted by start position, all values ≥ 1, each start < end,
 //!   no overlapping pairs
 

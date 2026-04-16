@@ -7,4 +7,4 @@ struct A3ParseError <: Exception
 end
 
 Base.showerror(io::IO, e::A3ValidationError) = print(io, "A3ValidationError: ", e.msg)
-Base.showerror(io::IO, e::A3ParseError)      = print(io, "A3ParseError: ", e.msg)
+Base.showerror(io::IO, e::A3ParseError) = print(io, "A3ParseError: ", e.msg)
