@@ -80,7 +80,7 @@ const MetadataSchema = z
   })
   .strict();
 
-export const A3InputSchema: z.ZodType<A3Data> = z
+const A3InputSchema: z.ZodType<A3Data> = z
   .object({
     $schema: z.literal(A3_SCHEMA_URI, {
       error: () => ({ message: `'$schema' must be '${A3_SCHEMA_URI}'` }),

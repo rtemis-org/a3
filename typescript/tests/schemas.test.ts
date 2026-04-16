@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { A3InputSchema } from "../src/a3";
-import { A3_SCHEMA_URI, A3_VERSION } from "../src/schemas";
+import { A3, A3ValidationError } from "../src/a3";
+import { A3_SCHEMA_URI, A3_VERSION, type A3Data } from "../src/schemas";
 
 const MINIMAL_VALID = {
   $schema: A3_SCHEMA_URI,
@@ -10,43 +10,58 @@ const MINIMAL_VALID = {
   metadata: { uniprot_id: "", description: "", reference: "", organism: "" },
 };
 
+type SafeParseResult =
+  | { success: true; data: A3Data }
+  | { success: false; error: A3ValidationError };
+
+const safeParseA3 = (input: unknown): SafeParseResult => {
+  try {
+    return { success: true, data: A3.fromData(input).toData() };
+  } catch (error) {
+    if (error instanceof A3ValidationError) {
+      return { success: false, error };
+    }
+    throw error;
+  }
+};
+
 describe("sequence validation", () => {
   it("accepts valid uppercase sequence", () => {
-    const result = A3InputSchema.safeParse(MINIMAL_VALID);
+    const result = safeParseA3(MINIMAL_VALID);
     expect(result.success).toBe(true);
     if (result.success) expect(result.data.sequence).toBe("MKTAYIAKQR");
   });
 
   it("uppercases lowercase input", () => {
-    const result = A3InputSchema.safeParse({ ...MINIMAL_VALID, sequence: "mktayiakqr" });
+    const result = safeParseA3({ ...MINIMAL_VALID, sequence: "mktayiakqr" });
     expect(result.success).toBe(true);
     if (result.success) expect(result.data.sequence).toBe("MKTAYIAKQR");
   });
 
   it("accepts sequence with stop codon *", () => {
-    const result = A3InputSchema.safeParse({ ...MINIMAL_VALID, sequence: "MKTAY*" });
+    const result = safeParseA3({ ...MINIMAL_VALID, sequence: "MKTAY*" });
     expect(result.success).toBe(true);
   });
 
   it("rejects sequence shorter than 2 characters", () => {
-    const result = A3InputSchema.safeParse({ ...MINIMAL_VALID, sequence: "M" });
+    const result = safeParseA3({ ...MINIMAL_VALID, sequence: "M" });
     expect(result.success).toBe(false);
   });
 
   it("rejects sequence with invalid characters", () => {
-    const result = A3InputSchema.safeParse({ ...MINIMAL_VALID, sequence: "MKT123" });
+    const result = safeParseA3({ ...MINIMAL_VALID, sequence: "MKT123" });
     expect(result.success).toBe(false);
   });
 
   it("rejects legacy character array sequence", () => {
-    const result = A3InputSchema.safeParse({ ...MINIMAL_VALID, sequence: ["M", "K", "T"] });
+    const result = safeParseA3({ ...MINIMAL_VALID, sequence: ["M", "K", "T"] });
     expect(result.success).toBe(false);
   });
 });
 
 describe("annotation validation", () => {
   it("rejects unknown annotation family key", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: { ...MINIMAL_VALID.annotations, unknownFamily: {} },
     });
@@ -54,7 +69,7 @@ describe("annotation validation", () => {
   });
 
   it("rejects empty annotation name", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -65,7 +80,7 @@ describe("annotation validation", () => {
   });
 
   it("rejects missing annotations object", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       $schema: A3_SCHEMA_URI,
       a3_version: A3_VERSION,
       sequence: "MKTAYIAKQR",
@@ -75,7 +90,7 @@ describe("annotation validation", () => {
   });
 
   it("accepts empty annotations object and defaults families to empty", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       $schema: A3_SCHEMA_URI,
       a3_version: A3_VERSION,
       sequence: "MKTAYIAKQR",
@@ -90,7 +105,7 @@ describe("annotation validation", () => {
   });
 
   it("accepts site entry in canonical {index, type} form", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -106,7 +121,7 @@ describe("annotation validation", () => {
   });
 
   it("rejects legacy bare array (not wrapped in {index, type})", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -117,7 +132,7 @@ describe("annotation validation", () => {
   });
 
   it("accepts region entry in canonical {index, type} form", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -142,7 +157,7 @@ describe("annotation validation", () => {
   });
 
   it("rejects overlapping ranges", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -161,7 +176,7 @@ describe("annotation validation", () => {
   });
 
   it("rejects legacy bare range array (not wrapped in {index, type})", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -172,7 +187,7 @@ describe("annotation validation", () => {
   });
 
   it("rejects degenerate range with start == end", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -183,7 +198,7 @@ describe("annotation validation", () => {
   });
 
   it("rejects region range with start > end", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -194,7 +209,7 @@ describe("annotation validation", () => {
   });
 
   it("accepts ptm entry with positions", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -205,7 +220,7 @@ describe("annotation validation", () => {
   });
 
   it("accepts ptm entry with ranges", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -219,7 +234,7 @@ describe("annotation validation", () => {
   });
 
   it("rejects position zero", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -230,7 +245,7 @@ describe("annotation validation", () => {
   });
 
   it("rejects position exceeding sequence length", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       sequence: "MKTAY",
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -241,7 +256,7 @@ describe("annotation validation", () => {
   });
 
   it("sorts positions", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -255,7 +270,7 @@ describe("annotation validation", () => {
   });
 
   it("rejects duplicate positions", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -268,7 +283,7 @@ describe("annotation validation", () => {
 
 describe("variant validation", () => {
   it("accepts variant with position and extra fields", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -282,7 +297,7 @@ describe("variant validation", () => {
   });
 
   it("rejects variant missing position", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -293,7 +308,7 @@ describe("variant validation", () => {
   });
 
   it("rejects variant with non-JSON-compatible metadata", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: {
         ...MINIMAL_VALID.annotations,
@@ -304,7 +319,7 @@ describe("variant validation", () => {
   });
 
   it("rejects legacy variant: {} (must be an array)", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       ...MINIMAL_VALID,
       annotations: { ...MINIMAL_VALID.annotations, variant: {} },
     });
@@ -314,7 +329,7 @@ describe("variant validation", () => {
 
 describe("metadata validation", () => {
   it("rejects missing metadata object", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       $schema: A3_SCHEMA_URI,
       a3_version: A3_VERSION,
       sequence: "MKTAY",
@@ -324,7 +339,7 @@ describe("metadata validation", () => {
   });
 
   it("defaults all metadata fields to empty string when metadata is {}", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       $schema: A3_SCHEMA_URI,
       a3_version: A3_VERSION,
       sequence: "MKTAY",
@@ -343,7 +358,7 @@ describe("metadata validation", () => {
   });
 
   it("accepts partial metadata", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       $schema: A3_SCHEMA_URI,
       a3_version: A3_VERSION,
       sequence: "MKTAY",
@@ -358,7 +373,7 @@ describe("metadata validation", () => {
   });
 
   it("rejects unknown metadata keys", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       sequence: "MKTAY",
       metadata: { uniprot_id: "P10636", unknown_key: "value" },
     });
@@ -366,7 +381,7 @@ describe("metadata validation", () => {
   });
 
   it("rejects legacy top-level metadata fields (must be inside metadata object)", () => {
-    const result = A3InputSchema.safeParse({
+    const result = safeParseA3({
       sequence: "MKTAY",
       uniprot_id: "P10636",
       description: "Test protein",
@@ -377,7 +392,7 @@ describe("metadata validation", () => {
 
 describe("top-level strictness", () => {
   it("rejects unknown top-level keys", () => {
-    const result = A3InputSchema.safeParse({ ...MINIMAL_VALID, extra: "value" });
+    const result = safeParseA3({ ...MINIMAL_VALID, extra: "value" });
     expect(result.success).toBe(false);
   });
 });
