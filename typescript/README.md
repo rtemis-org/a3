@@ -63,7 +63,7 @@ try {
 }
 ```
 
-## File I/O (Node.js)
+## File I/O (Node.js / Deno / Bun)
 
 ```ts
 import { readJSON, writeJSON } from "@rtemis/a3"
@@ -71,6 +71,18 @@ import { readJSON, writeJSON } from "@rtemis/a3"
 const a3 = await readJSON("./protein.json")
 await writeJSON(a3, "./output.json")
 ```
+
+## Browser and Edge Environments
+
+The default entry point includes `readJSON`/`writeJSON`, which depend on
+`node:fs/promises`. For browsers, Cloudflare Workers, and other environments
+without filesystem access, use the `./browser` subpath instead:
+
+```ts
+import { A3, A3ValidationError } from "@rtemis/a3/browser"
+```
+
+Everything except the file I/O functions is available.
 
 ## Wire Format
 
@@ -95,8 +107,9 @@ await writeJSON(a3, "./output.json")
 
 All five annotation families are always present in output. Each annotation
 entry is `{ index, type }` — bare arrays are rejected. Positions are
-1-based, sorted, and deduplicated. Ranges are `[start, end]` pairs
-(`start < end`), sorted by start; overlapping ranges are rejected.
+1-based and sorted ascending; duplicate positions are rejected. Ranges are
+`[start, end]` pairs (`start < end`), sorted by start; overlapping ranges
+are rejected.
 
 ## API
 
@@ -140,9 +153,9 @@ import type {
   A3Data,
   MetadataData,
   VariantData,
-  SiteEntryData,
-  RegionEntryData,
-  FlexEntryData,
+  A3PositionData,
+  A3RangeData,
+  A3FlexData,
 } from "@rtemis/a3"
 ```
 
