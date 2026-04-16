@@ -4,7 +4,7 @@
 \alias{read_A3json}
 \title{Read \code{A3} object from JSON file}
 \usage{
-read_A3json(filepath, verbosity = 0L)
+read_A3json(filepath, verbosity = 1L)
 }
 \arguments{
 \item{filepath}{Character: Path to JSON file.}

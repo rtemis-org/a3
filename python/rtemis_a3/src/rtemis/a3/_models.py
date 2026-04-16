@@ -19,9 +19,9 @@ from pydantic import (
 from pydantic.functional_validators import BeforeValidator
 
 from ._normalize import (
+    check_no_duplicate_positions,
     check_no_overlap,
     is_json_compatible,
-    sort_dedup,
     sort_ranges,
 )
 
@@ -66,7 +66,7 @@ class A3Position(BaseModel):
     def _normalize_positions(cls, v: Any) -> list[int]:
         if not isinstance(v, list):
             raise ValueError("index must be a list of positive integers")
-        return sort_dedup(v)
+        return check_no_duplicate_positions(v)
 
 
 class A3Range(BaseModel):
@@ -161,7 +161,7 @@ class A3Flex(BaseModel):
                     raise ValueError(
                         "cannot mix integers and non-integers in index"
                     )
-            return sort_dedup(v)
+            return check_no_duplicate_positions(v)
         else:
             raise ValueError(
                 f"index elements must be integers or [start, end] pairs, "

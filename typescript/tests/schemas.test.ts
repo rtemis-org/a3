@@ -239,7 +239,21 @@ describe("annotation validation", () => {
     expect(result.success).toBe(false);
   });
 
-  it("deduplicates and sorts positions", () => {
+  it("sorts positions", () => {
+    const result = A3InputSchema.safeParse({
+      ...MINIMAL_VALID,
+      annotations: {
+        ...MINIMAL_VALID.annotations,
+        site: { A: { index: [3, 1, 2], type: "" } },
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.annotations.site.A?.index).toEqual([1, 2, 3]);
+    }
+  });
+
+  it("rejects duplicate positions", () => {
     const result = A3InputSchema.safeParse({
       ...MINIMAL_VALID,
       annotations: {
@@ -247,10 +261,7 @@ describe("annotation validation", () => {
         site: { A: { index: [3, 1, 3, 2], type: "" } },
       },
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.annotations.site.A?.index).toEqual([1, 2, 3]);
-    }
+    expect(result.success).toBe(false);
   });
 });
 

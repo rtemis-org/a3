@@ -1,13 +1,25 @@
 import { z } from "zod";
-import { isJsonCompatible, sortDedup, sortRanges } from "./normalize";
+import { isJsonCompatible, sortRanges } from "./normalize";
 
 // ── Primitives ────────────────────────────────────────────────────────────────
 
 // 1-based positive integer position
 const PositionSchema = z.number().int().min(1);
 
-// Sorted, deduplicated array of positions
-const PositionsSchema = z.array(PositionSchema).transform(sortDedup);
+// Sorted array of positions; duplicate positions are rejected
+const PositionsSchema = z
+  .array(PositionSchema)
+  .transform((arr) => [...arr].sort((a, b) => a - b))
+  .superRefine((sorted, ctx) => {
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i] === sorted[i - 1]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `duplicate position: ${sorted[i]}`,
+        });
+      }
+    }
+  });
 
 // Inclusive [start, end] range tuple, start < end
 const RangeTupleSchema = z

@@ -27,9 +27,9 @@ class TestA3Position:
         assert entry.index == [1, 3, 5]  # sorted
         assert entry.type == "activeSite"
 
-    def test_dedup(self):
-        entry = A3Position(index=[3, 3, 1])
-        assert entry.index == [1, 3]
+    def test_duplicate_positions_rejected(self):
+        with pytest.raises(ValidationError, match="duplicate position"):
+            A3Position(index=[3, 3, 1])
 
     def test_default_type(self):
         entry = A3Position(index=[1, 2])

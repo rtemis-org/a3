@@ -10,6 +10,9 @@ from __future__ import annotations
 def sort_dedup(values: list[int]) -> list[int]:
     """Deduplicate and sort ascending.
 
+    Intended for use by a future ``clean``/``normalize`` API.
+    Strict parsers should use :func:`check_no_duplicate_positions` instead.
+
     Parameters
     ----------
     values : list[int]
@@ -21,6 +24,38 @@ def sort_dedup(values: list[int]) -> list[int]:
         Sorted list with duplicates removed.
     """
     return sorted(set(values))
+
+
+def check_no_duplicate_positions(values: list[int]) -> list[int]:
+    """Sort positions ascending and raise if any value appears more than once.
+
+    Parameters
+    ----------
+    values : list[int]
+        List of integers (expected positive).
+
+    Returns
+    -------
+    list[int]
+        Sorted list, guaranteed unique.
+
+    Raises
+    ------
+    ValueError
+        If any position appears more than once.
+    """
+    for item in values:
+        if isinstance(item, bool):
+            raise ValueError("boolean values are not valid positions")
+        if not isinstance(item, int):
+            raise ValueError(
+                f"index must be a list of positive integers, got {type(item).__name__!r}"
+            )
+    sorted_v = sorted(values)
+    for i in range(1, len(sorted_v)):
+        if sorted_v[i] == sorted_v[i - 1]:
+            raise ValueError(f"duplicate position: {sorted_v[i]}")
+    return sorted_v
 
 
 def sort_ranges(ranges: list[tuple[int, int]]) -> list[tuple[int, int]]:

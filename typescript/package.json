@@ -42,7 +42,9 @@
     "format": "biome format src tests",
     "format:write": "biome format --write src tests",
     "lint:fix": "biome lint --write src tests",
-    "fix": "biome check --write src tests"
+    "fix": "biome check --write src tests",
+    "publish:jsr": "deno publish --allow-slow-types",
+    "publish:jsr:dry": "deno publish --allow-slow-types --dry-run"
   },
   "dependencies": {
     "zod": "^4.3.6"
