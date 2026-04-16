@@ -1,4 +1,4 @@
-import { type ZodError, z } from "zod";
+import { z } from "zod";
 import { isJsonCompatible, sortRanges } from "./normalize";
 import { A3_SCHEMA_URI, A3_VERSION, type A3Data, type VariantData } from "./schemas";
 
@@ -144,6 +144,16 @@ export const A3InputSchema: z.ZodType<A3Data> = z
 
 // ── Error classes ─────────────────────────────────────────────────────────────
 
+/** A single validation issue reported for an invalid A3 document. */
+export interface A3ValidationIssue {
+  /** Machine-readable validation issue code. */
+  readonly code: string;
+  /** Human-readable validation message. */
+  readonly message: string;
+  /** Path to the invalid field within the input value. */
+  readonly path: readonly PropertyKey[];
+}
+
 /**
  * Thrown when an A3 object fails schema validation.
  *
@@ -152,12 +162,16 @@ export const A3InputSchema: z.ZodType<A3Data> = z
  */
 export class A3ValidationError extends Error {
   /** Full list of Zod validation issues for programmatic inspection. */
-  readonly issues: ZodError["issues"];
+  readonly issues: readonly A3ValidationIssue[];
 
   /**
+   * Create an error from a failed schema validation result.
    * @param zodError - The Zod error produced by a failed `safeParse` call.
    */
-  constructor(zodError: ZodError) {
+  constructor(zodError: {
+    readonly message: string;
+    readonly issues: readonly A3ValidationIssue[];
+  }) {
     super(zodError.message);
     this.name = "A3ValidationError";
     this.issues = zodError.issues;
@@ -172,6 +186,7 @@ export class A3ValidationError extends Error {
  */
 export class A3ParseError extends Error {
   /**
+   * Create an error for input that could not be parsed before validation.
    * @param message - Human-readable description of the parse failure.
    * @param options - Optional `cause` to chain the original error.
    */

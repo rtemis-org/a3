@@ -8,6 +8,8 @@
  *
  * @module
  */
+
+export type { A3ValidationIssue } from "./a3";
 export { A3, A3ParseError, A3ValidationError } from "./a3";
 export { readJSON, writeJSON } from "./io";
 export type {
@@ -18,3 +20,4 @@ export type {
   MetadataData,
   VariantData,
 } from "./schemas";
+export { A3_SCHEMA_URI, A3_VERSION } from "./schemas";
