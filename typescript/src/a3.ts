@@ -1,5 +1,146 @@
-import type { ZodError } from "zod";
-import { A3_SCHEMA_URI, A3_VERSION, type A3Data, A3InputSchema, type VariantData } from "./schemas";
+import { type ZodError, z } from "zod";
+import { isJsonCompatible, sortRanges } from "./normalize";
+import { A3_SCHEMA_URI, A3_VERSION, type A3Data, type VariantData } from "./schemas";
+
+// ── Internal Zod schemas ──────────────────────────────────────────────────────
+// These are implementation details and are intentionally not exported.
+
+const PositionSchema = z.number().int().min(1);
+
+const PositionsSchema = z
+  .array(PositionSchema)
+  .transform((arr) => [...arr].sort((a, b) => a - b))
+  .superRefine((sorted, ctx) => {
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i] === sorted[i - 1]) {
+        ctx.addIssue({
+          code: "custom",
+          message: `duplicate position: ${sorted[i]}`,
+        });
+      }
+    }
+  });
+
+const RangeTupleSchema = z
+  .tuple([PositionSchema, PositionSchema])
+  .refine(([s, e]) => s < e, { message: "start must be < end" });
+
+const RangesSchema = z
+  .array(RangeTupleSchema)
+  .transform(sortRanges)
+  .superRefine((ranges, ctx) => {
+    let prev: [number, number] | undefined;
+    for (const curr of ranges) {
+      if (prev !== undefined && curr[0] <= prev[1]) {
+        ctx.addIssue({
+          code: "custom",
+          message: `ranges [${prev[0]},${prev[1]}] and [${curr[0]},${curr[1]}] overlap`,
+        });
+      }
+      prev = curr;
+    }
+  });
+
+const A3PositionSchema = z.object({
+  index: PositionsSchema,
+  type: z.string().default(""),
+});
+
+const A3RangeSchema = z.object({
+  index: RangesSchema,
+  type: z.string().default(""),
+});
+
+const A3FlexSchema = z.object({
+  index: z.union([RangesSchema, PositionsSchema]),
+  type: z.string().default(""),
+});
+
+const VariantSchema = z
+  .object({ position: PositionSchema })
+  .catchall(z.unknown())
+  .refine((v) => isJsonCompatible(v), { message: "variant fields must be JSON-compatible" });
+
+const AnnotationsSchema = z
+  .object({
+    site: z.record(z.string().min(1), A3PositionSchema).default({}),
+    region: z.record(z.string().min(1), A3RangeSchema).default({}),
+    ptm: z.record(z.string().min(1), A3FlexSchema).default({}),
+    processing: z.record(z.string().min(1), A3FlexSchema).default({}),
+    variant: z.array(VariantSchema).default([]),
+  })
+  .strict();
+
+const MetadataSchema = z
+  .object({
+    uniprot_id: z.string().default(""),
+    description: z.string().default(""),
+    reference: z.string().default(""),
+    organism: z.string().default(""),
+  })
+  .strict();
+
+export const A3InputSchema: z.ZodType<A3Data> = z
+  .object({
+    $schema: z.literal(A3_SCHEMA_URI, {
+      error: () => ({ message: `'$schema' must be '${A3_SCHEMA_URI}'` }),
+    }),
+    a3_version: z.literal(A3_VERSION, {
+      error: () => ({ message: `'a3_version' must be '${A3_VERSION}'` }),
+    }),
+    sequence: z
+      .string()
+      .min(2, "sequence must be at least 2 characters")
+      .regex(/^[A-Za-z*]+$/, "sequence must contain only amino acid letters [A-Za-z] or '*'")
+      .transform((s) => s.toUpperCase()),
+    annotations: AnnotationsSchema,
+    metadata: MetadataSchema,
+  })
+  .strict()
+  .superRefine((data, ctx) => {
+    const len = data.sequence.length;
+
+    const boundsMsg = (pos: number) =>
+      `position ${pos} is out of bounds for sequence of length ${len} (must be 1–${len})`;
+
+    const checkPos = (pos: number, path: (string | number)[]) => {
+      if (pos < 1 || pos > len) ctx.addIssue({ code: "custom", message: boundsMsg(pos), path });
+    };
+
+    const checkIndex = (index: number[] | [number, number][], basePath: (string | number)[]) => {
+      if (index.length === 0) return;
+      if (Array.isArray(index[0])) {
+        let i = 0;
+        for (const [s, e] of index as [number, number][]) {
+          checkPos(s, [...basePath, i, 0]);
+          checkPos(e, [...basePath, i, 1]);
+          i++;
+        }
+      } else {
+        let i = 0;
+        for (const pos of index as number[]) {
+          checkPos(pos, [...basePath, i]);
+          i++;
+        }
+      }
+    };
+
+    for (const [name, entry] of Object.entries(data.annotations.site)) {
+      checkIndex(entry.index, ["annotations", "site", name, "index"]);
+    }
+    for (const [name, entry] of Object.entries(data.annotations.region)) {
+      checkIndex(entry.index, ["annotations", "region", name, "index"]);
+    }
+    for (const [name, entry] of Object.entries(data.annotations.ptm)) {
+      checkIndex(entry.index, ["annotations", "ptm", name, "index"]);
+    }
+    for (const [name, entry] of Object.entries(data.annotations.processing)) {
+      checkIndex(entry.index, ["annotations", "processing", name, "index"]);
+    }
+    data.annotations.variant.forEach((v, i) => {
+      checkPos(v.position, ["annotations", "variant", i, "position"]);
+    });
+  }) as z.ZodType<A3Data>;
 
 // ── Error classes ─────────────────────────────────────────────────────────────
 
@@ -13,6 +154,9 @@ export class A3ValidationError extends Error {
   /** Full list of Zod validation issues for programmatic inspection. */
   readonly issues: ZodError["issues"];
 
+  /**
+   * @param zodError - The Zod error produced by a failed `safeParse` call.
+   */
   constructor(zodError: ZodError) {
     super(zodError.message);
     this.name = "A3ValidationError";
@@ -27,6 +171,10 @@ export class A3ValidationError extends Error {
  * on otherwise-valid JSON, see {@link A3ValidationError}.
  */
 export class A3ParseError extends Error {
+  /**
+   * @param message - Human-readable description of the parse failure.
+   * @param options - Optional `cause` to chain the original error.
+   */
   constructor(message: string, options?: ErrorOptions) {
     super(message, options);
     this.name = "A3ParseError";
