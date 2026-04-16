@@ -228,39 +228,51 @@ test_that("A3Annotation succeeds with valid annotations", {
   expect_s7_class(x, A3Annotation)
   x <- A3Annotation(
     site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(KXGS = A3Region(
-      index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
-    ))
+    region = list(
+      KXGS = A3Region(
+        index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
+      )
+    )
   )
   expect_s7_class(x, A3Annotation)
   x <- A3Annotation(
     site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(KXGS = A3Region(
-      index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
-    )),
+    region = list(
+      KXGS = A3Region(
+        index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
+      )
+    ),
     ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L))))
   )
   expect_s7_class(x, A3Annotation)
   x <- A3Annotation(
     site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(KXGS = A3Region(
-      index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
-    )),
+    region = list(
+      KXGS = A3Region(
+        index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
+      )
+    ),
     ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
-    processing = list(`Signal peptide` = A3Processing(
-      index = A3Range(data = matrix(c(20L, 30L), ncol = 2))
-    ))
+    processing = list(
+      `Signal peptide` = A3Processing(
+        index = A3Range(data = matrix(c(20L, 30L), ncol = 2))
+      )
+    )
   )
   expect_s7_class(x, A3Annotation)
   x <- A3Annotation(
     site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(KXGS = A3Region(
-      index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
-    )),
+    region = list(
+      KXGS = A3Region(
+        index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
+      )
+    ),
     ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
-    processing = list(`Signal peptide` = A3Processing(
-      index = A3Range(data = matrix(c(20L, 30L), ncol = 2))
-    )),
+    processing = list(
+      `Signal peptide` = A3Processing(
+        index = A3Range(data = matrix(c(20L, 30L), ncol = 2))
+      )
+    ),
     variant = list(A3Variant(
       position = A3Position(data = c(15L)),
       info = list(mutation = "R15H")
@@ -389,13 +401,17 @@ test_that("A3 can be instantiated with valid sequence and annotations", {
     sequence = A3Sequence(data = "MKTAYIAKQRQISFVK"),
     annotations = A3Annotation(
       site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
-      region = list(KXGS = A3Region(
-        index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
-      )),
+      region = list(
+        KXGS = A3Region(
+          index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
+        )
+      ),
       ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
-      processing = list(`Signal peptide` = A3Processing(
-        index = A3Range(data = matrix(c(8L, 12L), ncol = 2))
-      )),
+      processing = list(
+        `Signal peptide` = A3Processing(
+          index = A3Range(data = matrix(c(8L, 12L), ncol = 2))
+        )
+      ),
       variant = list(A3Variant(
         position = A3Position(data = c(15L)),
         info = list(mutation = "R15H")
