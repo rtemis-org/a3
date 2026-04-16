@@ -27,7 +27,7 @@ Position = Annotated[int, Field(gt=0)]   # positive integer, 1-based
 
 # Annotation entry models (internal)
 SiteEntry(BaseModel, frozen=True)
-  index: list[Position]       # sorted, deduplicated via field_validator
+  index: list[Position]       # sorted; duplicates rejected via field_validator
   type:  str = ""
 
 RegionEntry(BaseModel, frozen=True)
@@ -66,9 +66,8 @@ A3(BaseModel, frozen=True, extra="forbid")
 
 ### `SiteEntry`
 
-- `index`: `field_validator(mode="before")` calls `sort_dedup()` — sorts ascending and
-  removes duplicates. All elements must be positive integers (enforced by `Position`
-  constraint after normalization).
+- `index`: `field_validator(mode="before")` sorts ascending then rejects any duplicate
+  positions. All elements must be positive integers (enforced by `Position` constraint).
 - `type`: plain string, defaults to `""`.
 
 ### `RegionEntry`
@@ -120,8 +119,12 @@ A3(BaseModel, frozen=True, extra="forbid")
 Pure functions used inside Pydantic validators:
 
 ```python
+check_no_duplicate_positions(values: list[int]) -> list[int]
+# Sort ascending; raises ValueError if any position appears more than once.
+
 sort_dedup(values: list[int]) -> list[int]
-# Deduplicate and sort ascending: sorted(set(values))
+# Deduplicate and sort ascending (sorted(set(values))).
+# Utility for a future lenient/clean API — not called by validators.
 
 sort_ranges(ranges: list[tuple[int, int]]) -> list[tuple[int, int]]
 # Sort by start, then end for ties. No merging.
@@ -241,7 +244,7 @@ serialized as JSON arrays, preserving wire-format compatibility.
 ### Stage 1 — Structural (`field_validator(mode="before")` on each model)
 
 - `sequence`: non-empty string, `[A-Za-z*]+`, ≥ 2 characters, uppercased
-- Positions: positive integers, sorted ascending, deduplicated
+- Positions: positive integers, sorted ascending; duplicates rejected
 - Ranges: inner lists/tuples coerced to `tuple[int, int]`, `start < end`,
   sorted, overlap-checked
 - `FlexEntry` index: geometry inferred from first element — ranges or positions,

@@ -16,18 +16,19 @@ Amino Acid Annotation (A3) format — TypeScript/Zod implementation design.
 - Package manager: `pnpm`
 - Formatter / linter: `biome`
 - Test runner: `vitest`
-- Validation: `zod ^3`
+- Validation: `zod ^4`
 
 ## Type Hierarchy
 
-Types are inferred from Zod schemas — no separate interface/type declarations.
+Exported TypeScript interfaces are written explicitly in `schemas.ts`. Zod schemas are
+typed as `z.ZodType<T>` against these interfaces — no `z.infer<...>` in the public API.
 
 ```
-// Primitives (Zod schemas → inferred TypeScript types)
+// Primitives (Zod schemas → TypeScript types)
 PositionSchema     → number          (positive integer, 1-based)
-PositionsSchema    → number[]        (sorted, deduplicated)
-RangeTupleSchema   → [number, number] (start <= end)
-RangesSchema       → [number, number][] (sorted, overlaps merged)
+PositionsSchema    → number[]        (sorted ascending; duplicates rejected)
+RangeTupleSchema   → [number, number] (start < end)
+RangesSchema       → [number, number][] (sorted; overlapping pairs rejected)
 
 // Annotation entries
 SiteEntryData      → { index: number[];                    type: string }
@@ -65,7 +66,8 @@ A3Data → {
 ### Positions (`PositionsSchema`)
 
 - `z.array(z.number().int().min(1))`
-- `.transform(sortDedup)` — sorted ascending, duplicates removed
+- `.transform(arr => [...arr].sort((a, b) => a - b))` — sorted ascending
+- `.superRefine(checkNoDuplicates)` — rejects if any consecutive pair is equal
 
 ### Ranges (`RangesSchema`)
 
@@ -113,9 +115,6 @@ Union order is significant: `RangesSchema` is tried first (more specific — req
 Pure functions used inside Zod transforms:
 
 ```ts
-sortDedup(arr: readonly number[]): number[]
-// Deduplicate and sort ascending
-
 sortRanges(arr: readonly [number, number][]): [number, number][]
 // Sort by start (then end for ties); no merging
 // Overlap detection is a separate step in RangesSchema
@@ -124,6 +123,9 @@ isJsonCompatible(v: unknown): boolean
 // Recursive check: null | boolean | number | string | array | plain object
 // Rejects: undefined, functions, symbols, class instances
 ```
+
+Position sorting is inlined in `PositionsSchema` (`.transform`); duplicate rejection is
+handled by a `.superRefine` on the same schema.
 
 ## `A3` Class
 
@@ -134,7 +136,6 @@ class A3 {
   constructor(input: unknown)
   static fromData(data: unknown): A3
   static fromJSONText(text: string): A3
-  static async readJSON(path: string): Promise<A3>   // via io.ts
 
   get length(): number                                // sequence length
   residueAt(position: number): string                 // 1-based; throws RangeError
@@ -143,8 +144,11 @@ class A3 {
   toData(): A3Data                                    // frozen reference
   toJSON(): A3Data                                    // called by JSON.stringify
   toJSONString(indent?: number): string
-  async writeJSON(path: string, indent?: number): Promise<void>
 }
+
+// Standalone I/O functions in io.ts (node:fs/promises; excluded from browser entry)
+readJSON(path: string): Promise<A3>
+writeJSON(a3: A3, path: string, indent?: number): Promise<void>
 ```
 
 `toJSON()` returns the plain data object (not a string), so `JSON.stringify(a3)`
@@ -165,14 +169,14 @@ class A3ParseError extends Error
 ```
 typescript/
   src/
-    normalize.ts   // pure normalization helpers
-    schemas.ts     // Zod schemas + exported inferred types
-    a3.ts          // A3 class, A3ValidationError, A3ParseError
-    io.ts          // readJSON / writeJSON (node:fs/promises)
-    index.ts       // public exports
+    normalize.ts      // sortRanges, isJsonCompatible
+    schemas.ts        // explicit TS interfaces + Zod schemas + A3InputSchema
+    a3.ts             // A3 class, A3ValidationError, A3ParseError
+    io.ts             // readJSON / writeJSON (node:fs/promises)
+    index.ts          // public exports (Node)
+    index-browser.ts  // public exports (browser — excludes io.ts)
   tests/
     normalize.test.ts
-    schemas.test.ts
     a3.test.ts
     roundtrip.test.ts
 ```
@@ -215,8 +219,8 @@ annotation families. The `type` field is always present in output (defaults to `
 ### Stage 1 — Structural (Zod schemas)
 
 - `sequence`: non-empty, `[A-Za-z*]+`, uppercased
-- Positions: positive integers, sorted, deduplicated
-- Ranges: `start <= end`, sorted, overlaps merged
+- Positions: positive integers, sorted ascending; duplicates rejected
+- Ranges: `start < end`, sorted; overlapping pairs rejected
 - Annotation entries: must be `{ index, type }` objects — bare arrays rejected
 - Annotation family keys: non-empty strings
 - Unknown annotation families: rejected (`.strict()`)
