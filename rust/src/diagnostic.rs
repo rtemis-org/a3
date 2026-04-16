@@ -2,9 +2,9 @@
 //!
 //! Implements the 6-step plan from `specs/diagnostic.md`:
 //!
-//! 1. Valid JSON                                              [fatal]
+//! 1. Valid JSON                                              \[fatal\]
 //! 2. Envelope: `$schema` and `a3_version`
-//! 3. Top-level field presence, types, no unknown keys       [fatal per field]
+//! 3. Top-level field presence, types, no unknown keys       \[fatal per field\]
 //! 4. Sequence value
 //! 5. Annotation families: site, region, ptm, processing, variant
 //! 6. Metadata fields
