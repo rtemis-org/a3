@@ -1,0 +1,16 @@
+{
+	"$schema": "https://jsr.io/schema/config-file.v1.json",
+	"name": "@rtemis/a3",
+	"version": "0.1.3",
+	"license": "MPL-2.0",
+	"imports": {
+		"zod": "npm:zod@^4.3.6"
+	},
+	"exports": {
+		".": "./src/index.ts",
+		"./browser": "./src/index-browser.ts"
+	},
+	"publish": {
+		"include": ["jsr.json", "package.json", "README.md", "LICENSE.txt", "src/**/*.ts"]
+	}
+}
