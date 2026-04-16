@@ -3,7 +3,14 @@ import { A3_SCHEMA_URI, A3_VERSION, type A3Data, A3InputSchema, type VariantData
 
 // ── Error classes ─────────────────────────────────────────────────────────────
 
+/**
+ * Thrown when an A3 object fails schema validation.
+ *
+ * The `issues` array contains the full Zod issue list and can be inspected
+ * programmatically to determine exactly which fields failed and why.
+ */
 export class A3ValidationError extends Error {
+  /** Full list of Zod validation issues for programmatic inspection. */
   readonly issues: ZodError["issues"];
 
   constructor(zodError: ZodError) {
@@ -13,6 +20,12 @@ export class A3ValidationError extends Error {
   }
 }
 
+/**
+ * Thrown when raw input cannot be parsed before validation begins.
+ *
+ * Wraps `JSON.parse` failures and file I/O errors. For schema violations
+ * on otherwise-valid JSON, see {@link A3ValidationError}.
+ */
 export class A3ParseError extends Error {
   constructor(message: string, options?: ErrorOptions) {
     super(message, options);
@@ -22,9 +35,28 @@ export class A3ParseError extends Error {
 
 // ── A3 class ──────────────────────────────────────────────────────────────────
 
+/**
+ * An immutable, validated A3 (Amino Acid Annotation) object.
+ *
+ * Construct via the constructor or the static helpers {@link A3.fromData} /
+ * {@link A3.fromJSONText}. For file I/O use {@link readJSON} / {@link writeJSON}.
+ *
+ * @example
+ * ```ts
+ * const a3 = A3.fromJSONText(jsonString);
+ * console.log(a3.length);          // sequence length
+ * console.log(a3.residueAt(1));    // first residue
+ * console.log(a3.toJSONString());  // canonical JSON
+ * ```
+ */
 export class A3 {
   readonly #data: A3Data;
 
+  /**
+   * Parse and validate raw input as an A3 object.
+   * @param input - Any value; typically a plain object parsed from JSON.
+   * @throws {@link A3ValidationError} if the input fails schema validation.
+   */
   constructor(input: unknown) {
     const result = A3InputSchema.safeParse(input);
     if (!result.success) throw new A3ValidationError(result.error);
@@ -33,10 +65,21 @@ export class A3 {
 
   // ── Static constructors ───────────────────────────────────────────────────
 
+  /**
+   * Parse and validate a plain data object as an A3 instance.
+   * @param data - Typically the result of `JSON.parse` or a hand-built object.
+   * @throws {@link A3ValidationError} if validation fails.
+   */
   static fromData(data: unknown): A3 {
     return new A3(data);
   }
 
+  /**
+   * Parse a JSON string and validate it as an A3 instance.
+   * @param text - Raw JSON string.
+   * @throws {@link A3ParseError} if the string is not valid JSON.
+   * @throws {@link A3ValidationError} if the parsed object fails validation.
+   */
   static fromJSONText(text: string): A3 {
     let parsed: unknown;
     try {
@@ -58,7 +101,8 @@ export class A3 {
 
   /**
    * Return the residue at a 1-based position.
-   * Throws RangeError if position is out of bounds.
+   * @param position - 1-based residue position.
+   * @throws `RangeError` if position is out of bounds.
    */
   residueAt(position: number): string {
     if (!Number.isInteger(position) || position < 1 || position > this.length) {
@@ -70,7 +114,8 @@ export class A3 {
   }
 
   /**
-   * Return all variants at a given 1-based position.
+   * Return all variant records at a given 1-based position.
+   * @param position - 1-based residue position.
    */
   variantsAt(position: number): VariantData[] {
     return this.#data.annotations.variant.filter((v) => v.position === position);

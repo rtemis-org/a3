@@ -10,6 +10,7 @@ export { A3_SCHEMA_URI, A3_VERSION };
 
 // ── Exported TypeScript interfaces ────────────────────────────────────────────
 
+/** Metadata fields for an A3 object. All fields default to `""` when absent. */
 export interface MetadataData {
   uniprot_id: string;
   description: string;
@@ -17,26 +18,34 @@ export interface MetadataData {
   organism: string;
 }
 
+/**
+ * A single variant record. `position` is required; all other fields are
+ * open and must be JSON-compatible.
+ */
 export interface VariantData {
   position: number;
   [key: string]: unknown;
 }
 
+/** Annotation entry with a position-based index (site family). */
 export interface A3PositionData {
   index: number[];
   type: string;
 }
 
+/** Annotation entry with a range-based index (region family). */
 export interface A3RangeData {
   index: [number, number][];
   type: string;
 }
 
+/** Annotation entry with either a position or range index (ptm / processing families). */
 export interface A3FlexData {
   index: number[] | [number, number][];
   type: string;
 }
 
+/** Fully validated and normalized A3 data object, as returned by {@link A3.toData}. */
 export interface A3Data {
   $schema: typeof A3_SCHEMA_URI;
   a3_version: typeof A3_VERSION;
