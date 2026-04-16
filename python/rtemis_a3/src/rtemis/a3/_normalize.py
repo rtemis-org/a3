@@ -97,7 +97,7 @@ def check_no_overlap(ranges: list[tuple[int, int]]) -> None:
         curr_start = ranges[i][0]
         if curr_start <= prev_end:
             raise ValueError(
-                f"overlapping ranges: [{ranges[i-1][0]}, {prev_end}] and "
+                f"overlapping ranges: [{ranges[i - 1][0]}, {prev_end}] and "
                 f"[{curr_start}, {ranges[i][1]}]"
             )
 

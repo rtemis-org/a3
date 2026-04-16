@@ -127,15 +127,21 @@ class TestA3FromJson:
 
     def test_missing_version_field(self):
         with pytest.raises(A3ValidationError, match="a3_version"):
-            a3_from_json('{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "sequence": "MAEPRQ"}')
+            a3_from_json(
+                '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "sequence": "MAEPRQ"}'
+            )
 
     def test_wrong_schema_uri(self):
         with pytest.raises(A3ValidationError, match=r"\$schema"):
-            a3_from_json('{"$schema": "https://wrong.example.com/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ"}')
+            a3_from_json(
+                '{"$schema": "https://wrong.example.com/schema.json", "a3_version": "1.0.0", "sequence": "MAEPRQ"}'
+            )
 
     def test_wrong_version(self):
         with pytest.raises(A3ValidationError, match="a3_version"):
-            a3_from_json('{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "9.9.9", "sequence": "MAEPRQ"}')
+            a3_from_json(
+                '{"$schema": "https://schema.rtemis.org/a3/v1/schema.json", "a3_version": "9.9.9", "sequence": "MAEPRQ"}'
+            )
 
 
 class TestA3ToJson:

@@ -80,10 +80,14 @@ def create_a3(
     try:
         return A3.model_validate(data)
     except _BoundsErrors as exc:
-        errors = [{"loc": (), "msg": msg, "type": "value_error"} for msg in exc.messages]
+        errors = [
+            {"loc": (), "msg": msg, "type": "value_error"} for msg in exc.messages
+        ]
         raise A3ValidationError("\n".join(exc.messages), errors) from exc
     except ValidationError as exc:
-        raise A3ValidationError(str(exc), cast(list[dict[str, Any]], exc.errors())) from exc
+        raise A3ValidationError(
+            str(exc), cast(list[dict[str, Any]], exc.errors())
+        ) from exc
 
 
 def a3_from_json(text: str) -> A3:
@@ -114,19 +118,54 @@ def a3_from_json(text: str) -> A3:
     if not isinstance(data, dict):
         raise A3ValidationError(
             "JSON root must be an object",
-            [{"loc": (), "msg": "JSON root must be an object", "type": "value_error", "input": data}],
+            [
+                {
+                    "loc": (),
+                    "msg": "JSON root must be an object",
+                    "type": "value_error",
+                    "input": data,
+                }
+            ],
         )
     envelope_errors: list[dict[str, Any]] = []
     schema_val = data.get("$schema")
     if schema_val is None:
-        envelope_errors.append({"loc": ("$schema",), "msg": "missing required field '$schema'", "type": "missing", "input": data})
+        envelope_errors.append(
+            {
+                "loc": ("$schema",),
+                "msg": "missing required field '$schema'",
+                "type": "missing",
+                "input": data,
+            }
+        )
     elif schema_val != _A3_SCHEMA_URI:
-        envelope_errors.append({"loc": ("$schema",), "msg": f"'$schema' must be '{_A3_SCHEMA_URI}', got '{schema_val}'", "type": "value_error", "input": schema_val})
+        envelope_errors.append(
+            {
+                "loc": ("$schema",),
+                "msg": f"'$schema' must be '{_A3_SCHEMA_URI}', got '{schema_val}'",
+                "type": "value_error",
+                "input": schema_val,
+            }
+        )
     version_val = data.get("a3_version")
     if version_val is None:
-        envelope_errors.append({"loc": ("a3_version",), "msg": "missing required field 'a3_version'", "type": "missing", "input": data})
+        envelope_errors.append(
+            {
+                "loc": ("a3_version",),
+                "msg": "missing required field 'a3_version'",
+                "type": "missing",
+                "input": data,
+            }
+        )
     elif version_val != _A3_VERSION:
-        envelope_errors.append({"loc": ("a3_version",), "msg": f"'a3_version' must be '{_A3_VERSION}', got '{version_val}'", "type": "value_error", "input": version_val})
+        envelope_errors.append(
+            {
+                "loc": ("a3_version",),
+                "msg": f"'a3_version' must be '{_A3_VERSION}', got '{version_val}'",
+                "type": "value_error",
+                "input": version_val,
+            }
+        )
     if envelope_errors:
         raise A3ValidationError(
             "; ".join(e["msg"] for e in envelope_errors),
@@ -139,10 +178,14 @@ def a3_from_json(text: str) -> A3:
     try:
         return A3.model_validate(data)
     except _BoundsErrors as exc:
-        errors = [{"loc": (), "msg": msg, "type": "value_error"} for msg in exc.messages]
+        errors = [
+            {"loc": (), "msg": msg, "type": "value_error"} for msg in exc.messages
+        ]
         raise A3ValidationError("\n".join(exc.messages), errors) from exc
     except ValidationError as exc:
-        raise A3ValidationError(str(exc), cast(list[dict[str, Any]], exc.errors())) from exc
+        raise A3ValidationError(
+            str(exc), cast(list[dict[str, Any]], exc.errors())
+        ) from exc
 
 
 def a3_to_json(a3: A3, *, indent: int | None = None) -> str:
