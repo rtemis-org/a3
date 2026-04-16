@@ -150,6 +150,7 @@ export class A3 {
 
   // ── Introspection ─────────────────────────────────────────────────────────
 
+  /** Return a human-readable summary, e.g. `A3 [P12345] { length: 42, sequence: "MKTAYIAKQR…" }`. */
   toString(): string {
     const seq = this.#data.sequence;
     const preview = seq.length > 12 ? `${seq.slice(0, 12)}…` : seq;
