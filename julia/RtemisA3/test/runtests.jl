@@ -6,9 +6,12 @@ using RtemisA3: sort_dedup, sort_ranges, check_no_overlap, is_json_compatible
 
 err(f) =
     try
-        ; f(); nothing;
+        ;
+        f();
+        nothing;
     catch e
-        ; e;
+        ;
+        e;
     end
 val_err(f) = begin
     e = err(f);
