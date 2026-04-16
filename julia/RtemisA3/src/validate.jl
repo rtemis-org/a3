@@ -3,11 +3,9 @@
 function validate_sequence(raw, path::String)::String
     raw isa AbstractString ||
         throw(A3ValidationError("$path: expected string, got $(typeof(raw))"))
-    isempty(raw) &&
-        throw(A3ValidationError("$path: must not be empty"))
+    isempty(raw) && throw(A3ValidationError("$path: must not be empty"))
     upper = uppercase(String(raw))
-    length(upper) < 2 &&
-        throw(A3ValidationError("$path: must be at least 2 characters"))
+    length(upper) < 2 && throw(A3ValidationError("$path: must be at least 2 characters"))
     for c in upper
         (c in 'A':'Z' || c == '*') ||
             throw(A3ValidationError("$path: invalid character '$c' (must match [A-Z*])"))
@@ -20,14 +18,12 @@ function validate_positions(raw::AbstractVector, path::String)::Vector{Int}
     for (i, v) in enumerate(raw)
         v isa Integer ||
             throw(A3ValidationError("$path[$i]: expected integer, got $(typeof(v))"))
-        v >= 1 ||
-            throw(A3ValidationError("$path[$i]: position $v must be >= 1"))
+        v >= 1 || throw(A3ValidationError("$path[$i]: position $v must be >= 1"))
         push!(positions, Int(v))
     end
     sorted = sort(positions)
     for (prev, curr) in zip(sorted, @view sorted[2:end])
-        prev == curr &&
-            throw(A3ValidationError("$path: duplicate position $curr"))
+        prev == curr && throw(A3ValidationError("$path: duplicate position $curr"))
     end
     return sorted
 end
@@ -38,17 +34,20 @@ function validate_ranges(raw::AbstractVector, path::String)::Vector{Tuple{Int,In
         (v isa AbstractVector && length(v) == 2) ||
             throw(A3ValidationError("$path[$i]: expected [start, end] pair, got $v"))
         s, e = v[1], v[2]
-        s isa Integer ||
-            throw(A3ValidationError("$path[$i]: range start must be integer, got $(typeof(s))"))
-        e isa Integer ||
-            throw(A3ValidationError("$path[$i]: range end must be integer, got $(typeof(e))"))
-        s >= 1 ||
-            throw(A3ValidationError("$path[$i]: start $s must be >= 1"))
-        e >= 1 ||
-            throw(A3ValidationError("$path[$i]: end $e must be >= 1"))
-        s < e  ||
-            throw(A3ValidationError("$path[$i]: start $s must be strictly less than end $e " *
-                "(degenerate single-position ranges must use a position-indexed family)"))
+        s isa Integer || throw(
+            A3ValidationError("$path[$i]: range start must be integer, got $(typeof(s))"),
+        )
+        e isa Integer || throw(
+            A3ValidationError("$path[$i]: range end must be integer, got $(typeof(e))"),
+        )
+        s >= 1 || throw(A3ValidationError("$path[$i]: start $s must be >= 1"))
+        e >= 1 || throw(A3ValidationError("$path[$i]: end $e must be >= 1"))
+        s < e || throw(
+            A3ValidationError(
+                "$path[$i]: start $s must be strictly less than end $e " *
+                "(degenerate single-position ranges must use a position-indexed family)",
+            ),
+        )
         push!(ranges, (Int(s), Int(e)))
     end
     sorted = sort_ranges(ranges)
@@ -56,7 +55,10 @@ function validate_ranges(raw::AbstractVector, path::String)::Vector{Tuple{Int,In
     return sorted
 end
 
-function validate_flex_index(raw::AbstractVector, path::String)::Union{Vector{Int},Vector{Tuple{Int,Int}}}
+function validate_flex_index(
+    raw::AbstractVector,
+    path::String,
+)::Union{Vector{Int},Vector{Tuple{Int,Int}}}
     isempty(raw) && return Int[]
     raw[1] isa AbstractVector ? validate_ranges(raw, path) : validate_positions(raw, path)
 end
@@ -64,20 +66,23 @@ end
 # ─── Entry parsers ────────────────────────────────────────────────────────────
 
 function _parse_entry_base(raw, path::String)
-    raw isa AbstractDict ||
-        throw(A3ValidationError(
+    raw isa AbstractDict || throw(
+        A3ValidationError(
             "$path: expected object with 'index' and 'type' fields, got $(typeof(raw)) " *
-            "(bare arrays are not accepted)"
-        ))
+            "(bare arrays are not accepted)",
+        ),
+    )
     for k in keys(raw)
-        k in ("index", "type") ||
-            throw(A3ValidationError("$path: unknown field '$k' (only 'index' and 'type' are allowed)"))
+        k in ("index", "type") || throw(
+            A3ValidationError(
+                "$path: unknown field '$k' (only 'index' and 'type' are allowed)",
+            ),
+        )
     end
     haskey(raw, "index") ||
         throw(A3ValidationError("$path: missing required field 'index'"))
     index_raw = raw["index"]
-    index_raw isa AbstractVector ||
-        throw(A3ValidationError("$path.index: expected array"))
+    index_raw isa AbstractVector || throw(A3ValidationError("$path.index: expected array"))
     type_val = get(raw, "type", "")
     type_val isa AbstractString ||
         throw(A3ValidationError("$path.type: expected string, got $(typeof(type_val))"))
@@ -101,15 +106,13 @@ function parse_flex_entry(raw, path::String)::A3Index
 end
 
 function parse_variant(raw, path::String)::VariantRecord
-    raw isa AbstractDict ||
-        throw(A3ValidationError("$path: expected object"))
+    raw isa AbstractDict || throw(A3ValidationError("$path: expected object"))
     haskey(raw, "position") ||
         throw(A3ValidationError("$path: missing required field 'position'"))
     pos = raw["position"]
     pos isa Integer ||
         throw(A3ValidationError("$path.position: expected integer, got $(typeof(pos))"))
-    pos >= 1 ||
-        throw(A3ValidationError("$path.position: must be >= 1, got $pos"))
+    pos >= 1 || throw(A3ValidationError("$path.position: must be >= 1, got $pos"))
     extra = Dict{String,Any}()
     for (k, v) in raw
         k == "position" && continue
@@ -120,9 +123,8 @@ function parse_variant(raw, path::String)::VariantRecord
     VariantRecord(Int(pos), extra)
 end
 
-function parse_named_map(raw, path::String, parser::Function, ::Type{T}) where T
-    raw isa AbstractDict ||
-        throw(A3ValidationError("$path: expected object"))
+function parse_named_map(raw, path::String, parser::Function, ::Type{T}) where {T}
+    raw isa AbstractDict || throw(A3ValidationError("$path: expected object"))
     result = Dict{String,T}()
     for (name, entry) in raw
         isempty(name) &&
@@ -133,20 +135,42 @@ function parse_named_map(raw, path::String, parser::Function, ::Type{T}) where T
 end
 
 function parse_annotations(raw, path::String)::A3Annotations
-    raw isa AbstractDict ||
-        throw(A3ValidationError("$path: expected object"))
+    raw isa AbstractDict || throw(A3ValidationError("$path: expected object"))
     for k in keys(raw)
-        k in ("site", "region", "ptm", "processing", "variant") ||
-            throw(A3ValidationError("$path: unknown annotation family '$k' " *
-                "(must be one of: site, region, ptm, processing, variant)"))
+        k in ("site", "region", "ptm", "processing", "variant") || throw(
+            A3ValidationError(
+                "$path: unknown annotation family '$k' " *
+                "(must be one of: site, region, ptm, processing, variant)",
+            ),
+        )
     end
 
     empty_dict() = Dict{String,Any}()
 
-    site       = parse_named_map(get(raw, "site",       empty_dict()), "$path.site",       parse_position_entry, A3Position)
-    region     = parse_named_map(get(raw, "region",     empty_dict()), "$path.region",     parse_range_entry,   A3Range)
-    ptm        = parse_named_map(get(raw, "ptm",        empty_dict()), "$path.ptm",        parse_flex_entry,    A3Index)
-    processing = parse_named_map(get(raw, "processing", empty_dict()), "$path.processing", parse_flex_entry,    A3Index)
+    site = parse_named_map(
+        get(raw, "site", empty_dict()),
+        "$path.site",
+        parse_position_entry,
+        A3Position,
+    )
+    region = parse_named_map(
+        get(raw, "region", empty_dict()),
+        "$path.region",
+        parse_range_entry,
+        A3Range,
+    )
+    ptm = parse_named_map(
+        get(raw, "ptm", empty_dict()),
+        "$path.ptm",
+        parse_flex_entry,
+        A3Index,
+    )
+    processing = parse_named_map(
+        get(raw, "processing", empty_dict()),
+        "$path.processing",
+        parse_flex_entry,
+        A3Index,
+    )
 
     variant_raw = get(raw, "variant", Any[])
     variant_raw isa AbstractVector ||
@@ -157,12 +181,14 @@ function parse_annotations(raw, path::String)::A3Annotations
 end
 
 function parse_metadata(raw, path::String)::A3Metadata
-    raw isa AbstractDict ||
-        throw(A3ValidationError("$path: expected object"))
+    raw isa AbstractDict || throw(A3ValidationError("$path: expected object"))
     for k in keys(raw)
-        k in ("uniprot_id", "description", "reference", "organism") ||
-            throw(A3ValidationError("$path: unknown field '$k' " *
-                "(must be one of: uniprot_id, description, reference, organism)"))
+        k in ("uniprot_id", "description", "reference", "organism") || throw(
+            A3ValidationError(
+                "$path: unknown field '$k' " *
+                "(must be one of: uniprot_id, description, reference, organism)",
+            ),
+        )
     end
     get_str(field) = begin
         v = get(raw, field, "")
@@ -170,17 +196,24 @@ function parse_metadata(raw, path::String)::A3Metadata
             throw(A3ValidationError("$path.$field: expected string, got $(typeof(v))"))
         String(v)
     end
-    A3Metadata(get_str("uniprot_id"), get_str("description"), get_str("reference"), get_str("organism"))
+    A3Metadata(
+        get_str("uniprot_id"),
+        get_str("description"),
+        get_str("reference"),
+        get_str("organism"),
+    )
 end
 
 # ─── Contextual validation (Stage 2) ─────────────────────────────────────────
 
 function validate_bounds(seq::String, annotations::A3Annotations)
     n = length(seq)
-    chk(pos, path) = 1 <= pos <= n ||
-        throw(A3ValidationError(
-            "$path: position $pos is out of bounds for sequence of length $n (must be 1-$n)"
-        ))
+    chk(pos, path) =
+        1 <= pos <= n || throw(
+            A3ValidationError(
+                "$path: position $pos is out of bounds for sequence of length $n (must be 1-$n)",
+            ),
+        )
     chk_range(r, path) = begin
         chk(r[1], "$path start")
         chk(r[2], "$path end")
@@ -198,16 +231,28 @@ function validate_bounds(seq::String, annotations::A3Annotations)
     end
     for (name, entry) in annotations.ptm
         if entry isa A3Position
-            for (i, p) in enumerate(entry.index); chk(p, "annotations.ptm.$name.index[$i]"); end
+            for (i, p) in enumerate(entry.index)
+                ;
+                chk(p, "annotations.ptm.$name.index[$i]");
+            end
         else
-            for (i, r) in enumerate(entry.index); chk_range(r, "annotations.ptm.$name.index[$i]"); end
+            for (i, r) in enumerate(entry.index)
+                ;
+                chk_range(r, "annotations.ptm.$name.index[$i]");
+            end
         end
     end
     for (name, entry) in annotations.processing
         if entry isa A3Position
-            for (i, p) in enumerate(entry.index); chk(p, "annotations.processing.$name.index[$i]"); end
+            for (i, p) in enumerate(entry.index)
+                ;
+                chk(p, "annotations.processing.$name.index[$i]");
+            end
         else
-            for (i, r) in enumerate(entry.index); chk_range(r, "annotations.processing.$name.index[$i]"); end
+            for (i, r) in enumerate(entry.index)
+                ;
+                chk_range(r, "annotations.processing.$name.index[$i]");
+            end
         end
     end
     for (i, v) in enumerate(annotations.variant)
@@ -218,14 +263,13 @@ end
 # ─── A3 outer constructor ─────────────────────────────────────────────────────
 
 const _A3_SCHEMA_URI = "https://schema.rtemis.org/a3/v1/schema.json"
-const _A3_VERSION    = "1.0.0"
-const _A3_ENVELOPE   = ("\$schema", "a3_version")
-const _A3_DATA_KEYS  = ("sequence", "annotations", "metadata")
+const _A3_VERSION = "1.0.0"
+const _A3_ENVELOPE = ("\$schema", "a3_version")
+const _A3_DATA_KEYS = ("sequence", "annotations", "metadata")
 
 function A3(raw::AbstractDict)
     schema_val = get(raw, "\$schema", nothing)
-    schema_val !== nothing ||
-        throw(A3ValidationError("missing required field '\$schema'"))
+    schema_val !== nothing || throw(A3ValidationError("missing required field '\$schema'"))
     schema_val == _A3_SCHEMA_URI ||
         throw(A3ValidationError("'\$schema' must be '$_A3_SCHEMA_URI', got '$schema_val'"))
 
@@ -236,20 +280,23 @@ function A3(raw::AbstractDict)
         throw(A3ValidationError("'a3_version' must be '$_A3_VERSION', got '$version_val'"))
 
     for k in keys(raw)
-        k in _A3_DATA_KEYS || k in _A3_ENVELOPE ||
-            throw(A3ValidationError("unknown top-level field '$k' " *
-                "(must be one of: \$schema, a3_version, sequence, annotations, metadata)"))
+        k in _A3_DATA_KEYS ||
+            k in _A3_ENVELOPE ||
+            throw(
+                A3ValidationError(
+                    "unknown top-level field '$k' " *
+                    "(must be one of: \$schema, a3_version, sequence, annotations, metadata)",
+                ),
+            )
     end
-    haskey(raw, "sequence") ||
-        throw(A3ValidationError("missing required field 'sequence'"))
+    haskey(raw, "sequence") || throw(A3ValidationError("missing required field 'sequence'"))
     haskey(raw, "annotations") ||
         throw(A3ValidationError("missing required field 'annotations'"))
-    haskey(raw, "metadata") ||
-        throw(A3ValidationError("missing required field 'metadata'"))
+    haskey(raw, "metadata") || throw(A3ValidationError("missing required field 'metadata'"))
 
-    seq         = validate_sequence(raw["sequence"], "sequence")
+    seq = validate_sequence(raw["sequence"], "sequence")
     annotations = parse_annotations(raw["annotations"], "annotations")
-    metadata    = parse_metadata(raw["metadata"], "metadata")
+    metadata = parse_metadata(raw["metadata"], "metadata")
 
     validate_bounds(seq, annotations)
     A3(seq, annotations, metadata)

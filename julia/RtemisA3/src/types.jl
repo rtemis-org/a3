@@ -38,9 +38,12 @@ end
 
 # Explicit equality for structs containing mutable fields (Vector, Dict)
 Base.:(==)(a::A3Metadata, b::A3Metadata) =
-    a.uniprot_id == b.uniprot_id && a.description == b.description &&
-    a.reference  == b.reference  && a.organism    == b.organism
+    a.uniprot_id == b.uniprot_id &&
+    a.description == b.description &&
+    a.reference == b.reference &&
+    a.organism == b.organism
 
-Base.:(==)(a::A3Position,    b::A3Position)    = a.index == b.index && a.type == b.type
-Base.:(==)(a::A3Range,       b::A3Range)       = a.index == b.index && a.type == b.type
-Base.:(==)(a::VariantRecord, b::VariantRecord) = a.position == b.position && a.extra == b.extra
+Base.:(==)(a::A3Position, b::A3Position) = a.index == b.index && a.type == b.type
+Base.:(==)(a::A3Range, b::A3Range) = a.index == b.index && a.type == b.type
+Base.:(==)(a::VariantRecord, b::VariantRecord) =
+    a.position == b.position && a.extra == b.extra
