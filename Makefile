@@ -10,7 +10,7 @@ format: format-r format-python format-typescript format-julia format-rust
 
 format-r:
 	@echo "==> R: Formatting rtemis.a3"
-	cd r && air format .
+	cd r && air format . && Rscript -e "urlchecker::url_check()"
 
 format-python:
 	@echo "==> Python: Formatting rtemis-a3"
