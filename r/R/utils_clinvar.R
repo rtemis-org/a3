@@ -29,6 +29,7 @@
 #' @export
 #'
 #' @examples
+#' # Requires internet connection and fetches data from ClinVar.
 #' \dontrun{
 #' # Pathogenic and likely pathogenic variants (default)
 #' mapt_variants <- clinvar_variants("MAPT")

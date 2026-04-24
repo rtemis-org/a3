@@ -30,6 +30,7 @@ Feature types not mapped to A3 (mutagenesis, alternative sequences, sequence
 conflicts, etc.) are silently ignored.
 }
 \examples{
+# Requires internet connection and fetches data from UniProt.
 \dontrun{
 mapt <- uniprot_to_A3("P10636")
 }

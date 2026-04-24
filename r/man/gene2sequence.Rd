@@ -33,6 +33,7 @@ data.frame with columns "gene", "ensembl_transcript_id" and "sequence".
 Get the sequence of a gene
 }
 \examples{
+# Requires internet connection and fetches data from Ensembl using biomaRt.
 \dontrun{
   mapt_seq <- gene2sequence("MAPT")
 }

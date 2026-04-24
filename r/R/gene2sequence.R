@@ -13,6 +13,7 @@
 #' @export
 #'
 #' @examples
+#' # Requires internet connection and fetches data from Ensembl using biomaRt.
 #' \dontrun{
 #'   mapt_seq <- gene2sequence("MAPT")
 #' }

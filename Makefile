@@ -3,6 +3,7 @@
 				docs docs-r docs-python docs-typescript docs-julia docs-rust \
 				install-r install-rust \
 				test test-r test-python test-typescript test-julia test-rust \
+				check-r
         
 
 # ── Format ───────────────────────────────────────────────────────────────────
@@ -36,7 +37,6 @@ document-r:
 	cd r && Rscript -e "devtools::document()"
 
 # ── Docs Site ────────────────────────────────────────────────────────────────
-
 docs-r:
 	@echo "==> R"
 	cd r && Rscript -e "pkgdown::build_site()"
@@ -75,8 +75,7 @@ docs:
 	[ $$((r+p+ts+jl+rs)) -eq 0 ]
 
 # ── Install ──────────────────────────────────────────────────────────────────
-
-install-r:
+install-r: document-r
 	@echo "==> R"
 	cd r && Rscript -e "pak::local_install()"
 
@@ -85,7 +84,6 @@ install-rust:
 	cd rust && cargo install --path .
 
 # ── Test ─────────────────────────────────────────────────────────────────────
-
 test-r:
 	@echo "==> R"
 	cd r && Rscript -e "devtools::test(stop_on_failure = TRUE)"
@@ -122,3 +120,8 @@ test:
 	[ $$rs -eq 0 ] && echo "  Rust:       passed" || echo "  Rust:       FAILED"; \
 	echo "─────────────────────────────────────────────────────"; \
 	[ $$((r+p+ts+jl+rs)) -eq 0 ]
+
+# ── Check ────────────────────────────────────────────────────────────────────
+check-r:
+	@echo "==> R: Checking rtemis.a3"
+	cd r && R CMD build . && R CMD check rtemis.a3_*.tar.gz --as-cran && rm rtemis.a3_*.tar.gz

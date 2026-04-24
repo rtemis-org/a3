@@ -16,6 +16,7 @@ data frame with AlphaFold info.
 Get AlphaFold info for a given UniProt ID
 }
 \examples{
+# Requires internet connection and fetches data from AlphaFold.
 \dontrun{
 get_alphafold("P10636")
 }

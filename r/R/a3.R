@@ -1143,10 +1143,11 @@ A3from_json <- function(x, ...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' mapt <- uniprot_to_A3("P10636")
-#' write_A3json(mapt, "P10636_A3.json")
-#' }
+#' a3 <- create_A3("MAEPRQEFEVMEDHAGTYGLGDRK", uniprot_id = "P10636")
+#' tmp <- tempfile(fileext = ".json")
+#' write_A3json(a3, tmp)
+#' a3_read <- read_A3json(tmp)
+#' unlink(tmp)
 write_A3json <- function(x, filepath, overwrite = FALSE) {
   check_is_S7(x, A3)
   check_inherits(filepath, "character")
@@ -1171,11 +1172,11 @@ write_A3json <- function(x, filepath, overwrite = FALSE) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' mapt <- uniprot_to_A3("P10636")
-#' write_A3json(mapt, "P10636_A3.json")
-#' mapt2 <- read_A3json("P10636_A3.json")
-#' }
+#' a3 <- create_A3("MAEPRQEFEVMEDHAGTYGLGDRK", uniprot_id = "P10636")
+#' tmp <- tempfile(fileext = ".json")
+#' write_A3json(a3, tmp)
+#' a3_read <- read_A3json(tmp, verbosity = 0L)
+#' unlink(tmp)
 read_A3json <- function(filepath, verbosity = 1L) {
   check_inherits(filepath, "character")
   filepath <- normalizePath(filepath)
@@ -1189,7 +1190,7 @@ read_A3json <- function(filepath, verbosity = 1L) {
       "Read ",
       basename(filepath),
       ": ",
-      green("\u2714 "),
+      fmt("\u2714 ", col = rtemis_colors[["green"]]),
       "valid A3 ",
       .A3_VERSION,
       sep = ""

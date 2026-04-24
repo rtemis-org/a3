@@ -48,6 +48,7 @@ When \code{pdb_id} is \code{NULL} the top-ranked structure (by PDBe coverage sco
 used automatically.
 }
 \examples{
+# Requires internet connection and fetches data from PDBe.
 \dontrun{
   ann  <- pdb_annotations("P10636")
   mapt <- create_A3(

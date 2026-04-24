@@ -8,10 +8,14 @@
 \description{
 Amino Acid Annotation format utilities
 }
+\details{
+\pkg{rtemis.a3}: Amino Acid Annotation format
+}
 \seealso{
 Useful links:
 \itemize{
   \item \url{https://a3.rtemis.org}
+  \item Report bugs at \url{https://github.com/rtemis-org/a3/issues}
 }
 
 }

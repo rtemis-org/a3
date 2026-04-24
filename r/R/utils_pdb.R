@@ -32,6 +32,7 @@
 #' @export
 #'
 #' @examples
+#' # Requires internet connection and fetches data from PDBe.
 #' \dontrun{
 #'   ann  <- pdb_annotations("P10636")
 #'   mapt <- create_A3(

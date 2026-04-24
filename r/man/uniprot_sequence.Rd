@@ -25,6 +25,7 @@ Lightweight FASTA-only fetch. Use this when you only need the amino acid
 sequence. For full annotations and metadata use \code{\link[=uniprot_to_A3]{uniprot_to_A3()}}.
 }
 \examples{
+# Requires internet connection and fetches data from UniProt.
 \dontrun{
   seq <- uniprot_sequence("P10636")
 }

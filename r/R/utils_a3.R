@@ -8,10 +8,12 @@
 #' @export
 #'
 #' @examples
+#' # Requires internet connection and fetches data from AlphaFold.
 #' \dontrun{
 #' get_alphafold("P10636")
 #' }
 get_alphafold <- function(uniprotid) {
+  check_dependencies(c("httr", "jsonlite"))
   url <- paste0("https://www.alphafold.ebi.ac.uk/api/prediction/", uniprotid)
   headers <- c(
     "accept" = "application/json"

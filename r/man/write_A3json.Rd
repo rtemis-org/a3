@@ -20,10 +20,11 @@ Invisible \code{x}. Writes JSON file as side effect.
 Write \code{A3} object to JSON file
 }
 \examples{
-\dontrun{
-mapt <- uniprot_to_A3("P10636")
-write_A3json(mapt, "P10636_A3.json")
-}
+a3 <- create_A3("MAEPRQEFEVMEDHAGTYGLGDRK", uniprot_id = "P10636")
+tmp <- tempfile(fileext = ".json")
+write_A3json(a3, tmp)
+a3_read <- read_A3json(tmp)
+unlink(tmp)
 }
 \author{
 EDG

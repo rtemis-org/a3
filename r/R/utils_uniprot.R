@@ -14,6 +14,7 @@
 #' @export
 #'
 #' @examples
+#' # Requires internet connection and fetches data from UniProt.
 #' \dontrun{
 #'   seq <- uniprot_sequence("P10636")
 #' }
@@ -52,6 +53,7 @@ uniprot_sequence <- function(
 #' @export
 #'
 #' @examples
+#' # Requires internet connection and fetches data from UniProt.
 #' \dontrun{
 #' mapt <- uniprot_to_A3("P10636")
 #' }
