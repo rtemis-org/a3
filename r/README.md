@@ -59,31 +59,34 @@ a3 <- read_A3json("path/to/protein.json")
 
 ### Construction
 
-| Function | Description |
-|---|---|
-| `create_A3(sequence, site, region, ptm, processing, variant, ...)` | Create an A3 object |
-| `annotation_position(x, type)` | Create a position-indexed annotation entry |
-| `annotation_range(x, type)` | Create a range-indexed annotation entry |
-| `annotation_variant(x, info)` | Create a variant annotation |
+|                                      Function | Description                                |
+|-----------------------------------------------|--------------------------------------------|
+| `create_A3(sequence, site, region, ptm, ...)` | Create an A3 object                        |
+|                `annotation_position(x, type)` | Create a position-indexed annotation entry |
+|                   `annotation_range(x, type)` | Create a range-indexed annotation entry    |
+|                 `annotation_variant(x, info)` | Create a variant annotation                |
 
 ### I/O
 
-| Function | Description |
-|---|---|
-| `write_A3json(x, path)` | Write an A3 object to a JSON file |
-| `read_A3json(path)` | Read an A3 object from a JSON file |
+|                Function | Description                        |
+|-------------------------|------------------------------------|
+| `write_A3json(x, path)` | Write an A3 object to a JSON file  |
+|     `read_A3json(path)` | Read an A3 object from a JSON file |
 
 ### S7 Class Hierarchy
 
 ```
 A3
- ├── sequence:    A3Sequence
- ├── annotations: A3Annotation
+ ├── sequence:     A3Sequence
+ ├── annotations:  A3Annotation
  │   ├── site:        named list of A3Site       (A3Position index)
  │   ├── region:      named list of A3Region     (A3Range index)
  │   ├── ptm:         named list of A3PTM        (A3Index — position or range)
  │   ├── processing:  named list of A3Processing (A3Index — position or range)
  │   └── variant:     list of A3Variant
- └── metadata:    A3Metadata
-     ├── uniprot_id, description, reference, organism
+ └── metadata:     A3Metadata
+     ├── uniprot_id
+     ├── description
+     ├── reference
+     └── organism
 ```
