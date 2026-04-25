@@ -1,10 +1,10 @@
-#' Get the sequence of a gene
+#' Get the coding sequence of a gene
 #'
-#' @param gene Character: Gene name.
-#' @param organism Character: Organism name.
-#' @param biomart Character: Biomart name.
-#' @param host Character: Host address.
-#' @param seq_type Character: Sequence type to retrieve. See [biomaRt::getSequence].
+#' @param gene Character vector: One or more HGNC gene symbols.
+#' @param organism Character scalar: Organism short name (Ensembl convention,
+#' e.g. `"hsapiens"`).
+#' @param biomart Character scalar: BioMart name.
+#' @param host Character scalar: Host address.
 #' @param verbosity Integer: Verbosity level.
 #'
 #' @return data.frame with columns "gene", "ensembl_transcript_id" and "sequence".
@@ -22,14 +22,13 @@ gene2sequence <- function(
   organism = "hsapiens",
   biomart = "ensembl",
   host = "https://www.ensembl.org",
-  seq_type = "coding",
   verbosity = 1L
 ) {
-  # Check dependencies ----
   check_dependencies("biomaRt")
-
-  # Arguments ----
-  stopifnot(is.character(gene))
+  check_character(gene, arg_name = "gene")
+  check_scalar_character(organism, arg_name = "organism")
+  check_scalar_character(biomart, arg_name = "biomart")
+  check_scalar_character(host, arg_name = "host")
 
   if (verbosity > 0) {
     msg0("Getting sequence for gene ", highlight(gene), "...")
@@ -65,7 +64,7 @@ gene2sequence <- function(
   sequence <- biomaRt::getSequence(
     id = transcripts[["ensembl_transcript_id"]],
     type = "ensembl_transcript_id",
-    seqType = seq_type,
+    seqType = "coding",
     mart = mart,
     verbose = verbosity > 1
   )
