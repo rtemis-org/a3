@@ -4,13 +4,14 @@
 \alias{annotation_range}
 \title{Create range-based annotations for A3}
 \usage{
-annotation_range(x, type = "")
+annotation_range(x, type = NULL)
 }
 \arguments{
 \item{x}{Integer matrix with 2 columns corresponding to start and end positions of the
 annotation (1-based indexing).}
 
-\item{type}{Optional character scalar: Annotation type}
+\item{type}{Optional character scalar: Annotation type. \code{NULL} is treated as
+the empty string in the canonical A3 representation.}
 }
 \value{
 Named list with \code{index} (A3Range) and \code{type} (character)
@@ -21,7 +22,7 @@ for use with \code{create_A3()}.
 }
 \examples{
 # Create a region annotation for ranges 3-10 and 15-22, of type "repeat"
-annotation_range(matrix(c(3L, 10L, 15L, 22L), ncol = 2, byrow = TRUE), type = "repeat")
+annotation_range(rbind(c(3L, 10L), c(15L, 22L)), type = "repeat")
 }
 \author{
 EDG

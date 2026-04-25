@@ -11,14 +11,14 @@ create_A3(
   ptm = list(),
   processing = list(),
   variant = list(),
-  uniprot_id = "",
-  description = "",
-  reference = "",
-  organism = ""
+  uniprot_id = NULL,
+  description = NULL,
+  reference = NULL,
+  organism = NULL
 )
 }
 \arguments{
-\item{sequence}{Character: Amino acid sequence string.}
+\item{sequence}{Character scalar: Amino acid sequence string.}
 
 \item{site}{Named list of site annotations}
 
@@ -30,13 +30,13 @@ create_A3(
 
 \item{variant}{Named list of variant annotations}
 
-\item{uniprot_id}{Character: UniProt ID for metadata}
+\item{uniprot_id}{Optional character scalar: UniProt accession.}
 
-\item{description}{Character: Protein description for metadata}
+\item{description}{Optional character scalar: Protein description.}
 
-\item{reference}{Character: Reference for metadata}
+\item{reference}{Optional character scalar: Citation or URL.}
 
-\item{organism}{Character: Organism name for metadata}
+\item{organism}{Optional character scalar: Species name.}
 }
 \value{
 A3 object
@@ -55,7 +55,7 @@ a <- create_A3(
     Active_site = annotation_position(c(5L, 17L), type = "active site")
   ),
   region = list(
-    Domain = annotation_range(matrix(c(3L, 10L, 15L, 22L), ncol = 2, byrow = TRUE),
+    Domain = annotation_range(rbind(c(3L, 10L), c(15L, 22L)),
       type = "repeat"
     )
   ),

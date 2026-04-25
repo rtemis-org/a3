@@ -15,8 +15,8 @@ pdb_annotations(
 \arguments{
 \item{accession}{Character scalar: UniProt accession, e.g. \code{"P10636"}.}
 
-\item{pdb_id}{Character scalar: Four-character PDB ID (e.g. \code{"2mz7"}). If
-\code{NULL} (default), the top-ranked structure from PDBe is used.}
+\item{pdb_id}{Optional character scalar: Four-character PDB ID (e.g. \code{"2mz7"}). If
+\code{NULL}, the top-ranked structure from PDBe is used.}
 
 \item{pdbe_graph_url}{Character scalar: PDBe Graph API base URL.}
 

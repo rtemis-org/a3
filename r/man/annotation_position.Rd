@@ -4,12 +4,13 @@
 \alias{annotation_position}
 \title{Create position-based annotations for A3}
 \usage{
-annotation_position(x, type = "")
+annotation_position(x, type = NULL)
 }
 \arguments{
 \item{x}{Integer vector: Positions of the annotation (1-based indexing).}
 
-\item{type}{Optional character scalar: Annotation type}
+\item{type}{Optional character scalar: Annotation type. \code{NULL} is treated as
+the empty string in the canonical A3 representation.}
 }
 \value{
 Named list with \code{index} (A3Position) and \code{type} (character)

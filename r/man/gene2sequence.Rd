@@ -2,27 +2,25 @@
 % Please edit documentation in R/gene2sequence.R
 \name{gene2sequence}
 \alias{gene2sequence}
-\title{Get the sequence of a gene}
+\title{Get the coding sequence of a gene}
 \usage{
 gene2sequence(
   gene,
   organism = "hsapiens",
   biomart = "ensembl",
   host = "https://www.ensembl.org",
-  seq_type = "coding",
   verbosity = 1L
 )
 }
 \arguments{
-\item{gene}{Character: Gene name.}
+\item{gene}{Character vector: One or more HGNC gene symbols.}
 
-\item{organism}{Character: Organism name.}
+\item{organism}{Character scalar: Organism short name (Ensembl convention,
+e.g. \code{"hsapiens"}).}
 
-\item{biomart}{Character: Biomart name.}
+\item{biomart}{Character scalar: BioMart name.}
 
-\item{host}{Character: Host address.}
-
-\item{seq_type}{Character: Sequence type to retrieve. See \link[biomaRt:getSequence]{biomaRt::getSequence}.}
+\item{host}{Character scalar: Host address.}
 
 \item{verbosity}{Integer: Verbosity level.}
 }
@@ -30,7 +28,7 @@ gene2sequence(
 data.frame with columns "gene", "ensembl_transcript_id" and "sequence".
 }
 \description{
-Get the sequence of a gene
+Get the coding sequence of a gene
 }
 \examples{
 # Requires internet connection and fetches data from Ensembl using biomaRt.
