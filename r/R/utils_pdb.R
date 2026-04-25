@@ -14,8 +14,8 @@
 #' used automatically.
 #'
 #' @param accession Character scalar: UniProt accession, e.g. `"P10636"`.
-#' @param pdb_id Character scalar: Four-character PDB ID (e.g. `"2mz7"`). If
-#'   `NULL` (default), the top-ranked structure from PDBe is used.
+#' @param pdb_id Optional character scalar: Four-character PDB ID (e.g. `"2mz7"`). If
+#'   `NULL`, the top-ranked structure from PDBe is used.
 #' @param pdbe_graph_url Character scalar: PDBe Graph API base URL.
 #' @param pdbe_api_url Character scalar: PDBe REST API base URL.
 #' @param verbosity Integer scalar: Verbosity level.
@@ -48,8 +48,11 @@ pdb_annotations <- function(
   pdbe_api_url = "https://www.ebi.ac.uk/pdbe/api",
   verbosity = 1L
 ) {
-  check_inherits(accession, "character")
   check_dependencies(c("httr", "jsonlite"))
+  check_scalar_character(accession)
+  check_optional_scalar_character(pdb_id)
+  check_scalar_character(pdbe_graph_url)
+  check_scalar_character(pdbe_api_url)
 
   fetch_json <- function(url) {
     resp <- httr::GET(url)

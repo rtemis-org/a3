@@ -45,8 +45,13 @@ clinvar_variants <- function(
   batch_size = 500L,
   verbosity = 1L
 ) {
-  check_inherits(gene, "character")
   check_dependencies(c("httr", "jsonlite"))
+  check_scalar_character(gene)
+  check_character(significance)
+  max_variants <- clean_int(max_variants)
+  check_scalar_character(esearch_url)
+  check_scalar_character(esummary_url)
+  batch_size <- clean_int(batch_size)
 
   # -- Build search term ----
   valid_sig <- c(

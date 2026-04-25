@@ -23,7 +23,8 @@ uniprot_sequence <- function(
   base_url = "https://rest.uniprot.org/uniprotkb",
   verbosity = 1L
 ) {
-  check_inherits(accession, "character")
+  check_scalar_character(accession, arg_name = "accession")
+  check_scalar_character(base_url, arg_name = "base_url")
   check_dependencies("seqinr")
 
   path <- paste0(base_url, "/", accession, ".fasta")
@@ -62,7 +63,8 @@ uniprot_to_A3 <- function(
   base_url = "https://rest.uniprot.org/uniprotkb",
   verbosity = 1L
 ) {
-  check_inherits(accession, "character")
+  check_scalar_character(accession, arg_name = "accession")
+  check_scalar_character(base_url, arg_name = "base_url")
   check_dependencies(c("httr", "jsonlite"))
 
   # -- Fetch ----
@@ -153,7 +155,7 @@ uniprot_to_A3 <- function(
 
   parse_region <- function(f) {
     A3Region(
-      index = A3Range(data = matrix(c(loc_start(f), loc_end(f)), nrow = 1L)),
+      index = A3Range(data = rbind(c(loc_start(f), loc_end(f)))),
       type = region_types[[f[["type"]]]]
     )
   }
@@ -162,7 +164,7 @@ uniprot_to_A3 <- function(
     a3_type <- ptm_types[[f[["type"]]]]
     # Disulfide bond encodes a residue pair as a two-position range
     idx <- if (f[["type"]] == "Disulfide bond") {
-      A3Range(data = matrix(c(loc_start(f), loc_end(f)), nrow = 1L))
+      A3Range(data = rbind(c(loc_start(f), loc_end(f))))
     } else {
       A3Position(data = loc_start(f))
     }
@@ -175,7 +177,7 @@ uniprot_to_A3 <- function(
     idx <- if (f[["type"]] == "Initiator methionine") {
       A3Position(data = loc_start(f))
     } else {
-      A3Range(data = matrix(c(loc_start(f), loc_end(f)), nrow = 1L))
+      A3Range(data = rbind(c(loc_start(f), loc_end(f))))
     }
     A3Processing(index = idx, type = a3_type)
   }

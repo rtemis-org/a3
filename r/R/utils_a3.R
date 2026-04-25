@@ -13,6 +13,7 @@
 #' get_alphafold("P10636")
 #' }
 get_alphafold <- function(uniprotid) {
+  check_scalar_character(uniprotid, arg_name = "uniprotid")
   check_dependencies(c("httr", "jsonlite"))
   url <- paste0("https://www.alphafold.ebi.ac.uk/api/prediction/", uniprotid)
   headers <- c(
@@ -47,7 +48,8 @@ get_alphafold_pdb <- function(uniprotid) {
 #' @examples
 #' aa_sub(c("A", "R", "N", "D"), c("R2K", "N3S"))
 aa_sub <- function(x, substitutions, verbosity = 1L) {
-  stopifnot(is.character(x), is.character(substitutions))
+  check_inherits(x, "character")
+  check_inherits(substitutions, "character")
   # Split x into characters
   if (length(x) == 1) {
     x <- unlist(strsplit(x, ""))
