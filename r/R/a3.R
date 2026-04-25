@@ -655,6 +655,7 @@ method(print, A3) <- function(x, output_type = NULL, ...) {
 #' # Concatenate a character vector of single-letter amino acids into a sequence string
 #' concat(c("M", "A", "E", "P", "R"))
 concat <- function(x) {
+  check_inherits(x, "character")
   if (length(x) > 1) {
     if (any(nchar(x) != 1)) {
       cli::cli_abort(
@@ -675,7 +676,8 @@ concat <- function(x) {
 #' for use with `create_A3()`.
 #'
 #' @param x Integer vector: Positions of the annotation (1-based indexing).
-#' @param type Optional character scalar: Annotation type
+#' @param type Optional character scalar: Annotation type. `NULL` is treated as
+#' the empty string in the canonical A3 representation.
 #'
 #' @return Named list with `index` (A3Position) and `type` (character)
 #'
@@ -685,7 +687,9 @@ concat <- function(x) {
 #' @examples
 #' # Create a site annotation for positions 5 and 17, of type "active site"
 #' annotation_position(c(5L, 17L), type = "active site")
-annotation_position <- function(x, type = "") {
+annotation_position <- function(x, type = NULL) {
+  check_optional_scalar_character(type)
+  if (is.null(type)) type <- ""
   list(
     index = A3Position(data = clean_int(x)),
     type = type
@@ -700,7 +704,8 @@ annotation_position <- function(x, type = "") {
 #'
 #' @param x Integer matrix with 2 columns corresponding to start and end positions of the
 #' annotation (1-based indexing).
-#' @param type Optional character scalar: Annotation type
+#' @param type Optional character scalar: Annotation type. `NULL` is treated as
+#' the empty string in the canonical A3 representation.
 #'
 #' @return Named list with `index` (A3Range) and `type` (character)
 #'
@@ -709,8 +714,10 @@ annotation_position <- function(x, type = "") {
 #'
 #' @examples
 #' # Create a region annotation for ranges 3-10 and 15-22, of type "repeat"
-#' annotation_range(matrix(c(3L, 10L, 15L, 22L), ncol = 2, byrow = TRUE), type = "repeat")
-annotation_range <- function(x, type = "") {
+#' annotation_range(rbind(c(3L, 10L), c(15L, 22L)), type = "repeat")
+annotation_range <- function(x, type = NULL) {
+  check_optional_scalar_character(type)
+  if (is.null(type)) type <- ""
   list(
     index = A3Range(data = clean_int(x)),
     type = type
@@ -736,6 +743,7 @@ annotation_range <- function(x, type = "") {
 #' # Create a variant annotation for position 10 with info about the variant
 #' annotation_variant(10L, info = list(ref = "A", alt = "T", type = "missense"))
 annotation_variant <- function(x, info = list()) {
+  check_inherits(info, "list")
   A3Variant(
     position = A3Position(clean_int(x)),
     info = info
@@ -746,16 +754,16 @@ annotation_variant <- function(x, info = list()) {
 # %% create_A3 ----
 #' Create an A3 object from sequence, annotations, and metadata
 #'
-#' @param sequence Character: Amino acid sequence string.
+#' @param sequence Character scalar: Amino acid sequence string.
 #' @param site Named list of site annotations
 #' @param region Named list of region annotations
 #' @param ptm Named list of PTM annotations
 #' @param processing Named list of processing annotations
 #' @param variant Named list of variant annotations
-#' @param uniprot_id Character: UniProt ID for metadata
-#' @param description Character: Protein description for metadata
-#' @param reference Character: Reference for metadata
-#' @param organism Character: Organism name for metadata
+#' @param uniprot_id Optional character scalar: UniProt accession.
+#' @param description Optional character scalar: Protein description.
+#' @param reference Optional character scalar: Citation or URL.
+#' @param organism Optional character scalar: Species name.
 #'
 #' @return A3 object
 #'
@@ -773,7 +781,7 @@ annotation_variant <- function(x, info = list()) {
 #'     Active_site = annotation_position(c(5L, 17L), type = "active site")
 #'   ),
 #'   region = list(
-#'     Domain = annotation_range(matrix(c(3L, 10L, 15L, 22L), ncol = 2, byrow = TRUE),
+#'     Domain = annotation_range(rbind(c(3L, 10L), c(15L, 22L)),
 #'       type = "repeat"
 #'     )
 #'   ),
@@ -790,11 +798,25 @@ create_A3 <- function(
   ptm = list(),
   processing = list(),
   variant = list(),
-  uniprot_id = "",
-  description = "",
-  reference = "",
-  organism = ""
+  uniprot_id = NULL,
+  description = NULL,
+  reference = NULL,
+  organism = NULL
 ) {
+  check_scalar_character(sequence, arg_name = "sequence")
+  check_inherits(site, "list")
+  check_inherits(region, "list")
+  check_inherits(ptm, "list")
+  check_inherits(processing, "list")
+  check_inherits(variant, "list")
+  check_optional_scalar_character(uniprot_id)
+  check_optional_scalar_character(description)
+  check_optional_scalar_character(reference)
+  check_optional_scalar_character(organism)
+  if (is.null(uniprot_id))  uniprot_id  <- ""
+  if (is.null(description)) description <- ""
+  if (is.null(reference))   reference   <- ""
+  if (is.null(organism))    organism    <- ""
   site <- lapply(site, function(a) {
     if (S7_inherits(a, A3Site)) {
       a
@@ -1150,7 +1172,8 @@ A3from_json <- function(x, ...) {
 #' unlink(tmp)
 write_A3json <- function(x, filepath, overwrite = FALSE) {
   check_is_S7(x, A3)
-  check_inherits(filepath, "character")
+  check_scalar_character(filepath, arg_name = "filepath")
+  check_scalar_logical(overwrite, arg_name = "overwrite")
   filepath <- normalizePath(filepath, mustWork = FALSE)
   if (file.exists(filepath) && !overwrite) {
     cli::cli_abort(
@@ -1178,7 +1201,7 @@ write_A3json <- function(x, filepath, overwrite = FALSE) {
 #' a3_read <- read_A3json(tmp, verbosity = 0L)
 #' unlink(tmp)
 read_A3json <- function(filepath, verbosity = 1L) {
-  check_inherits(filepath, "character")
+  check_scalar_character(filepath, arg_name = "filepath")
   filepath <- normalizePath(filepath)
   if (!file.exists(filepath)) {
     cli::cli_abort("File {.file {filepath}} does not exist.")
