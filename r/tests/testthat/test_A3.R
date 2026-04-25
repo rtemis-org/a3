@@ -51,32 +51,32 @@ test_that("A3Position fails with invalid data", {
 # %% A3Range ----
 test_that("A3Range succeeds with valid data", {
   # Single range
-  x <- A3Range(data = matrix(c(1L, 5L), ncol = 2))
+  x <- A3Range(data = rbind(c(1L, 5L)))
   expect_s7_class(x, A3Range)
   # Two non-overlapping ranges: [1,5] and [10,15]
-  x <- A3Range(data = matrix(c(1L, 10L, 5L, 15L), ncol = 2))
+  x <- A3Range(data = rbind(c(1L, 5L), c(10L, 15L)))
   expect_s7_class(x, A3Range)
   # Adjacent ranges are permitted: [1,5] and [6,10]
-  x <- A3Range(data = matrix(c(1L, 6L, 5L, 10L), ncol = 2))
+  x <- A3Range(data = rbind(c(1L, 5L), c(6L, 10L)))
   expect_s7_class(x, A3Range)
 })
 
 test_that("A3Range fails with invalid data", {
   expect_error(
-    A3Range(data = matrix(c(0L, 5L, 10L, 15L), ncol = 2)),
+    A3Range(data = rbind(c(0L, 10L), c(5L, 15L))),
     "Range values must be positive integers."
   )
   expect_error(
-    A3Range(data = matrix(c(1.5, 5L, 10L, 15L), ncol = 2)),
+    A3Range(data = rbind(c(1.5, 10L), c(5L, 15L))),
     "object properties are invalid"
   )
   expect_error(
-    A3Range(data = matrix(c(5L, 10L, 1L, 15L), ncol = 2)),
+    A3Range(data = rbind(c(5L, 1L), c(10L, 15L))),
     "Start of range must be less than end of range."
   )
   # Overlapping ranges: [1,5] and [3,8]
   expect_error(
-    A3Range(data = matrix(c(1L, 3L, 5L, 8L), ncol = 2)),
+    A3Range(data = rbind(c(1L, 5L), c(3L, 8L))),
     "must not overlap"
   )
 })
@@ -116,10 +116,10 @@ test_that("A3Site fails with invalid index or type", {
 
 # %% A3Region ----
 test_that("A3Region succeeds with valid index and optional type", {
-  x <- A3Region(index = A3Range(data = matrix(c(1L, 10L, 5L, 12L), ncol = 2)))
+  x <- A3Region(index = A3Range(data = rbind(c(1L, 5L), c(10L, 12L))))
   expect_s7_class(x, A3Region)
   x <- A3Region(
-    index = A3Range(data = matrix(c(1L, 10L, 5L, 12L), ncol = 2)),
+    index = A3Range(data = rbind(c(1L, 5L), c(10L, 12L))),
     type = "Phosphodegron"
   )
   expect_s7_class(x, A3Region)
@@ -127,20 +127,20 @@ test_that("A3Region succeeds with valid index and optional type", {
 
 test_that("A3Region fails with invalid index or type", {
   expect_error(
-    A3Region(index = A3Range(data = matrix(c(0L, 10L, 5L, 12L), ncol = 2))),
+    A3Region(index = A3Range(data = rbind(c(0L, 5L), c(10L, 12L)))),
     "Range values must be positive integers"
   )
   expect_error(
-    A3Region(index = A3Range(data = matrix(c(1.5, 10L, 5L, 12L), ncol = 2))),
+    A3Region(index = A3Range(data = rbind(c(1.5, 5L), c(10L, 12L)))),
     "object properties are invalid"
   )
   expect_error(
-    A3Region(index = A3Range(data = matrix(c(5L, 10L, 1L, 12L), ncol = 2))),
+    A3Region(index = A3Range(data = rbind(c(5L, 1L), c(10L, 12L)))),
     "Start of range must be less than end of range"
   )
   expect_error(
     A3Region(
-      index = A3Range(data = matrix(c(1L, 10L, 5L, 12L), ncol = 2)),
+      index = A3Range(data = rbind(c(1L, 5L), c(10L, 12L))),
       type = 99L
     ),
     "object properties are invalid"
@@ -153,7 +153,7 @@ test_that("A3PTM succeeds with valid index and optional type", {
   x <- A3PTM(index = A3Position(data = c(3L, 5L, 7L)))
   expect_s7_class(x, A3PTM)
   x <- A3PTM(
-    index = A3Range(data = matrix(c(3L, 10L, 7L, 12L), ncol = 2)),
+    index = A3Range(data = rbind(c(3L, 7L), c(10L, 12L))),
     type = "phosphorylation"
   )
   expect_s7_class(x, A3PTM)
@@ -179,7 +179,7 @@ test_that("A3Processing succeeds with valid index and optional type", {
   x <- A3Processing(index = A3Position(data = c(3L, 5L, 7L)))
   expect_s7_class(x, A3Processing)
   x <- A3Processing(
-    index = A3Range(data = matrix(c(3L, 10L, 7L, 12L), ncol = 2)),
+    index = A3Range(data = rbind(c(3L, 7L), c(10L, 12L))),
     type = "signal peptide"
   )
   expect_s7_class(x, A3Processing)
@@ -230,7 +230,7 @@ test_that("A3Annotation succeeds with valid annotations", {
     site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
     region = list(
       KXGS = A3Region(
-        index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
+        index = A3Range(data = rbind(c(1L, 10L)))
       )
     )
   )
@@ -239,7 +239,7 @@ test_that("A3Annotation succeeds with valid annotations", {
     site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
     region = list(
       KXGS = A3Region(
-        index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
+        index = A3Range(data = rbind(c(1L, 10L)))
       )
     ),
     ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L))))
@@ -249,13 +249,13 @@ test_that("A3Annotation succeeds with valid annotations", {
     site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
     region = list(
       KXGS = A3Region(
-        index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
+        index = A3Range(data = rbind(c(1L, 10L)))
       )
     ),
     ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
     processing = list(
       `Signal peptide` = A3Processing(
-        index = A3Range(data = matrix(c(20L, 30L), ncol = 2))
+        index = A3Range(data = rbind(c(20L, 30L)))
       )
     )
   )
@@ -264,13 +264,13 @@ test_that("A3Annotation succeeds with valid annotations", {
     site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
     region = list(
       KXGS = A3Region(
-        index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
+        index = A3Range(data = rbind(c(1L, 10L)))
       )
     ),
     ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
     processing = list(
       `Signal peptide` = A3Processing(
-        index = A3Range(data = matrix(c(20L, 30L), ncol = 2))
+        index = A3Range(data = rbind(c(20L, 30L)))
       )
     ),
     variant = list(A3Variant(
@@ -403,13 +403,13 @@ test_that("A3 can be instantiated with valid sequence and annotations", {
       site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
       region = list(
         KXGS = A3Region(
-          index = A3Range(data = matrix(c(1L, 10L), ncol = 2))
+          index = A3Range(data = rbind(c(1L, 10L)))
         )
       ),
       ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
       processing = list(
         `Signal peptide` = A3Processing(
-          index = A3Range(data = matrix(c(8L, 12L), ncol = 2))
+          index = A3Range(data = rbind(c(8L, 12L)))
         )
       ),
       variant = list(A3Variant(
@@ -450,7 +450,7 @@ test_that("create_A3 succeeds with valid inputs", {
     ),
     region = list(
       Phosphodegron = annotation_range(
-        matrix(c(1, 10), ncol = 2),
+        rbind(c(1, 10)),
         type = "functional region"
       )
     ),
@@ -461,7 +461,7 @@ test_that("create_A3 succeeds with valid inputs", {
     ),
     processing = list(
       `Signal peptide` = annotation_range(
-        matrix(c(8, 12), ncol = 2)
+        rbind(c(8, 12))
       )
     ),
     variant = list(
@@ -487,13 +487,13 @@ test_that("to_json produces valid JSON with canonical structure", {
       `Active site` = annotation_position(c(3, 5), type = "activeSite")
     ),
     region = list(
-      KXGS = annotation_range(matrix(c(1L, 10L), ncol = 2))
+      KXGS = annotation_range(rbind(c(1L, 10L)))
     ),
     ptm = list(
       Phosphorylation = annotation_position(c(7))
     ),
     processing = list(
-      `Signal peptide` = annotation_range(matrix(c(8L, 12L), ncol = 2))
+      `Signal peptide` = annotation_range(rbind(c(8L, 12L)))
     ),
     variant = list(
       annotation_variant(15, info = list(from = "R", to = "H"))
@@ -520,13 +520,13 @@ test_that("A3from_json round-trips to_json with zero loss", {
       `Active site` = annotation_position(c(3, 5), type = "activeSite")
     ),
     region = list(
-      KXGS = annotation_range(matrix(c(1L, 10L), ncol = 2))
+      KXGS = annotation_range(rbind(c(1L, 10L)))
     ),
     ptm = list(
       Phosphorylation = annotation_position(c(7))
     ),
     processing = list(
-      `Signal peptide` = annotation_range(matrix(c(8L, 12L), ncol = 2))
+      `Signal peptide` = annotation_range(rbind(c(8L, 12L)))
     ),
     variant = list(
       annotation_variant(15, info = list(from = "R", to = "H"))
