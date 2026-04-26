@@ -388,6 +388,84 @@ describe("metadata validation", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  describe("uniprot_id validation", () => {
+    const parseWithUniprot = (uniprot_id: string) =>
+      safeParseA3({
+        ...MINIMAL_VALID,
+        metadata: { ...MINIMAL_VALID.metadata, uniprot_id },
+      });
+
+    it.each([
+      ["P12345", "short form (P*)"],
+      ["O12345", "short form (O*)"],
+      ["Q9Y6K9", "short form (Q*)"],
+      ["A0A0A0AAA1", "long form (10 chars)"],
+      ["A0A024", "long form (6 chars)"],
+    ])("accepts %s — %s", (uniprot_id) => {
+      const result = parseWithUniprot(uniprot_id);
+      expect(result.success).toBe(true);
+    });
+
+    it.each([
+      ["P", "single character"],
+      ["P1", "too short"],
+      ["P12345X", "too long for short form"],
+      ["X12345", "X is reserved for long form, not short"],
+      ["p12345", "lowercase rejected"],
+      ["12345", "no leading letter"],
+    ])("rejects %s — %s", (uniprot_id) => {
+      const result = parseWithUniprot(uniprot_id);
+      expect(result.success).toBe(false);
+    });
+
+    it("trims whitespace before validating", () => {
+      const result = parseWithUniprot("  P12345  ");
+      expect(result.success).toBe(true);
+      if (result.success) expect(result.data.metadata.uniprot_id).toBe("P12345");
+    });
+  });
+
+  describe("optional text metadata validation", () => {
+    const parseWithMeta = (metadata: Partial<A3Data["metadata"]>) =>
+      safeParseA3({
+        ...MINIMAL_VALID,
+        metadata: { ...MINIMAL_VALID.metadata, ...metadata },
+      });
+
+    it.each([
+      "description",
+      "reference",
+      "organism",
+    ] as const)("rejects single-character %s", (field) => {
+      const result = parseWithMeta({ [field]: "X" });
+      expect(result.success).toBe(false);
+    });
+
+    it.each([
+      "description",
+      "reference",
+      "organism",
+    ] as const)("accepts empty %s (field is optional)", (field) => {
+      const result = parseWithMeta({ [field]: "" });
+      expect(result.success).toBe(true);
+    });
+
+    it.each([
+      "description",
+      "reference",
+      "organism",
+    ] as const)("accepts 2+ character %s", (field) => {
+      const result = parseWithMeta({ [field]: "ok" });
+      expect(result.success).toBe(true);
+    });
+
+    it("trims whitespace and treats whitespace-only as empty", () => {
+      const result = parseWithMeta({ description: "   " });
+      expect(result.success).toBe(true);
+      if (result.success) expect(result.data.metadata.description).toBe("");
+    });
+  });
 });
 
 describe("top-level strictness", () => {

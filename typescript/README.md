@@ -146,6 +146,21 @@ Serialize to a JSON string. Default indent is 2; pass 0 for compact output.
 
 Works directly — `toJSON()` is implemented.
 
+## Index Parsers
+
+Free-form text parsers for the `index` field of annotation entries. Accept the kinds of strings users type or paste from spreadsheets and text files (whitespace, commas, newlines, tabs as separators) and return sorted/structured arrays. Errors are returned in a result envelope rather than thrown.
+
+```ts
+import { parsePositions, parseRanges, parseIndex } from "@rtemis/a3"
+
+parsePositions("10, 25\n42")        // { ok: true, value: [10, 25, 42] }
+parseRanges("1-50, 75-100")          // { ok: true, value: [[1, 50], [75, 100]] }
+parseIndex("82, 109")                // { ok: true, value: { kind: "positions", values: [82, 109] } }
+parseIndex("30-45")                  // { ok: true, value: { kind: "ranges",   values: [[30, 45]] } }
+```
+
+`formatPositions` / `formatRanges` produce the inverse string form, suitable for round-tripping into a text input.
+
 ## Exported Types
 
 ```ts
@@ -156,6 +171,8 @@ import type {
   A3PositionData,
   A3RangeData,
   A3FlexData,
+  ParseResult,
+  ParsedIndex,
 } from "@rtemis/a3"
 ```
 

@@ -2,8 +2,10 @@ import { z } from "zod";
 import { isJsonCompatible, sortRanges } from "./normalize";
 import { A3_SCHEMA_URI, A3_VERSION, type A3Data, type VariantData } from "./schemas";
 
-// ── Internal Zod schemas ──────────────────────────────────────────────────────
-// These are implementation details and are intentionally not exported.
+// ── Zod schemas ───────────────────────────────────────────────────────────────
+// Sub-schemas are kept module-private; only `A3InputSchema` is part of the
+// public API so consumers can use it directly with form libraries (e.g.
+// `zodResolver(A3InputSchema)` from `@hookform/resolvers/zod`).
 
 const PositionSchema = z.number().int().min(1);
 
@@ -71,16 +73,38 @@ const AnnotationsSchema = z
   })
   .strict();
 
+// Official UniProt accession patterns:
+//   short:  [OPQ][0-9][A-Z0-9]{3}[0-9]                                   (6 chars)
+//   long:   [A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9]([A-Z][A-Z0-9]{2}[0-9])?   (6 or 10 chars)
+const UNIPROT_ACCESSION =
+  /^[OPQ][0-9][A-Z0-9]{3}[0-9]$|^[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9]([A-Z][A-Z0-9]{2}[0-9])?$/;
+
+/** Optional free-text metadata: empty is allowed; if non-empty, must be ≥ 2 chars. */
+const optionalText = (label: string) =>
+  z
+    .string()
+    .trim()
+    .default("")
+    .refine((s) => s === "" || s.length >= 2, {
+      message: `${label} must be at least 2 characters`,
+    });
+
 const MetadataSchema = z
   .object({
-    uniprot_id: z.string().default(""),
-    description: z.string().default(""),
-    reference: z.string().default(""),
-    organism: z.string().default(""),
+    uniprot_id: z
+      .string()
+      .trim()
+      .default("")
+      .refine((s) => s === "" || UNIPROT_ACCESSION.test(s), {
+        message: "uniprot_id must be a valid UniProt accession (e.g. P12345 or A0A0A0AAA1)",
+      }),
+    description: optionalText("description"),
+    reference: optionalText("reference"),
+    organism: optionalText("organism"),
   })
   .strict();
 
-const A3InputSchema: z.ZodType<A3Data> = z
+export const A3InputSchema: z.ZodType<A3Data> = z
   .object({
     $schema: z.literal(A3_SCHEMA_URI, {
       error: () => ({ message: `'$schema' must be '${A3_SCHEMA_URI}'` }),

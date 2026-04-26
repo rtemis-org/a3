@@ -1,6 +1,6 @@
 {
   "name": "@rtemis/a3",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "Amino Acid Annotation (A3) format — TypeScript implementation",
   "homepage": "https://a3.rtemis.org",
   "keywords": [
@@ -50,10 +50,10 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.10",
-    "@types/node": "^25.5.2",
-    "typescript": "^6.0.2",
-    "vite": "^6",
-    "vitest": "^4.1.2"
+    "@biomejs/biome": "^2.4.13",
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.3",
+    "vite": "^6.4.2",
+    "vitest": "^4.1.5"
   }
 }
