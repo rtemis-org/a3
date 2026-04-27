@@ -27,10 +27,10 @@ rtemis-a3 = "0.1"
 
 The `a3` binary validates an A3 JSON file and prints a summary.
 
-**Install:**
+**Install from crates.io:**
 
 ```sh
-cargo install --path .
+cargo install rtemis-a3
 ```
 
 **Usage:**
