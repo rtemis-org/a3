@@ -11,6 +11,12 @@ which provides A3 implementations in R, Python, Julia, TypeScript, and Rust.
 
 ## Installation
 
+### CRAN
+
+```r
+install.packages("rtemis.a3")
+```
+
 ### R-universe
 
 ```r
