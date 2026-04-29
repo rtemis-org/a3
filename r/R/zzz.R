@@ -10,7 +10,7 @@ rtemis.a3_version <- utils::packageVersion("rtemis.a3")
 .onAttach <- function(libname, pkgname) {
   packageStartupMessage(
     paste0(
-      ".:",
+      "  .:",
       pkgname,
       " ",
       rtemis.a3_version,
