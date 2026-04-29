@@ -14,7 +14,7 @@
 
 A3 monorepo: specification and cross-language implementations of the Amino Acid Annotation format
 
-[![rtemis a3 logo](https://www.rtemis.org/a3.svg)](https://a3.rtemis.org)
+[![rtemis a3 logo](https://www.rtemis.org/rtemis-a3-cover.avif)](https://a3.rtemis.org)
 
 ## Schema
 
