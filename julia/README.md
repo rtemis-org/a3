@@ -7,15 +7,18 @@ Julia implementation of the [A3 (Amino Acid Annotation) format](../specs/a3.md).
 
 ## Installation
 
+### From the registry
+
+```julia
+using Pkg
+Pkg.add("RtemisA3")
+```
+
+### From GitHub
+
 ```julia
 using Pkg
 Pkg.add(url="https://github.com/rtemis-org/a3", subdir="julia/RtemisA3")
-```
-
-Or from a local clone:
-
-```julia
-Pkg.develop(path="julia/RtemisA3")
 ```
 
 ## Usage
