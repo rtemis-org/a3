@@ -1,6 +1,5 @@
 [![CRAN status](https://www.r-pkg.org/badges/version/rtemis.a3)](https://CRAN.R-project.org/package=rtemis.a3) [![rtemis.a3 status badge](https://rtemis-org.r-universe.dev/rtemis.a3/badges/version)](https://rtemis-org.r-universe.dev/rtemis.a3)
 [![PyPI version](https://img.shields.io/pypi/v/rtemis_a3.svg)](https://pypi.org/project/rtemis_a3/)
-[![version](https://juliahub.com/docs/General/RtemisA3/stable/version.svg)](https://juliahub.com/ui/Packages/General/RtemisA3)
 [![Julia](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/rtemis-org/a3/main/julia/RtemisA3/Project.toml&query=$.version&label=Julia&logo=julia&color=9558B2)](https://juliahub.com/ui/Packages/General/RtemisA3)
 [![npm version](https://img.shields.io/npm/v/@rtemis/a3.svg)](https://www.npmjs.com/package/@rtemis/a3)
 [![JSR](https://jsr.io/badges/@rtemis/a3)](https://jsr.io/@rtemis/a3)
