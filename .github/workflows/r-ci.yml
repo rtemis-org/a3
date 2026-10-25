@@ -5,63 +5,79 @@ on:
   pull_request:
     paths:
       - r/**
-      - spec/conformance/**
+      - .github/workflows/r-ci.yml
+      - .gitattributes
+      - schema/**
+      - spec/**
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - r/**
-      - spec/conformance/**
+      - .github/workflows/r-ci.yml
+      - .gitattributes
+      - schema/**
+      - spec/**
 
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
-  group: r-ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   r-cmd-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-
+    timeout-minutes: 30
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
-
     steps:
       - uses: actions/checkout@v6
-
       - uses: r-lib/actions/setup-pandoc@v2
-
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
           use-public-rspm: true
           extra-repositories: https://rtemis-org.r-universe.dev
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: r
           extra-packages: any::rcmdcheck
           needs: check
+          # Save dependencies even when a later check fails.
+          cache: always
           cache-version: 1
-
       - uses: r-lib/actions/check-r-package@v2
+        timeout-minutes: 20
         with:
           working-directory: r
           upload-snapshots: true
+          error-on: '"note"'
           args: 'c("--no-manual", "--as-cran")'
           build_args: 'c("--no-manual", "--compact-vignettes=gs+qpdf")'
-
-      # A plain check does not catch a package used unconditionally from
-      # Suggests. This does, and it is the check that would have caught
-      # jsonlite being in Suggests with 13 unguarded call sites.
+      # Exercise the declared dependency boundary independently of Suggests.
       - name: Check with dependencies only
+        timeout-minutes: 5
         working-directory: r
         env:
-          _R_CHECK_DEPENDS_ONLY_: true
-          _R_CHECK_FORCE_SUGGESTS_: false
+          _R_CHECK_DEPENDS_ONLY_: 'true'
+          _R_CHECK_FORCE_SUGGESTS_: 'false'
+        shell: Rscript {0}
         run: |
-          R CMD build .
-          R CMD check rtemis.a3_*.tar.gz --no-manual
+          rcmdcheck::rcmdcheck(
+            ".", args = "--no-manual", build_args = "--no-manual",
+            error_on = "note", check_dir = "check-depends-only"
+          )
+      - name: Preserve incomplete check diagnostics
+        if: ${{ failure() || cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: check-diagnostics
+          path: |
+            r/check
+            r/check-depends-only
+          if-no-files-found: ignore
