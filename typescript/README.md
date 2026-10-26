@@ -58,7 +58,7 @@ try {
   const a3 = A3.fromJSONText(jsonString)
 } catch (e) {
   if (e instanceof A3ValidationError) {
-    console.error(e.issues) // Zod issue array with field paths
+    console.error(e.issues) // A3Issue[]: { code, path, message }
   }
 }
 ```

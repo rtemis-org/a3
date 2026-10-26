@@ -22,7 +22,7 @@ uniprot_to_A3(
 }
 \description{
 Fetches the UniProt JSON for the given accession via the UniProt REST API,
-maps all sequence annotations to the A3 schema (see \code{specs/uniprot.md}), and
+maps all sequence annotations to the A3 schema, and
 returns a fully populated \code{A3} object.
 }
 \details{

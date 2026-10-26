@@ -38,7 +38,7 @@ uniprot_sequence <- function(
 #' Fetch a UniProt entry and parse it into an A3 object
 #'
 #' Fetches the UniProt JSON for the given accession via the UniProt REST API,
-#' maps all sequence annotations to the A3 schema (see `specs/uniprot.md`), and
+#' maps all sequence annotations to the A3 schema, and
 #' returns a fully populated `A3` object.
 #'
 #' Feature types not mapped to A3 (mutagenesis, alternative sequences, sequence

@@ -83,7 +83,7 @@ issue in the earliest failing stage is reported at once:
 
 1. **Envelope** — the document is an object and declares itself A3 1.0.0
 2. **Structural** — types, shapes, required members, charset, annotation names
-3. **Intra-field** — positions >= 1 and deduplicated, ranges ordered and disjoint
+3. **Intra-field** — positions >= 1 and unique, ranges ordered and disjoint
 4. **Contextual** — bounds against `length(sequence)`, variant `from` residue
 
 Stages short-circuit: a stage runs only if every earlier stage produced no

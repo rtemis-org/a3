@@ -1,10 +1,8 @@
 name: TypeScript Publish (JSR)
 
-# Manual only. Nothing about this repo publishes on a push or a tag, and that is
-# deliberate — see __dev/ops.md. What CI buys here is not automation but
-# provenance: JSR mints a SLSA attestation in the Sigstore transparency log only
-# for packages published from GitHub Actions over OIDC. A `deno publish` from a
-# laptop cannot produce one, which is why the package scored 0/1 on provenance.
+# Runs on manual dispatch only; no push or tag publishes. Publishing from GitHub
+# Actions over OIDC lets JSR record a SLSA provenance attestation in the Sigstore
+# transparency log. A `deno publish` from a local machine records none.
 on:
   workflow_dispatch:
     inputs:

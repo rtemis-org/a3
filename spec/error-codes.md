@@ -32,16 +32,11 @@ issues at all, anywhere in the document.
 | 3 | Intra-field | every value is internally consistent |
 | 4 | Contextual | every value is consistent with the rest of the document |
 
-Short-circuiting is not an optimization, it is a correctness requirement. A
-document whose `sequence` fails Stage 2 has no known length, so running Stage 4
-against it would emit one spurious out-of-bounds issue per annotated position —
-several hundred for a real file, none of them a problem the user has.
+A document whose `sequence` fails Stage 2 has no length, so Stage 4 does not
+run against it.
 
 The stage boundary is the whole document, not the subtree. A Stage 2 issue in
-`metadata` suppresses Stage 3 issues in `annotations`. This is coarse on
-purpose: a per-subtree rule would need a defined subtree granularity in five
-languages, and the cost of the coarse rule is one extra round-trip on documents
-that are broken in two different ways at once.
+`metadata` suppresses Stage 3 issues in `annotations`.
 
 ### The guard rule
 
@@ -74,7 +69,7 @@ not an object produce two `A3E_ENTRY_NOT_OBJECT` issues, one per entry.
   is checked on the constructor path only and has no code here.
 - **Anything about the content of a metadata field.** `uniprot_id`,
   `description`, `reference`, and `organism` are free text. See
-  [`README.md`](README.md), "Validation is not linting".
+  [`README.md`](README.md), "Scope of validation".
 
 ---
 
@@ -89,8 +84,7 @@ not an object produce two `A3E_ENTRY_NOT_OBJECT` issues, one per entry.
 | `A3E_ENVELOPE_VERSION_MISMATCH` | field | `/a3_version` | ✓ | `a3_version` is present and is not exactly `"1.0.0"` (including when it is not a string) |
 
 `a3_version` is a constant, not a range. `"1.1.0"` and `"2.0.0"` are both
-`A3E_ENVELOPE_VERSION_MISMATCH`. A supported-range policy is future work and is
-noted as a limitation rather than implemented.
+`A3E_ENVELOPE_VERSION_MISMATCH`.
 
 The `_MISMATCH` codes absorb wrong-type cases. The schema expresses both fields
 with `const`, and a `const` failure is one failure regardless of why.
@@ -196,13 +190,10 @@ non-integral number such as `2.5` is *other*.
 
 **Sorting is normalization, not a rule.** Positions are sorted ascending and
 ranges are sorted by start (then by end) as part of parsing. An unsorted index is
-valid and is silently sorted. There is deliberately no `A3E_POS_UNSORTED` or
-`A3E_RANGE_UNSORTED`: normalization and validation cannot both own ordering, and
-all five implementations already sort.
+valid and is sorted. There is no `A3E_POS_UNSORTED` or `A3E_RANGE_UNSORTED`.
 
 **Duplication is a rule, not normalization.** Duplicate positions are rejected,
-not deduplicated. A repeated position is far more often a merge mistake than an
-intention, and silently collapsing it discards the evidence.
+not deduplicated.
 
 `A3E_POS_DUPLICATE` is emitted **once per distinct repeated value**, not once
 per excess occurrence. An index of `[7, 7, 7]` produces one issue naming `7`.
@@ -224,33 +215,29 @@ only because Stages 1–3 passed.
 | `A3E_VARIANT_RESIDUE_MISMATCH` | field | `/annotations/variant/N/from` | ✓ | a variant's `from` residue is not the residue at `position` |
 
 `A3E_RANGE_OUT_OF_BOUNDS` points at the **range element**, not at the endpoint
-inside it. Stage 3 has already established `start < end`, so only `end` can
-exceed the sequence length and naming which endpoint carries no information.
+inside it. Stage 3 has established `start < end`, so only `end` can exceed the
+sequence length.
 
 ### `A3E_VARIANT_RESIDUE_MISMATCH`
 
-Deliberately narrow. `from` is an optional member of an open record, so the rule
-fires only when:
+`from` is an optional member of an open record. The rule fires only when:
 
 - the record has a `from` member, **and**
 - it is a string of exactly one character, **and**
 - that character, compared case-insensitively, is not the residue at `position`
 
 Absence of `from` is not an error. A `from` of any other shape — a number, a
-three-letter code, an empty string, `"Arg"` — is not this rule's problem and is
-preserved verbatim, because the field is open and A3 does not own its meaning.
-The comparison is case-insensitive because `sequence` is case-folded during
-normalization and `from` is not.
+three-letter code, an empty string, `"Arg"` — does not trigger the rule and is
+preserved verbatim. The comparison is case-insensitive because `sequence` is
+case-folded during normalization and `from` is not.
 
-This is the only rule that catches a biological error rather than a structural
-one. It is what makes a variant list imported against the wrong isoform fail
-loudly instead of silently annotating the wrong residues.
+The rule detects a variant list whose coordinates refer to a different isoform
+of the sequence.
 
 ---
 
 ## Coverage
 
 Every code above is exercised by at least one case in
-[`conformance/`](conformance/), in isolation. A meta-test fails if a code has no
-case. Adding a code without adding a case breaks the build on purpose — the
-registry and the corpus drift within two months otherwise.
+[`conformance/`](conformance/), in isolation. The corpus generator and the Rust
+runner fail if a code has no case.

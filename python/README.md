@@ -99,7 +99,7 @@ json_string = a3_to_json(a3, indent=2) # pretty-printed
 
 All five annotation families are always present in output. Each annotation
 entry is `{ index, type }` — bare arrays are rejected. Positions are
-1-based, sorted, and deduplicated. Ranges are `[start, end]` pairs
+1-based and sorted; duplicates are rejected. Ranges are `[start, end]` pairs
 (`start < end`), sorted by start; overlapping ranges are rejected.
 
 ## API

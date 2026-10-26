@@ -3,19 +3,9 @@
 Every validation issue carries a `path`: an **RFC 6901 JSON Pointer** into the
 document being validated. This file is normative.
 
-## Why JSON Pointer
-
-- It is the locator JSON Schema itself uses. Draft 2020-12's standard output
-  format gives every error an `instanceLocation`, which is a JSON Pointer. A3
-  issue paths are the same thing, so A3's output and an off-the-shelf validator's
-  output are directly comparable.
-- Escaping is decided by the RFC rather than by us. Annotation names containing
-  `.`, `[`, spaces, parentheses, or commas need no special handling and no schema
-  restriction.
-- Array subscripts are 0-based by definition of the standard, which removes the
-  live trap of 1-based sequence positions sitting next to 0-based array indices.
-- Constructing one is three lines in every language, and the rules cannot drift
-  because they are not ours.
+A JSON Pointer is the same locator as `instanceLocation` in the JSON Schema
+draft 2020-12 output format. Annotation names are unrestricted; the RFC's
+escaping covers every name.
 
 ## The grammar
 
@@ -77,8 +67,8 @@ Escaping in practice:
 | `a~b` | `/annotations/site/a~0b/index` |
 | `` (empty string) | `/annotations/site/` |
 
-The last row is not a typo. A pointer whose final reference token is empty
-denotes the member named `""`, which is exactly what `A3E_NAME_EMPTY` reports.
+In the last row the final reference token is empty: the pointer denotes the
+member named `""`, which is what `A3E_NAME_EMPTY` reports.
 
 ## Rule 1 — missing members point at where the member would be
 
@@ -92,13 +82,10 @@ A3E_VARIANT_POSITION_MISSING    →  /annotations/variant/0/position
 A3E_ENVELOPE_SCHEMA_MISSING     →  /$schema
 ```
 
-This is a **deliberate divergence** from JSON Schema's output format, where a
-`required` failure reports the containing object as `instanceLocation`. A3
-diverges because the pointer's job here is to tell an editor or form which field
-to attach the message to, and "the document root" is not an answer a user
-interface can use. RFC 6901 defines a pointer as a locator; it does not require
-that the locator resolve to an existing value, and failure to resolve is
-precisely the "this is missing" signal.
+JSON Schema's output format reports a `required` failure at the containing
+object. A3 reports it at the missing member's pointer, so an editor or form can
+attach the issue to the field. RFC 6901 does not require a pointer to resolve to
+an existing value.
 
 ## Rule 2 — element subscripts appear only for per-element rules
 
@@ -119,10 +106,9 @@ rule that is a property of the **whole collection** stops at the collection.
 | `A3E_RANGE_OVERLAP` | whole-set | `/annotations/region/foo/index` |
 | `A3E_INDEX_MIXED` | whole-set | `/annotations/ptm/foo/index` |
 
-A duplicate is not a property of either of the two positions involved, and an
-overlap is not a property of either range — both are properties of the set. This
-is the rule a reimplementer is most likely to get wrong, so the registry marks
-every code with its kind.
+A duplicate is not a property of either position involved, and an overlap is
+not a property of either range; both are properties of the set. The registry
+marks every code with its kind.
 
 ## Rule 3 — subscripts index the document, not the sequence
 
@@ -151,10 +137,8 @@ Stage 2 order:  [5, 0, -3]      ← nothing fires here
 Stage 3 order:  [-3, 0, 5]      ← A3E_POS_NOT_POSITIVE at /index/0 and /index/1
 ```
 
-The alternative — carrying original subscripts through the sort — costs
-bookkeeping in five languages to produce a locator pointing at a value the user
-would have to re-find anyway. Consumers that need to highlight the original text
-should match on the value, not the subscript.
+A consumer that highlights the original text matches on the value, not the
+subscript.
 
 ## Rule 5 — path ranges over the document, not the object model
 
@@ -166,10 +150,9 @@ value lives in the file.
 
 ## Rule 6 — order is not contractual
 
-Issues are emitted in document order where that is natural, but the corpus
-compares issue **sets**. Two implementations that produce the same
-`{code, path}` pairs in different orders both conform. Do not sort defensively,
-and do not write a test that depends on order.
+The corpus compares issue multisets. Two implementations that produce the same
+`{code, path}` pairs in different orders both conform, and a test that depends on
+order tests nothing in the contract.
 
 ## Constructing a pointer
 

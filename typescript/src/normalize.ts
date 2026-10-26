@@ -1,6 +1,6 @@
 /**
  * Sort and deduplicate a position array.
- * Input positions are assumed valid (positive integers) — validated by Zod before calling.
+ * Input positions are assumed valid (positive integers) — validated by the caller.
  */
 export function sortDedup(arr: readonly number[]): number[] {
   return [...new Set(arr)].sort((a, b) => a - b);
@@ -8,8 +8,8 @@ export function sortDedup(arr: readonly number[]): number[] {
 
 /**
  * Sort ranges by start position (then end position for ties).
- * Input ranges are assumed valid (start < end) — validated by Zod before calling.
- * Overlap detection is handled separately in the schema layer.
+ * Input ranges are assumed valid (start < end) — validated by the caller.
+ * Overlap is a document-level rule, reported by `validate` as `A3E_RANGE_OVERLAP`.
  */
 export function sortRanges(arr: readonly [number, number][]): [number, number][] {
   return [...arr].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
