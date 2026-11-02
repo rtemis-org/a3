@@ -16,7 +16,6 @@ __dev/
 *.Rcheck/
 *.tar.gz
 docs
-
-# pkgdown
 pkgdown/
 _pkgdown.yml
+cran-comments.md
