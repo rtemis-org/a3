@@ -77,7 +77,7 @@ needs specific `jsonlite` settings that a caller should not have to know.
 
 Validation is **collect-all**: a document is checked in four stages, every issue
 in the earliest failing stage is reported at once, and each issue carries a
-stable code and an [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901) JSON
+stable code and an [RFC 6901](https://www.rfc-editor.org/info/rfc6901/) JSON
 Pointer. Codes and paths are identical across all five implementations; messages
 are not, and may be reworded freely.
 

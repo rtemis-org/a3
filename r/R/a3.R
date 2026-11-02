@@ -351,7 +351,7 @@ A3Metadata <- new_class(
     organism = ""
   ) {
     new_object(
-      Metadata,
+      Metadata(),
       uniprot_id = uniprot_id,
       description = description,
       reference = reference,
