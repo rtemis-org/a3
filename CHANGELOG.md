@@ -1,14 +1,31 @@
 # Changelog
 
-## Unreleased: R S7 compatibility
-
-**R only.** Updates for compatibility with S7 > 0.2.2.
-
 All five A3 implementations are released together from one commit whenever a
 change reaches the format, the validator, or the conformance corpus. Versions
 differ per package because each started from a different number. A change
 confined to one implementation's own packaging ships on its own, and its entry
 says which packages it covers.
+
+## 2026-11-02 — R S7 compatibility
+
+| Package | Version |
+|---|---|
+| `rtemis.a3` (R) | 0.6.1 |
+
+**R only.** Nothing in the A3 format, the validator, or the conformance corpus
+changed, so the other four implementations stay at their current versions.
+`a3_version` remains `"1.0.0"`.
+
+### Fixed
+
+- **`A3Metadata()` constructs its parent as an instance**, `Metadata()`, which
+  S7 releases after 0.2.2 require of `new_object()`.
+- **The namespace imports S7's `:=` and excludes data.table's**, which removes
+  the import-replacement warning on load under S7 releases after 0.2.2.
+- **Load, unload, and build hooks register and clean up S7 methods** through
+  `S7_on_load()`, `S7_on_unload()`, and `S7_on_build()` when S7 provides them,
+  and through `methods_register()` with earlier S7 releases. The minimum S7
+  version is unchanged.
 
 ## 2026-08-07 — TypeScript provenance
 

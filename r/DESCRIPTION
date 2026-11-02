@@ -1,7 +1,7 @@
 Package: rtemis.a3
 Title: Amino Acid Annotation (A3) Format
-Version: 0.6.0
-Date: 2026-08-06
+Version: 0.6.1
+Date: 2026-11-02
 Authors@R:
     person(given = "E.D.", family = "Gennatas", role = c("aut", "cre", "cph"),
            email = "gennatas@gmail.com",

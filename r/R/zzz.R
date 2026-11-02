@@ -5,7 +5,7 @@ rtemis.a3_version <- utils::packageVersion("rtemis.a3")
 
 .onLoad <- function(libname, pkgname) {
   if ("S7_on_load" %in% getNamespaceExports("S7")) {
-    S7::S7_on_load()
+    getExportedValue("S7", "S7_on_load")()
   } else {
     S7::methods_register()
   }
@@ -27,10 +27,10 @@ rtemis.a3_version <- utils::packageVersion("rtemis.a3")
 
 .onUnload <- function(libpath) {
   if ("S7_on_unload" %in% getNamespaceExports("S7")) {
-    S7::S7_on_unload()
+    getExportedValue("S7", "S7_on_unload")()
   }
 }
 
 if ("S7_on_build" %in% getNamespaceExports("S7")) {
-  S7::S7_on_build()
+  getExportedValue("S7", "S7_on_build")()
 }

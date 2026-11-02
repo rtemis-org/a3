@@ -100,7 +100,7 @@ A3
 Validation is **collect-all**. A document is checked in four stages — envelope,
 structural, intra-field, contextual — and every issue in the earliest failing
 stage is reported at once. Each issue carries a stable `code` and an
-[RFC 6901](https://www.rfc-editor.org/rfc/rfc6901) JSON Pointer `path`, both of
+[RFC 6901](https://www.rfc-editor.org/info/rfc6901/) JSON Pointer `path`, both of
 which are identical across the R, Python, Julia, TypeScript, and Rust
 implementations of A3. Messages are for humans and are not contractual.
 
