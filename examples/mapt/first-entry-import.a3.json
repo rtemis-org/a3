@@ -1,0 +1,303 @@
+{
+  "$schema": "https://schema.rtemis.org/a3/v1/schema.json",
+  "a3_version": "1.0.0",
+  "sequence": "MAEPRQEFEVMEDHAGTYGLGDRKDQGGYTMHQDQEGDTDAGLKESPLQTPTEDGSEEPGSETSDAKSTPTAEDVTAPLVDEGAPGKQAAAQPHTEIPEGTTAEEAGIGDTPSLEDEAAGHVTQARMVSKSKDGTGSDDKKAKGADGKTKIATPRGAAPPGQKGQANATRIPAKTPPAPKTPPSSGEPPKSGDRSGYSSPGSPGTPGSRSRTPSLPTPPTREPKKVAVVRTPPKSPSSAKSRLQTAPVPMPDLKNVKSKIGSTENLKHQPGGGKVQIINKKLDLSNVQSKCGSKDNIKHVPGGGSVQIVYKPVDLSKVTSKCGSLGNIHHKPGGGQVEVKSEKLDFKDRVQSKIGSLDNITHVPGGGNKKIETHKLTFRENAKAKTDHGAEIVYKSPVVSGDTSPRHLSNVSSTGSIDMVDSPQLATLADEVSASLAKQGL",
+  "annotations": {
+    "site": {
+      "AT8 epitope": {
+        "index": [202, 205],
+        "type": "phospho-epitope"
+      },
+      "AT100 epitope": {
+        "index": [212, 214],
+        "type": "phospho-epitope"
+      },
+      "AT180 epitope": {
+        "index": [231],
+        "type": "phospho-epitope"
+      },
+      "AT270 epitope": {
+        "index": [181],
+        "type": "phospho-epitope"
+      },
+      "PHF-1 epitope": {
+        "index": [396, 404],
+        "type": "phospho-epitope"
+      },
+      "12E8 epitope": {
+        "index": [262, 356],
+        "type": "phospho-epitope"
+      }
+    },
+    "region": {
+      "R1": {
+        "index": [
+          [244, 274]
+        ],
+        "type": "repeat"
+      },
+      "R2": {
+        "index": [
+          [275, 305]
+        ],
+        "type": "repeat"
+      },
+      "R3": {
+        "index": [
+          [306, 336]
+        ],
+        "type": "repeat"
+      },
+      "R4": {
+        "index": [
+          [337, 368]
+        ],
+        "type": "repeat"
+      },
+      "Disordered": {
+        "index": [
+          [1, 256],
+          [398, 417]
+        ],
+        "type": "region"
+      },
+      "Microtubule-binding domain": {
+        "index": [
+          [244, 368]
+        ],
+        "type": "region"
+      },
+      "N-terminal inserts": {
+        "index": [
+          [45, 73],
+          [74, 102]
+        ],
+        "type": "alternatively spliced segment"
+      }
+    },
+    "ptm": {
+      "Phosphorylation": {
+        "index": [18, 29, 46, 61, 69, 71, 111, 153, 169, 175, 181, 185, 191, 195, 197, 198, 199, 202, 205, 212, 214, 217, 231, 235, 237, 262, 285, 293, 305, 324, 352, 356, 394, 396, 400, 403, 404, 409, 416, 422, 427],
+        "type": "phosphorylation"
+      },
+      "Acetylation": {
+        "index": [2, 163, 225, 259, 281, 290, 298, 311, 317, 321, 331, 343, 347, 369, 385],
+        "type": "acetylation"
+      },
+      "Methylation": {
+        "index": [155, 163, 259, 311, 349],
+        "type": "methylation"
+      },
+      "Deamidation": {
+        "index": [167, 279],
+        "type": "deamidation"
+      },
+      "Glycation": {
+        "index": [87, 132, 150, 163, 174, 225, 234, 259, 280, 281, 347, 353, 369],
+        "type": "glycation"
+      },
+      "O-GlcNAcylation": {
+        "index": [208, 238, 400],
+        "type": "O-GlcNAcylation"
+      },
+      "Ubiquitination": {
+        "index": [44, 254, 259, 267, 281, 298, 311, 317, 321, 331, 343, 347, 353, 369, 375, 385],
+        "type": "ubiquitination"
+      },
+      "Disulfide bond": {
+        "index": [291, 322],
+        "type": "disulfide bond"
+      }
+    },
+    "processing": {
+      "Initiator methionine": {
+        "index": [1],
+        "type": "initiator methionine removed"
+      },
+      "Chain": {
+        "index": [
+          [2, 441]
+        ],
+        "type": "chain"
+      },
+      "Caspase cleavage": {
+        "index": [421],
+        "type": "proteolytic cleavage"
+      },
+      "AEP cleavage": {
+        "index": [255, 368],
+        "type": "proteolytic cleavage"
+      }
+    },
+    "variant": [
+      {
+        "position": 250,
+        "from": "N",
+        "source": "ClinVar",
+        "id": "VCV004056341.1"
+      },
+      {
+        "position": 226,
+        "from": "L",
+        "source": "ClinVar",
+        "id": "VCV003778831.1"
+      },
+      {
+        "position": 243,
+        "from": "P",
+        "source": "ClinVar",
+        "id": "VCV003075676.1"
+      },
+      {
+        "position": 275,
+        "from": "P",
+        "source": "ClinVar",
+        "id": "VCV002573094.1"
+      },
+      {
+        "position": 304,
+        "from": "P",
+        "source": "ClinVar",
+        "id": "VCV000807628.3"
+      },
+      {
+        "position": 247,
+        "from": "Q",
+        "source": "ClinVar",
+        "id": "VCV000665222.12"
+      },
+      {
+        "position": 362,
+        "from": "H",
+        "source": "ClinVar",
+        "id": "VCV000599620.1"
+      },
+      {
+        "position": 613,
+        "from": "N",
+        "source": "ClinVar",
+        "id": "VCV000098243.38"
+      },
+      {
+        "position": 652,
+        "from": "G",
+        "source": "ClinVar",
+        "id": "VCV000098228.5"
+      },
+      {
+        "position": 632,
+        "from": "L",
+        "source": "ClinVar",
+        "id": "VCV000098226.3"
+      },
+      {
+        "position": 303,
+        "from": "G",
+        "source": "ClinVar",
+        "id": "VCV000014269.2"
+      },
+      {
+        "position": 317,
+        "from": "K",
+        "source": "ClinVar",
+        "id": "VCV000014268.2"
+      },
+      {
+        "position": 352,
+        "from": "S",
+        "source": "ClinVar",
+        "id": "VCV000014267.2"
+      },
+      {
+        "position": 266,
+        "from": "L",
+        "source": "ClinVar",
+        "id": "VCV000014266.6"
+      },
+      {
+        "position": 5,
+        "from": "R",
+        "source": "ClinVar",
+        "id": "VCV000014263.4"
+      },
+      {
+        "position": 320,
+        "from": "S",
+        "source": "ClinVar",
+        "id": "VCV000014262.5"
+      },
+      {
+        "position": 369,
+        "from": "K",
+        "source": "ClinVar",
+        "id": "VCV000014260.1"
+      },
+      {
+        "position": 257,
+        "from": "K",
+        "source": "ClinVar",
+        "id": "VCV000014259.1"
+      },
+      {
+        "position": 342,
+        "from": "E",
+        "source": "ClinVar",
+        "id": "VCV000014258.2"
+      },
+      {
+        "position": 301,
+        "from": "P",
+        "source": "ClinVar",
+        "id": "VCV000014256.4"
+      },
+      {
+        "position": 389,
+        "from": "G",
+        "source": "ClinVar",
+        "id": "VCV000014255.10"
+      },
+      {
+        "position": 305,
+        "from": "S",
+        "source": "ClinVar",
+        "id": "VCV000014254.3"
+      },
+      {
+        "position": 279,
+        "from": "N",
+        "source": "ClinVar",
+        "id": "VCV000014253.37"
+      },
+      {
+        "position": 337,
+        "from": "V",
+        "source": "ClinVar",
+        "id": "VCV000014252.13"
+      },
+      {
+        "position": 406,
+        "from": "R",
+        "source": "ClinVar",
+        "id": "VCV000014247.59"
+      },
+      {
+        "position": 272,
+        "from": "G",
+        "source": "ClinVar",
+        "id": "VCV000014246.4"
+      },
+      {
+        "position": 301,
+        "from": "P",
+        "source": "ClinVar",
+        "id": "VCV000014245.60"
+      }
+    ]
+  },
+  "metadata": {
+    "uniprot_id": "P10636-8",
+    "description": "Microtubule-associated protein tau, isoform 2N4R (UniProtKB isoform Tau-F; RefSeq NP_005901.2)",
+    "reference": "UniProtKB P10636; ClinVar; literature.tsv; see mapt.provenance.json",
+    "organism": "Homo sapiens"
+  }
+}

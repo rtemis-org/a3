@@ -1,0 +1,153 @@
+{
+  "document": "examples/mapt.a3.json",
+  "built": "2026-11-11T19:21:43-0800",
+  "sequence": {
+    "uniprot": "P10636-8",
+    "isoform": "Tau-F",
+    "refseq": "NP_005901.2",
+    "length": 441,
+    "identical_to_refseq": true,
+    "reconstructed_from_canonical": true
+  },
+  "sources": {
+    "uniprotkb": {
+      "accession": "P10636",
+      "release": "2026_04",
+      "release_date": "04-November-2026",
+      "entry_version": 296,
+      "sequence_version": 5,
+      "canonical_length": 758,
+      "license": "CC BY 4.0"
+    },
+    "clinvar": {
+      "query": "MAPT[gene]",
+      "retrieved": "Thu, 12 Nov 2026 03:06:34 GMT",
+      "records_listed": 691,
+      "classifications_included": ["Pathogenic", "Likely pathogenic", "Pathogenic/Likely pathogenic"],
+      "records_included": 27,
+      "protein_reference": "NP_005901.2"
+    },
+    "literature": [
+      {
+        "name": "AT8 epitope",
+        "reference": "Goedert M, Jakes R, Vanmechelen E (1995) Monoclonal antibody AT8 recognises tau protein phosphorylated at both serine 202 and threonine 205. Neurosci Lett 189(3):167-169",
+        "doi": "10.1016/0304-3940(95)11484-e",
+        "pmid": "7624036"
+      },
+      {
+        "name": "AT100 epitope",
+        "reference": "Zheng-Fischhofer Q, Biernat J, Mandelkow EM, Illenberger S, Godemann R, Mandelkow E (1998) Sequential phosphorylation of Tau by glycogen synthase kinase-3beta and protein kinase A at Thr212 and Ser214 generates the Alzheimer-specific epitope of antibody AT100 and requires a paired-helical-filament-like conformation. Eur J Biochem 252(3):542-552",
+        "doi": "10.1046/j.1432-1327.1998.2520542.x",
+        "pmid": "9546672"
+      },
+      {
+        "name": "AT180 epitope",
+        "reference": "Goedert M, Jakes R, Crowther RA, Cohen P, Vanmechelen E, Vandermeeren M, Cras P (1994) Epitope mapping of monoclonal antibodies to the paired helical filaments of Alzheimer's disease: identification of phosphorylation sites in tau protein. Biochem J 301(3):871-877",
+        "doi": "10.1042/bj3010871",
+        "pmid": "7519852"
+      },
+      {
+        "name": "AT270 epitope",
+        "reference": "Goedert M, Jakes R, Crowther RA, Cohen P, Vanmechelen E, Vandermeeren M, Cras P (1994) Epitope mapping of monoclonal antibodies to the paired helical filaments of Alzheimer's disease: identification of phosphorylation sites in tau protein. Biochem J 301(3):871-877",
+        "doi": "10.1042/bj3010871",
+        "pmid": "7519852"
+      },
+      {
+        "name": "PHF-1 epitope",
+        "reference": "Otvos L Jr, Feiner L, Lang E, Szendrei GI, Goedert M, Lee VM (1994) Monoclonal antibody PHF-1 recognizes tau protein phosphorylated at serine residues 396 and 404. J Neurosci Res 39(6):669-673",
+        "doi": "10.1002/jnr.490390607",
+        "pmid": "7534834"
+      },
+      {
+        "name": "12E8 epitope",
+        "reference": "Seubert P, Mawal-Dewan M, Barbour R, et al. (1995) Detection of phosphorylated Ser262 in fetal tau, adult tau, and paired helical filament tau. J Biol Chem 270(32):18917-18922",
+        "doi": "10.1074/jbc.270.32.18917",
+        "pmid": "7642549"
+      },
+      {
+        "name": "Caspase cleavage",
+        "reference": "Gamblin TC, Chen F, Zambrano A, et al. (2003) Caspase cleavage of tau: linking amyloid and neurofibrillary tangles in Alzheimer's disease. Proc Natl Acad Sci USA 100(17):10032-10037",
+        "doi": "10.1073/pnas.1630428100",
+        "pmid": "12888622"
+      },
+      {
+        "name": "AEP cleavage",
+        "reference": "Zhang Z, Song M, Liu X, et al. (2014) Cleavage of tau by asparagine endopeptidase mediates the neurofibrillary pathology in Alzheimer's disease. Nat Med 20(11):1254-1262",
+        "doi": "10.1038/nm.3700",
+        "pmid": "25326800"
+      }
+    ]
+  },
+  "counts": {
+    "site": {
+      "AT8 epitope": 2,
+      "AT100 epitope": 2,
+      "AT180 epitope": 1,
+      "AT270 epitope": 1,
+      "PHF-1 epitope": 2,
+      "12E8 epitope": 2
+    },
+    "region": {
+      "R1": 1,
+      "R2": 1,
+      "R3": 1,
+      "R4": 1,
+      "Disordered": 2,
+      "Microtubule-binding domain": 1,
+      "N-terminal inserts": 2
+    },
+    "ptm": {
+      "Phosphorylation": 41,
+      "Acetylation": 15,
+      "Methylation": 5,
+      "Deamidation": 2,
+      "Glycation": 13,
+      "O-GlcNAcylation": 3,
+      "Ubiquitination": 16,
+      "Disulfide bond": 2
+    },
+    "processing": {
+      "Initiator methionine": 1,
+      "Chain": 1,
+      "Caspase cleavage": 1,
+      "AEP cleavage": 2
+    },
+    "variant": {
+      "UniProtKB": 25,
+      "ClinVar": 27
+    }
+  },
+  "excluded": {
+    "UniProtKB Compositional bias: feature type not included": 14,
+    "UniProtKB Helix: feature type not included": 6,
+    "UniProtKB Beta strand: feature type not included": 21,
+    "UniProtKB Turn: feature type not included": 3,
+    "UniProtKB Mutagenesis: feature type not included": 14,
+    "UniProtKB Sequence conflict: feature type not included": 6,
+    "UniProtKB Site: feature type not included": 31,
+    "UniProtKB Alternative sequence: used for the coordinate map and the N-terminal inserts, not annotated": 8,
+    "UniProtKB modification: absent from the isoform": 1,
+    "UniProtKB Natural variant: absent from the isoform": 5,
+    "ClinVar: classification not pathogenic or likely pathogenic": 597,
+    "ClinVar: pathogenic or likely pathogenic, not MAPT alone": 58,
+    "ClinVar: no single-residue change on NP_005901.2 (noncoding, splice, multi-residue, or outside the isoform)": 9
+  },
+  "first_entry_import": {
+    "description": "ClinVar records above, positioned by the first single-residue entry of the esummary `protein_change` field instead of the HGVS expression on NP_005901.2 and validated against the same sequence.",
+    "document": "first-entry-import.a3.json",
+    "records": 27,
+    "records_at_refseq_position": 18,
+    "records_displaced": ["VCV004056341.1", "VCV003778831.1", "VCV003075676.1", "VCV002573094.1", "VCV000807628.3", "VCV000665222.12", "VCV000098243.38", "VCV000098228.5", "VCV000098226.3"],
+    "records_flagged": ["VCV004056341.1", "VCV003778831.1", "VCV003075676.1", "VCV002573094.1", "VCV000807628.3", "VCV000665222.12", "VCV000098243.38", "VCV000098228.5", "VCV000098226.3"],
+    "displaced_not_flagged": [],
+    "flagged_not_displaced": [],
+    "issues": {
+      "A3E_VARIANT_OUT_OF_BOUNDS": 3,
+      "A3E_VARIANT_RESIDUE_MISMATCH": 6
+    }
+  },
+  "r": {
+    "version": "R version 4.6.2 (2026-10-29)",
+    "rtemis.a3": "0.6.1"
+  }
+}

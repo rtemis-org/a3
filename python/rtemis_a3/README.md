@@ -1,11 +1,8 @@
 # rtemis-a3
 
-Python implementation of the **Amino Acid Annotation (A3)** format —
-a structured JSON format for amino acid sequences with site, region, PTM,
-processing, and variant annotations.
+Python implementation of the **Amino Acid Annotation (A3)** format — a structured JSON format for amino acid sequences with site, region, PTM, processing, and variant annotations.
 
-Part of the [rtemis-org/a3](https://github.com/rtemis-org/a3) monorepo,
-which provides A3 implementations in Python, TypeScript, R, Julia, and Rust.
+Part of the [rtemis-org/a3](https://github.com/rtemis-org/a3) monorepo, which provides A3 implementations in Python, TypeScript, R, Julia, and Rust.
 
 ## Installation
 
@@ -15,7 +12,7 @@ pip install rtemis-a3
 uv add rtemis-a3
 ```
 
-## Quick Start
+## Usage
 
 ```python
 from rtemis.a3 import create_a3
@@ -96,10 +93,7 @@ json_string = a3_to_json(a3, indent=2) # pretty-printed
 }
 ```
 
-All five annotation families are always present in output. Each annotation
-entry is `{ index, type }` — bare arrays are rejected. Positions are
-1-based and sorted; duplicates are rejected. Ranges are `[start, end]` pairs
-(`start < end`), sorted by start; overlapping ranges are rejected.
+All five annotation families are always present in output. Each annotation entry is `{ index, type }` — bare arrays are rejected. Positions are 1-based and sorted; duplicates are rejected. Ranges are `[start, end]` pairs (`start < end`), sorted by start; overlapping ranges are rejected.
 
 ## API
 
@@ -140,16 +134,12 @@ A3
      ├── uniprot_id, description, reference, organism
 ```
 
-All models are immutable (`frozen=True`). Users never construct them directly —
-use `create_a3` or `a3_from_json` instead.
+All models are immutable (`frozen=True`). Users never construct them directly — use `create_a3` or `a3_from_json` instead.
 
 ## Canonical Schema
 
-See [`schema/a3.schema.json`](https://github.com/rtemis-org/a3/blob/main/schema/a3.schema.json)
-for the schema that defines which documents are valid, and
-[`spec/`](https://github.com/rtemis-org/a3/tree/main/spec) for the conformance
-contract shared by all five implementations.
+See [`schema/a3.schema.json`](https://github.com/rtemis-org/a3/blob/main/schema/a3.schema.json) for the schema that defines which documents are valid, and [`spec/`](https://github.com/rtemis-org/a3/tree/main/spec) for the conformance contract shared by all five implementations.
 
 ## License
 
-[MPL-2.0](https://www.mozilla.org/en-US/MPL/2.0/)
+[BSD 3-Clause](https://opensource.org/license/bsd-3-clause)

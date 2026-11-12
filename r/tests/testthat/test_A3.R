@@ -748,3 +748,20 @@ test_that("read_A3json reports valid A3 version", {
     "valid A3 1\\.0\\.0"
   )
 })
+
+test_that("write_A3json() writes a named variant list as a JSON array", {
+  a3 <- create_A3(
+    "MAEPRQEFEVMEDHAGTYGLGDRK",
+    variant = list(
+      R5L = annotation_variant(5L, info = list(from = "R", to = "L")),
+      E7K = annotation_variant(7L, info = list(from = "E", to = "K"))
+    )
+  )
+  tmp <- tempfile(fileext = ".json")
+  on.exit(unlink(tmp))
+  write_A3json(a3, tmp)
+  expect_identical(nrow(validate_A3json(tmp)), 0L)
+  raw <- jsonlite::fromJSON(tmp, simplifyVector = FALSE)
+  expect_null(names(raw[["annotations"]][["variant"]]))
+  expect_length(raw[["annotations"]][["variant"]], 2L)
+})

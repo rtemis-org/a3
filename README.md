@@ -1,16 +1,6 @@
-[![CRAN status](https://www.r-pkg.org/badges/version/rtemis.a3)](https://CRAN.R-project.org/package=rtemis.a3) [![rtemis.a3 status badge](https://rtemis-org.r-universe.dev/rtemis.a3/badges/version)](https://rtemis-org.r-universe.dev/rtemis.a3)
-[![PyPI version](https://img.shields.io/pypi/v/rtemis_a3.svg)](https://pypi.org/project/rtemis_a3/)
-[![Julia](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/rtemis-org/a3/main/julia/RtemisA3/Project.toml&query=$.version&label=Julia&logo=julia&color=9558B2)](https://juliahub.com/ui/Packages/General/RtemisA3)
-[![npm version](https://img.shields.io/npm/v/@rtemis/a3.svg)](https://www.npmjs.com/package/@rtemis/a3)
-[![JSR](https://jsr.io/badges/@rtemis/a3)](https://jsr.io/@rtemis/a3)
-[![Crates.io Version](https://img.shields.io/crates/v/rtemis_a3)](https://crates.io/crates/rtemis_a3)
+[![CRAN status](https://www.r-pkg.org/badges/version/rtemis.a3)](https://CRAN.R-project.org/package=rtemis.a3) [![rtemis.a3 status badge](https://rtemis-org.r-universe.dev/rtemis.a3/badges/version)](https://rtemis-org.r-universe.dev/rtemis.a3) [![PyPI version](https://img.shields.io/pypi/v/rtemis_a3.svg)](https://pypi.org/project/rtemis_a3/) [![Julia](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/rtemis-org/a3/main/julia/RtemisA3/Project.toml&query=$.version&label=Julia&logo=julia&color=9558B2)](https://juliahub.com/ui/Packages/General/RtemisA3) [![npm version](https://img.shields.io/npm/v/@rtemis/a3.svg)](https://www.npmjs.com/package/@rtemis/a3) [![JSR](https://jsr.io/badges/@rtemis/a3)](https://jsr.io/@rtemis/a3) [![Crates.io Version](https://img.shields.io/crates/v/rtemis_a3)](https://crates.io/crates/rtemis_a3)
 
-[![r-ci](https://github.com/rtemis-org/a3/actions/workflows/r-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/r-ci.yml)
-[![python-ci](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml)
-[![julia-ci](https://github.com/rtemis-org/a3/actions/workflows/julia-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/julia-ci.yml)
-[![typescript-ci](https://github.com/rtemis-org/a3/actions/workflows/typescript-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/typescript-ci.yml)
-[![rust-ci](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml)
-[![conformance](https://github.com/rtemis-org/a3/actions/workflows/conformance.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/conformance.yml)
+[![r-ci](https://github.com/rtemis-org/a3/actions/workflows/r-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/r-ci.yml) [![python-ci](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml) [![julia-ci](https://github.com/rtemis-org/a3/actions/workflows/julia-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/julia-ci.yml) [![typescript-ci](https://github.com/rtemis-org/a3/actions/workflows/typescript-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/typescript-ci.yml) [![rust-ci](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml) [![conformance](https://github.com/rtemis-org/a3/actions/workflows/conformance.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/conformance.yml)
 
 # A3
 
@@ -24,22 +14,13 @@ A3 monorepo: specification and cross-language implementations of the Amino Acid 
 
 ## Specification
 
-The `spec/` directory holds the language-agnostic conformance contract that all
-five implementations are held to:
+The `spec/` directory holds the language-agnostic conformance contract that all five implementations are held to:
 
-- [`spec/error-codes.md`](spec/error-codes.md): the rule registry — one stable
-  code per validation rule, with its stage and the path it reports
-- [`spec/error-paths.md`](spec/error-paths.md): the path grammar — every issue
-  carries an RFC 6901 JSON Pointer to the offending value
-- [`spec/conformance/`](spec/conformance/): the shared conformance corpus, read
-  by all five implementations from one copy
+- [`spec/error-codes.md`](spec/error-codes.md): the rule registry — one stable code per validation rule, with its stage and the path it reports
+- [`spec/error-paths.md`](spec/error-paths.md): the path grammar — every issue carries an RFC 6901 JSON Pointer to the offending value
+- [`spec/conformance/`](spec/conformance/): the shared conformance corpus, read by all five implementations from one copy
 
-Conformance is exact, not approximate. Given the same document, all five
-implementations report the same set of `{code, path}` pairs from the same
-validation stage — codes and JSON Pointer paths are contractual, message wording
-is not. Every implementation is run against the one shared corpus in CI on every
-change, so a divergence fails the build rather than surfacing later as a
-cross-language bug.
+Conformance is exact, not approximate. Given the same document, all five implementations report the same set of `{code, path}` pairs from the same validation stage — codes and JSON Pointer paths are contractual, message wording is not. Every implementation is run against the one shared corpus in CI on every change, so a divergence fails the build rather than surfacing later as a cross-language bug.
 
 ## Implementation
 
@@ -51,9 +32,7 @@ cross-language bug.
 
 ## Cross-language API
 
-The five APIs are idiomatic per language but structurally identical: the same
-operations, the same arity, the same return shapes. A reader moving between
-languages should not have to guess.
+The five APIs are idiomatic per language and structurally identical: the same operations, the same arity, and the same return shapes.
 
 | Operation | R | Python | TypeScript | Julia | Rust |
 |---|---|---|---|---|---|
@@ -69,26 +48,18 @@ languages should not have to guess.
 | Issue list on failure | condition `issues` | `err.issues` | `err.issues` | `err.issues` | `err.issues()` |
 | Issue stage | `issues[["stage"]]` | `err.stage` | `err.stage` | `stage(err)` | `err.stage()` |
 
-Rust has no file helpers because the `a3` CLI covers that use. R's non-throwing
-entry point takes a path rather than a parsed value, because R's parse step
-needs specific `jsonlite` settings that a caller should not have to know.
+Rust has no file helpers; the `a3` CLI covers that use. R's non-throwing entry point takes a path, and applies the `jsonlite` settings that R's parse step requires.
 
 ## Validation
 
-Validation is **collect-all**: a document is checked in four stages, every issue
-in the earliest failing stage is reported at once, and each issue carries a
-stable code and an [RFC 6901](https://www.rfc-editor.org/info/rfc6901/) JSON
-Pointer. Codes and paths are identical across all five implementations; messages
-are not, and may be reworded freely.
+Validation is **collect-all**: a document is checked in four stages, every issue in the earliest failing stage is reported at once, and each issue carries a stable code and an [RFC 6901](https://www.rfc-editor.org/info/rfc6901/) JSON Pointer. Codes and paths are identical across all five implementations; messages are not, and may be reworded freely.
 
 ```
 [A3E_POS_OUT_OF_BOUNDS] /annotations/site/Active site/index/2:
   position 99 is out of bounds for a sequence of length 24 (must be 1-24)
 ```
 
-Reading a **document** collects every issue; calling a **constructor** fails
-fast with one corrective message. That split is deliberate — see
-[`spec/README.md`](spec/README.md).
+Reading a **document** collects every issue; calling a **constructor** stops at the first issue with one corrective message ([`spec/README.md`](spec/README.md)).
 
 ## Development
 
@@ -101,17 +72,13 @@ Recipes are in the [`justfile`](justfile); `just --list` shows them all.
 | `just corpus` | regenerate `spec/conformance/` from its generator |
 | `just check` | everything CI runs |
 
-Changing validation? Read [`spec/README.md`](spec/README.md) first — codes and
-paths are contractual, and a rule must land in all five at once.
+Changing validation? Read [`spec/README.md`](spec/README.md) first — codes and paths are contractual, and a rule must land in all five at once.
 
-Releases are manual and unautomated; the five packages carry different version
-numbers but ship from one commit, tagged once for the Zenodo DOI.
+Releases are manual and unautomated; the five packages carry different version numbers but ship from one commit, tagged once for the Zenodo DOI.
 
 ## Licensing
 
-The R package is licensed `GPL (>= 3)`; it imports `rtemis.core`, which is
-itself GPL-licensed. The Python, TypeScript, Julia, and Rust packages are
-licensed `MPL-2.0`. This split is deliberate, not an oversight.
+The five packages, the specification, the schema, and the conformance corpus are licensed BSD 3-Clause ([`LICENSE`](LICENSE)). The UniProtKB content in `examples/` is distributed by the UniProt Consortium under [CC BY 4.0](https://www.uniprot.org/help/license); the ClinVar records are from [NCBI ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/).
 
 ## Visualization
 

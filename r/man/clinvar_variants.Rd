@@ -2,59 +2,66 @@
 % Please edit documentation in R/utils_clinvar.R
 \name{clinvar_variants}
 \alias{clinvar_variants}
-\title{Fetch ClinVar variants for a gene and parse them into A3Variant objects}
+\title{Fetch ClinVar variants for a gene, positioned on one RefSeq protein}
 \usage{
 clinvar_variants(
   gene,
-  significance = c("pathogenic", "likely_pathogenic"),
-  max_variants = 500L,
-  esearch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi",
-  esummary_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi",
-  batch_size = 500L,
+  protein,
+  classification = c("Pathogenic", "Likely pathogenic", "Pathogenic/Likely pathogenic"),
+  eutils_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils",
   verbosity = 1L
 )
 }
 \arguments{
 \item{gene}{Character scalar: HGNC gene symbol, e.g. \code{"MAPT"}.}
 
-\item{significance}{Character vector: Clinical significance filter. Any
-combination of \code{"pathogenic"}, \code{"likely_pathogenic"},
-\code{"uncertain_significance"}, \code{"likely_benign"}, \code{"benign"}. Pass \code{NULL}
-to fetch all records regardless of significance.}
+\item{protein}{Character scalar: RefSeq protein accession with version
+whose coordinates the variants use, e.g. \code{"NP_005901.2"} for tau isoform
+2N4R. The A3 document's sequence must be this protein's sequence.}
 
-\item{max_variants}{Integer scalar: Maximum number of ClinVar records to
-fetch after filtering. Defaults to \code{500L}.}
+\item{classification}{Character vector: Aggregate germline classifications
+to keep, compared exactly with ClinVar's
+\code{germline_classification.description}. \code{NULL} keeps every record.}
 
-\item{esearch_url}{Character scalar: NCBI E-utilities esearch endpoint.}
-
-\item{esummary_url}{Character scalar: NCBI E-utilities esummary endpoint.}
-
-\item{batch_size}{Integer scalar: Number of UIDs per esummary request.
-NCBI recommends no more than 500 per request.}
+\item{eutils_url}{Character scalar: Base URL of NCBI E-utilities.}
 
 \item{verbosity}{Integer scalar: Verbosity level.}
 }
 \value{
-Named list of \code{A3Variant} objects. Names use \verb{\{from\}\{position\}\{to\}}
-notation (e.g. \code{"R406W"}), with a numeric suffix to disambiguate
-duplicates.
+Named list of \code{A3Variant} objects, ordered by position. Names use
+\verb{\{from\}\{position\}\{to\}} notation (e.g. \code{"P301L"}, \code{"N279del"}), with a
+numeric suffix to disambiguate duplicates.
 }
 \description{
-Queries the NCBI ClinVar database via E-utilities for all variants
-associated with a gene, and returns those with protein-level amino acid
-changes as a named list of \code{A3Variant} objects.
+Lists every ClinVar record for \code{gene} through NCBI E-utilities, keeps the
+records whose only gene is \code{gene} and whose aggregate germline
+classification is in \code{classification}, and returns one \code{A3Variant} per
+record with a single-residue change on \code{protein}.
 }
 \details{
-Variants without a parseable protein change (intronic, regulatory, etc.)
-are silently skipped.
+The position, reference residue, and alternate residue come from the
+record's HGVS protein expression on \code{protein} (for example
+\code{NP_005901.2:p.Pro301Leu}). ClinVar's summary field \code{protein_change} lists
+the change on every RefSeq isoform without naming the isoform, so it does
+not determine a position. A record with no single-residue change on
+\code{protein} (noncoding, splice-site, frameshift, or multi-residue changes, and
+changes in exons the isoform lacks) is skipped and counted in a message.
+
+Supported changes are missense (\code{P301L}), nonsense (\verb{R5*}), and deletion of
+one residue (\code{N279del}). A deletion record has no \code{to} member.
+
+Each variant's \code{info} holds \code{from}, \code{to}, \code{type} (\code{"missense"},
+\code{"nonsense"}, or \code{"deletion"}), \code{source} (\code{"ClinVar"}), \code{id} (the VCV
+accession with its version), \code{hgvs_p}, \code{clinical_significance},
+\code{review_status}, and \code{conditions} (a character vector of condition names).
 }
 \examples{
 # Requires internet connection and fetches data from ClinVar.
 \dontrun{
-# Pathogenic and likely pathogenic variants (default)
-mapt_variants <- clinvar_variants("MAPT")
-# All variants regardless of significance
-mapt_all <- clinvar_variants("MAPT", significance = NULL)
+# Pathogenic and likely pathogenic MAPT variants on tau isoform 2N4R
+mapt_variants <- clinvar_variants("MAPT", protein = "NP_005901.2")
+mapt_seq <- uniprot_sequence("P10636-8")
+a3 <- create_A3(mapt_seq, variant = mapt_variants, uniprot_id = "P10636-8")
 }
 }
 \author{

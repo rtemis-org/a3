@@ -37,21 +37,18 @@ describe("mapt.a3.json (canonical format)", () => {
     const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     const data = a3.toData();
-    expect(data.annotations.site).toHaveProperty("Disease_associated_variant");
-    expect(data.annotations.site).toHaveProperty("N-terminal Repeat");
+    expect(data.annotations.site).toHaveProperty("AT8 epitope");
+    expect(data.annotations.site["AT8 epitope"]?.index).toEqual([202, 205]);
+    expect(data.annotations.site).toHaveProperty("PHF-1 epitope");
   });
 
   it("contains expected region annotations", async () => {
     const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     const data = a3.toData();
-    expect(data.annotations.region).toHaveProperty("KXGS");
-    expect(data.annotations.region.KXGS?.index).toEqual([
-      [259, 262],
-      [290, 293],
-      [321, 324],
-      [353, 356],
-    ]);
+    expect(data.annotations.region).toHaveProperty("R1");
+    expect(data.annotations.region.R1?.index).toEqual([[244, 274]]);
+    expect(data.annotations.region.R4?.index).toEqual([[337, 368]]);
   });
 
   it("contains expected PTM annotations", async () => {
@@ -66,8 +63,9 @@ describe("mapt.a3.json (canonical format)", () => {
     const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
     const meta = a3.toData().metadata;
-    expect(meta.uniprot_id).toBe("P10636");
-    expect(meta.description).toContain("Tau");
+    expect(meta.uniprot_id).toBe("P10636-8");
+    expect(meta.description).toContain("tau");
+    expect(meta.organism).toBe("Homo sapiens");
   });
 
   it("round-trips: parse → serialize → parse gives identical data", async () => {
@@ -82,6 +80,16 @@ describe("mapt.a3.json (canonical format)", () => {
     expect(a3b.toData().annotations.site).toEqual(a3.toData().annotations.site);
     expect(a3b.toData().annotations.region).toEqual(a3.toData().annotations.region);
     expect(a3b.toData().annotations.ptm).toEqual(a3.toData().annotations.ptm);
+    expect(a3b.toData().annotations.processing).toEqual(a3.toData().annotations.processing);
+    expect(a3b.toData().annotations.variant).toEqual(a3.toData().annotations.variant);
+  });
+
+  it("contains ClinVar variant records on 2N4R coordinates", async () => {
+    const text = await readExample("mapt.a3.json");
+    const a3 = A3.fromJSONText(text);
+    const p301l = a3.variantsAt(301).filter((v) => v.source === "ClinVar" && v.to === "L");
+    expect(p301l).toHaveLength(1);
+    expect(p301l[0]?.from).toBe("P");
   });
 
   it("serialized output always has all five annotation families", async () => {

@@ -1,0 +1,4 @@
+# Reviewed findings of style_scan.py that are not defects.
+# Format: <CATEGORY>[:<term>] <path-glob>[:<line>]  # <reason>
+
+FILLER:just justfile  # `just` is the command runner

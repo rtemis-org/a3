@@ -47,6 +47,20 @@ jobs:
             exit 1
           fi
 
+  schema-matches-corpus:
+    name: Schema agrees with the corpus
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v7
+
+      # Every valid case conforms to the schema; an invalid case conforms to
+      # it only when every issue it expects is a cross-field rule.
+      - name: Validate the corpus against schema/a3.schema.json
+        run: uv run --no-project --with jsonschema python schema/check_corpus.py
+
   conformance:
     name: All five implementations
     runs-on: ubuntu-latest
