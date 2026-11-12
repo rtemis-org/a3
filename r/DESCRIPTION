@@ -1,7 +1,7 @@
 Package: rtemis.a3
 Title: Amino Acid Annotation (A3) Format
-Version: 0.6.1
-Date: 2026-11-02
+Version: 0.6.2
+Date: 2026-11-11
 Authors@R:
     person(given = "E.D.", family = "Gennatas", role = c("aut", "cre", "cph"),
            email = "gennatas@gmail.com",
@@ -13,7 +13,7 @@ Description: Implements the Amino Acid Annotation (A3) format using 'S7' classes
     'UniProt', 'AlphaFold', 'PDBe', 'ClinVar', and 'Ensembl'.
 URL: https://a3.rtemis.org
 BugReports: https://github.com/rtemis-org/a3/issues
-License: GPL (>= 3)
+License: BSD_3_clause + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Depends:
@@ -30,6 +30,7 @@ Suggests:
     biomaRt,
     httr,
     seqinr,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    xml2
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.1

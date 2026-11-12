@@ -15,9 +15,9 @@ zero rows when the document is valid.
 }
 \description{
 Returns every validation issue found in the earliest failing stage, as a data
-frame. An empty data frame means the document is valid. Use this when you
-want to present issues in a form or a report; use \code{\link[=read_A3json]{read_A3json()}} when you
-want the object and an error if it cannot be built.
+frame. An empty data frame means the document is valid. It suits forms and
+reports; \code{\link[=read_A3json]{read_A3json()}} returns the object, or an error if the object cannot
+be built.
 }
 \details{
 Each issue carries a stable \code{code} and an RFC 6901 JSON Pointer \code{path}, both

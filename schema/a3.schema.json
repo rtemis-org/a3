@@ -98,6 +98,7 @@
     "positionIndex": {
       "type": "array",
       "items": { "$ref": "#/$defs/position" },
+      "uniqueItems": true,
       "description": "Ordered array of 1-based residue positions."
     },
     "rangeIndex": {

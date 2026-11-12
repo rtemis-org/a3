@@ -932,6 +932,11 @@ method(to_json, A3) <- function(x, pretty = TRUE, ...) {
       names(out) <- names(val)
       return(out)
     }
+    # A vector marked with I() stays a JSON array at any length, so a
+    # one-element list member such as `conditions` keeps its array type.
+    if (inherits(val, "AsIs")) {
+      return(as.vector(unclass(val)))
+    }
     if (is.atomic(val) && length(val) == 1L) jsonlite::unbox(val) else val
   }
 
@@ -961,7 +966,9 @@ method(to_json, A3) <- function(x, pretty = TRUE, ...) {
         x@annotations@processing,
         feature_to_list
       )),
-      variant = lapply(x@annotations@variant, variant_to_list)
+      # `variant` is a JSON array; unname() keeps a named list of variants,
+      # such as the one clinvar_variants() returns, from becoming an object.
+      variant = unname(lapply(x@annotations@variant, variant_to_list))
     ),
     metadata = list(
       uniprot_id = jsonlite::unbox(x@metadata@uniprot_id),
@@ -1059,9 +1066,9 @@ method(to_json, A3) <- function(x, pretty = TRUE, ...) {
 #' Validate an A3 JSON file without throwing
 #'
 #' Returns every validation issue found in the earliest failing stage, as a data
-#' frame. An empty data frame means the document is valid. Use this when you
-#' want to present issues in a form or a report; use [read_A3json()] when you
-#' want the object and an error if it cannot be built.
+#' frame. An empty data frame means the document is valid. It suits forms and
+#' reports; [read_A3json()] returns the object, or an error if the object cannot
+#' be built.
 #'
 #' Each issue carries a stable `code` and an RFC 6901 JSON Pointer `path`, both
 #' of which are identical across the R, Python, Julia, TypeScript, and Rust

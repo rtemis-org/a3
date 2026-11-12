@@ -148,6 +148,12 @@ corpus-check: corpus
         exit 1; \
     }
 
+# Fail unless the JSON Schema accepts every valid case and rejects every
+# invalid case except those that break only cross-field rules
+schema-check:
+    @just _msg "─── Checking the JSON Schema against the corpus ───"
+    {{ uv }} run --quiet --no-project --with jsonschema python schema/check_corpus.py
+
 # ── Test ─────────────────────────────────────────────────────────────────────
 
 test-r:
@@ -213,7 +219,7 @@ conformance-rust:
     cd rust && {{ cargo }} test --test conformance
 
 # Run the shared corpus against all five implementations
-conformance: corpus-check
+conformance: corpus-check schema-check
     #!/usr/bin/env sh
     r=0; p=0; jl=0; ts=0; rs=0
     just conformance-r          || r=1

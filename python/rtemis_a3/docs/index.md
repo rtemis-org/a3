@@ -15,7 +15,7 @@ pip install rtemis-a3
 uv add rtemis-a3
 ```
 
-## Quick Start
+## Usage
 
 ```python
 from rtemis.a3 import create_a3

@@ -2,9 +2,7 @@
 
 # @rtemis/a3
 
-TypeScript implementation of the **Amino Acid Annotation (A3)** format —
-a structured JSON format for amino acid sequences with site, region, PTM,
-processing, and variant annotations.
+TypeScript implementation of the **Amino Acid Annotation (A3)** format — a structured JSON format for amino acid sequences with site, region, PTM, processing, and variant annotations.
 
 Part of the [rtemis-org/a3](https://github.com/rtemis-org/a3) monorepo.
 
@@ -16,7 +14,7 @@ npm install @rtemis/a3
 pnpm add @rtemis/a3
 ```
 
-## Quick Start
+## Usage
 
 ```ts
 import { A3 } from "@rtemis/a3"
@@ -74,9 +72,7 @@ await writeJSON(a3, "./output.json")
 
 ## Browser and Edge Environments
 
-The default entry point includes `readJSON`/`writeJSON`, which depend on
-`node:fs/promises`. For browsers, Cloudflare Workers, and other environments
-without filesystem access, use the `./browser` subpath instead:
+The default entry point includes `readJSON`/`writeJSON`, which depend on `node:fs/promises`. For browsers, Cloudflare Workers, and other environments without filesystem access, use the `./browser` subpath instead:
 
 ```ts
 import { A3, A3ValidationError } from "@rtemis/a3/browser"
@@ -105,11 +101,7 @@ Everything except the file I/O functions is available.
 }
 ```
 
-All five annotation families are always present in output. Each annotation
-entry is `{ index, type }` — bare arrays are rejected. Positions are
-1-based and sorted ascending; duplicate positions are rejected. Ranges are
-`[start, end]` pairs (`start < end`), sorted by start; overlapping ranges
-are rejected.
+All five annotation families are always present in output. Each annotation entry is `{ index, type }` — bare arrays are rejected. Positions are 1-based and sorted ascending; duplicate positions are rejected. Ranges are `[start, end]` pairs (`start < end`), sorted by start; overlapping ranges are rejected.
 
 ## API
 
@@ -119,8 +111,7 @@ Construct and validate. Throws `A3ValidationError` if input is invalid.
 
 ### `A3.fromJSONText(text)`
 
-Parse a JSON string and validate. Throws `A3ParseError` on invalid JSON,
-`A3ValidationError` on schema violations.
+Parse a JSON string and validate. Throws `A3ParseError` on invalid JSON, `A3ValidationError` on schema violations.
 
 ### `a3.length`
 
@@ -178,16 +169,11 @@ import type {
 
 ## License
 
-[MPL-2.0](https://www.mozilla.org/en-US/MPL/2.0/)
+[BSD 3-Clause](https://opensource.org/license/bsd-3-clause)
 
 ## Validation
 
-Validation is **collect-all**. A document is checked in four stages — envelope,
-structural, intra-field, contextual — and every issue in the earliest failing
-stage is reported at once. Each issue carries a stable `code` and an
-[RFC 6901](https://www.rfc-editor.org/rfc/rfc6901) JSON Pointer `path`, both of
-which are identical across the R, Python, Julia, TypeScript, and Rust
-implementations of A3. Messages are for humans and are not contractual.
+Validation is **collect-all**. A document is checked in four stages — envelope, structural, intra-field, contextual — and every issue in the earliest failing stage is reported at once. Each issue carries a stable `code` and an [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901) JSON Pointer `path`, both of which are identical across the R, Python, Julia, TypeScript, and Rust implementations of A3. Messages are for humans and are not contractual.
 
 ```ts
 import { A3, A3ValidationError } from "@rtemis/a3";
@@ -205,8 +191,7 @@ try {
 }
 ```
 
-For a form or a live-validation panel, use the non-throwing entry point and
-attach each issue to a field by its pointer:
+For a form or a live-validation panel, use the non-throwing entry point and attach each issue to a field by its pointer:
 
 ```ts
 import { validate, resolvePointer } from "@rtemis/a3";
@@ -218,8 +203,3 @@ for (const issue of issues) {
 }
 ```
 
-> **Note on 0.3.0.** `zod` is no longer a dependency and `A3InputSchema` is no
-> longer exported. The conformance contract requires exact `{code, path}` pairs
-> and four staged passes, which a general-purpose schema library cannot produce
-> without a translation layer that drifts. `A3ValidationIssue.path` was an array
-> of keys and is now a pointer string.

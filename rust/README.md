@@ -1,14 +1,10 @@
-[![Crates.io Version](https://img.shields.io/crates/v/rtemis_a3)](https://crates.io/crates/rtemis_a3)
-[![rust-ci](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml)
+[![Crates.io Version](https://img.shields.io/crates/v/rtemis_a3)](https://crates.io/crates/rtemis_a3) [![rust-ci](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml)
 
 # rtemis-a3
 
-Rust implementation of the **Amino Acid Annotation (A3)** format —
-a structured JSON format for amino acid sequences with site, region, PTM,
-processing, and variant annotations.
+Rust implementation of the **Amino Acid Annotation (A3)** format — a structured JSON format for amino acid sequences with site, region, PTM, processing, and variant annotations.
 
-Part of the [rtemis-org/a3](https://github.com/rtemis-org/a3) monorepo,
-which provides A3 implementations in Python, TypeScript, R, Julia, and Rust.
+Part of the [rtemis-org/a3](https://github.com/rtemis-org/a3) monorepo, which provides A3 implementations in Python, TypeScript, R, Julia, and Rust.
 
 > [!NOTE]
 > The Rust code contains extensive comments and documentation as an educational tool to help learn
@@ -16,7 +12,7 @@ which provides A3 implementations in Python, TypeScript, R, Julia, and Rust.
 
 ## Installation
 
-Add to your `Cargo.toml`:
+Add to `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -105,7 +101,7 @@ if a3 -q protein.json; then
 fi
 ```
 
-## Quick Start
+## Usage
 
 ```rust
 use rtemis_a3::{a3_from_json, a3_to_json};
@@ -189,10 +185,7 @@ let vars = variants_at(&a3, 3);
 }
 ```
 
-All five annotation families are always present in output. Each annotation
-entry is `{ index, type }` — bare arrays are rejected. Positions are
-1-based and sorted; duplicates are rejected. Ranges are `[start, end]` pairs
-(`start < end`), sorted by start; overlapping ranges are rejected.
+All five annotation families are always present in output. Each annotation entry is `{ index, type }` — bare arrays are rejected. Positions are 1-based and sorted; duplicates are rejected. Ranges are `[start, end]` pairs (`start < end`), sorted by start; overlapping ranges are rejected.
 
 ## API
 
@@ -225,8 +218,7 @@ A3
      ├── uniprot_id, description, reference, organism: String
 ```
 
-`A3Index` is an enum that holds either `Positions(Vec<u32>)` or `Ranges(Vec<[u32; 2]>)`,
-used as the index type inside `FlexEntry`.
+`A3Index` is an enum that holds either `Positions(Vec<u32>)` or `Ranges(Vec<[u32; 2]>)`, used as the index type inside `FlexEntry`.
 
 ### Errors
 
@@ -238,21 +230,15 @@ pub enum A3Error {
 }
 ```
 
-All violations are collected before returning — you see every problem at once,
-not just the first one.
+Validation collects every violation in the earliest failing stage before it returns.
 
 ## License
 
-[MPL-2.0](https://www.mozilla.org/en-US/MPL/2.0/)
+[BSD 3-Clause](https://opensource.org/license/bsd-3-clause)
 
 ## Validation
 
-Validation is **collect-all**. A document is checked in four stages — envelope,
-structural, intra-field, contextual — and every issue in the earliest failing
-stage is reported at once. Each issue carries a stable `code` and an
-[RFC 6901](https://www.rfc-editor.org/rfc/rfc6901) JSON Pointer `path`, both of
-which are identical across the R, Python, Julia, TypeScript, and Rust
-implementations of A3. Messages are for humans and are not contractual.
+Validation is **collect-all**. A document is checked in four stages — envelope, structural, intra-field, contextual — and every issue in the earliest failing stage is reported at once. Each issue carries a stable `code` and an [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901) JSON Pointer `path`, both of which are identical across the R, Python, Julia, TypeScript, and Rust implementations of A3. Messages are for humans and are not contractual.
 
 ```rust
 use rtemis_a3::a3_from_json;
@@ -265,8 +251,7 @@ for issue in err.issues() {
 }
 ```
 
-The CLI emits the same structure, which makes it usable as the conformance
-oracle when debugging another implementation:
+The CLI emits the same structure, which makes it usable as the conformance oracle when debugging another implementation:
 
 ```console
 $ a3 --json broken.a3.json
@@ -283,4 +268,4 @@ $ a3 --json broken.a3.json
 }
 ```
 
-`--diagnose` is deprecated and ignored: every run is now a full diagnostic.
+`--diagnose` is accepted and ignored; every run reports every issue.

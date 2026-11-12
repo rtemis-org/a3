@@ -323,12 +323,12 @@ end
     if isfile(example_path)
         a = read_a3json(example_path)
         @test length(a.sequence) == 441
-        @test a.metadata.uniprot_id == "P10636"
-        @test haskey(a.annotations.site, "Disease_associated_variant")
-        @test haskey(a.annotations.region, "KXGS")
+        @test a.metadata.uniprot_id == "P10636-8"
+        @test haskey(a.annotations.site, "AT8 epitope")
+        @test haskey(a.annotations.region, "R1")
         @test haskey(a.annotations.ptm, "Phosphorylation")
-        @test isempty(a.annotations.processing)
-        @test isempty(a.annotations.variant)
+        @test haskey(a.annotations.processing, "Chain")
+        @test !isempty(a.annotations.variant)
 
         # round-trip
         json1 = a3_to_json(a)
@@ -338,6 +338,8 @@ end
         @test b.annotations.site == a.annotations.site
         @test b.annotations.region == a.annotations.region
         @test b.annotations.ptm == a.annotations.ptm
+        @test b.annotations.processing == a.annotations.processing
+        @test b.annotations.variant == a.annotations.variant
     else
         @warn "Example file not found, skipping: $example_path"
     end
