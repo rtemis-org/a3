@@ -99,7 +99,10 @@
           }
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-rtemis": {
+        "class": "rtemis.a3::A3Annotations"
+      }
     },
     "A3Metadata": {
       "description": "Free-text metadata about the protein. The empty string records an absent value.",
@@ -122,7 +125,10 @@
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-rtemis": {
+        "class": "rtemis.a3::A3Metadata"
+      }
     },
     "A3PTM": {
       "description": "A named set of post-translational modifications, given as residue positions or residue ranges, with an optional type label. Positions follow the rules of a site entry and ranges those of a region entry.",
@@ -137,7 +143,10 @@
         }
       },
       "required": ["index"],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-rtemis": {
+        "class": "rtemis.a3::A3PTM"
+      }
     },
     "A3Processing": {
       "description": "A named set of processing events, such as signal peptides, cleavage sites, and maturation events, given as residue positions or residue ranges, with an optional type label. Positions follow the rules of a site entry and ranges those of a region entry.",
@@ -152,7 +161,10 @@
         }
       },
       "required": ["index"],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-rtemis": {
+        "class": "rtemis.a3::A3Processing"
+      }
     },
     "A3Region": {
       "description": "A named set of contiguous residue ranges, with an optional type label. In each range, start is less than end and end is at most the sequence length; no two ranges share a residue.",
@@ -167,7 +179,10 @@
         }
       },
       "required": ["index"],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-rtemis": {
+        "class": "rtemis.a3::A3Region"
+      }
     },
     "A3Site": {
       "description": "A named set of single residues, given by position, with an optional type label. Every position is at most the sequence length.",
@@ -182,7 +197,10 @@
         }
       },
       "required": ["index"],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-rtemis": {
+        "class": "rtemis.a3::A3Site"
+      }
     },
     "mixedIndex": {
       "description": "Residue positions or residue ranges; one kind per index.",
@@ -215,6 +233,9 @@
         },
         "minItems": 2,
         "maxItems": 2
+      },
+      "x-rtemis": {
+        "node": "matrix"
       }
     },
     "variantRecord": {
