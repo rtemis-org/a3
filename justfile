@@ -9,6 +9,8 @@ cargo := env("CARGO", "cargo")
 uv := env("UV", "uv")
 pnpm := env("PNPM", "pnpm")
 
+schema_repo := env("SCHEMA_REPO", "")
+
 generator := "spec/conformance/generator/Cargo.toml"
 r_tarball := "rtemis.a3_*.tar.gz"
 
@@ -164,6 +166,30 @@ schema-check: schema
     }
     @just _msg "─── Checking the JSON Schema against the corpus ───"
     {{ uv }} run --quiet --no-project --with jsonschema python schema/check_corpus.py
+
+# Copy the schema into the schema registry checkout ($SCHEMA_REPO), reindex,
+# and check it; stops before the commit there, whose push is the deploy. The
+# reindex runs here because a stale index.json fails nothing in the registry and
+# surfaces as a sha256 mismatch in a consumer's schema sync.
+[doc("Copy the schema to $SCHEMA_REPO/a3/v1, reindex, and check, before the commit there")]
+publish-schema repo=schema_repo: schema-check
+    @just _need SCHEMA_REPO "{{ repo }}"
+    @just _msg "─── Copying schema/a3.schema.json to {{ repo }}/a3/v1/schema.json ───"
+    cp schema/a3.schema.json "{{ repo }}/a3/v1/schema.json"
+    @just _msg "─── Indexing {{ repo }} ───"
+    cd "{{ repo }}" && just index && just check
+    @git -C "{{ repo }}" status --short
+    @just _msg "Review the diff above, then commit and push; the push is the deploy:"
+    @echo "   git -C '{{ repo }}' add a3/v1/schema.json index.json && git -C '{{ repo }}' commit -m 'update a3 schema' && git -C '{{ repo }}' push"
+
+_need var path:
+    @if [ -z "{{ path }}" ]; then \
+        echo "   Error: {{ var }} is not set. Point it at your local schema registry checkout."; \
+        exit 1; \
+    elif [ ! -d "{{ path }}" ]; then \
+        echo "   Error: {{ var }} is set to '{{ path }}', which is not a directory."; \
+        exit 1; \
+    fi
 
 # ── Test ─────────────────────────────────────────────────────────────────────
 
