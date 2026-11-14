@@ -14,11 +14,12 @@ annotation (1-based indexing).}
 the empty string in the canonical A3 representation.}
 }
 \value{
-Named list with \code{index} (A3Range) and \code{type} (character)
+Named list with \code{index} (two-column integer matrix, sorted by start)
+and \code{type} (character).
 }
 \description{
-Creates an annotation spec (named list) with an \code{A3Range} index and optional type,
-for use with \code{create_A3()}.
+Creates an annotation entry with a range index, for the \code{region}, \code{ptm}, and
+\code{processing} arguments of \code{create_A3()}.
 }
 \examples{
 # Create a region annotation for ranges 3-10 and 15-22, of type "repeat"

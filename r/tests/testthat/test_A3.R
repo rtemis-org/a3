@@ -1,599 +1,220 @@
-# %% A3Sequence ----
-test_that("A3Sequence succeeds with valid data", {
-  x <- A3Sequence(data = "MKTAYIAKQRQISFVKSHFSRQDILDLWIYHTQGYFPDWQNYTPG")
-  expect_s7_class(x, A3Sequence)
-})
-
-test_that("A3Sequence fails with invalid data", {
-  expect_error(
-    A3Sequence(data = c("SRQ", "MKTA")),
-    "Sequence must be a single string"
-  )
-  expect_error(
-    A3Sequence(data = "M"),
-    "Sequence must be at least 2 characters long"
-  )
-  expect_error(
-    A3Sequence(data = "MK123"),
-    "Sequence must only contain uppercase letters"
-  )
-})
-
-
-# %% A3Index ----
-test_that("A3Index is abstract and cannot be instantiated", {
-  expect_error(A3Index(data = c(3L, 5L, 7L)))
-})
-
-
-# %% A3Position ----
-test_that("A3Position succeeds with valid data", {
-  x <- A3Position(data = c(3L, 5L, 7L))
-  expect_s7_class(x, A3Position)
-})
-
-test_that("A3Position fails with invalid data", {
-  expect_error(
-    A3Position(data = c(0L, 5L, 7L)),
-    "Position data must be a positive integer."
-  )
-  expect_error(
-    A3Position(data = c(-1L, 5L, 7L)),
-    "Position data must be a positive integer."
-  )
-  expect_error(
-    A3Position(data = c(1.5, 5L, 7L)),
-    "object properties are invalid"
-  )
-})
-
-
-# %% A3Range ----
-test_that("A3Range succeeds with valid data", {
-  # Single range
-  x <- A3Range(data = rbind(c(1L, 5L)))
-  expect_s7_class(x, A3Range)
-  # Two non-overlapping ranges: [1,5] and [10,15]
-  x <- A3Range(data = rbind(c(1L, 5L), c(10L, 15L)))
-  expect_s7_class(x, A3Range)
-  # Adjacent ranges are permitted: [1,5] and [6,10]
-  x <- A3Range(data = rbind(c(1L, 5L), c(6L, 10L)))
-  expect_s7_class(x, A3Range)
-})
-
-test_that("A3Range fails with invalid data", {
-  expect_error(
-    A3Range(data = rbind(c(0L, 10L), c(5L, 15L))),
-    "Range values must be positive integers."
-  )
-  expect_error(
-    A3Range(data = rbind(c(1.5, 10L), c(5L, 15L))),
-    "object properties are invalid"
-  )
-  expect_error(
-    A3Range(data = rbind(c(5L, 1L), c(10L, 15L))),
-    "Start of range must be less than end of range."
-  )
-  # Overlapping ranges: [1,5] and [3,8]
-  expect_error(
-    A3Range(data = rbind(c(1L, 5L), c(3L, 8L))),
-    "must not overlap"
-  )
-})
-
-# %% A3Feature ----
-test_that("A3Feature is abstract and cannot be instantiated", {
-  expect_error(A3Feature(type = "phosphorylation"))
-})
-
-
-# %% A3Site ----
-test_that("A3Site succeeds with valid index and optional type", {
-  x <- A3Site(index = A3Position(data = c(3L, 5L, 7L)))
+# %% Annotation entries ----
+test_that("A3Site holds a position index and a type", {
+  x <- A3Site(index = c(5L, 3L), type = "activeSite")
   expect_s7_class(x, A3Site)
-  x <- A3Site(
-    index = A3Position(data = c(3L, 5L, 7L)),
-    type = "phosphorylation"
-  )
-  expect_s7_class(x, A3Site)
+  expect_identical(x@index, c(5L, 3L))
+  expect_identical(A3Site(index = integer())@type, "")
+  expect_error(A3Site(index = c(0L, 5L)), ">= 1")
+  expect_error(A3Site(index = c(3L, 3L)), "distinct")
+  expect_error(A3Site(index = c(1.5, 5)))
+  expect_error(A3Site(index = 3L, type = 99L))
 })
 
-test_that("A3Site fails with invalid index or type", {
-  expect_error(
-    A3Site(index = A3Position(data = c(0L, 5L, 7L))),
-    "Position data must be a positive integer."
-  )
-  expect_error(
-    A3Site(index = A3Position(data = c(1.5, 5L, 7L))),
-    "object properties are invalid"
-  )
-  expect_error(
-    A3Site(index = A3Position(data = c(1.5, 5L, 7L)), type = 99L),
-    "object properties are invalid"
-  )
+test_that("A3Region holds a range index with ordered, disjoint ranges", {
+  x <- A3Region(index = rbind(c(10L, 12L), c(1L, 5L)))
+  expect_identical(nrow(x@index), 2L)
+  expect_s7_class(A3Region(index = rbind(c(1L, 5L), c(6L, 10L))), A3Region)
+  expect_s7_class(A3Region(index = matrix(integer(), ncol = 2L)), A3Region)
+  expect_error(A3Region(index = rbind(c(5L, 1L))), "start < end")
+  expect_error(A3Region(index = rbind(c(1L, 5L), c(3L, 8L))), "overlap")
+  expect_error(A3Region(index = rbind(c(0L, 5L))))
+  expect_error(A3Region(index = c(1L, 5L)))
 })
 
-
-# %% A3Region ----
-test_that("A3Region succeeds with valid index and optional type", {
-  x <- A3Region(index = A3Range(data = rbind(c(1L, 5L), c(10L, 12L))))
-  expect_s7_class(x, A3Region)
-  x <- A3Region(
-    index = A3Range(data = rbind(c(1L, 5L), c(10L, 12L))),
-    type = "Phosphodegron"
-  )
-  expect_s7_class(x, A3Region)
-})
-
-test_that("A3Region fails with invalid index or type", {
-  expect_error(
-    A3Region(index = A3Range(data = rbind(c(0L, 5L), c(10L, 12L)))),
-    "Range values must be positive integers"
-  )
-  expect_error(
-    A3Region(index = A3Range(data = rbind(c(1.5, 5L), c(10L, 12L)))),
-    "object properties are invalid"
-  )
-  expect_error(
-    A3Region(index = A3Range(data = rbind(c(5L, 1L), c(10L, 12L)))),
-    "Start of range must be less than end of range"
-  )
-  expect_error(
-    A3Region(
-      index = A3Range(data = rbind(c(1L, 5L), c(10L, 12L))),
-      type = 99L
-    ),
-    "object properties are invalid"
-  )
+test_that("A3PTM and A3Processing hold positions or ranges", {
+  expect_s7_class(A3PTM(index = c(3L, 7L)), A3PTM)
+  expect_s7_class(A3PTM(index = rbind(c(3L, 7L), c(10L, 12L))), A3PTM)
+  expect_s7_class(A3Processing(index = 1L), A3Processing)
+  expect_s7_class(A3Processing(index = rbind(c(1L, 20L))), A3Processing)
+  expect_error(A3PTM(index = c(0L, 5L)))
+  expect_error(A3Processing(index = rbind(c(9L, 3L))), "start < end")
+  expect_error(A3PTM(index = "a"))
 })
 
 
-# %% A3PTM ----
-test_that("A3PTM succeeds with valid index and optional type", {
-  x <- A3PTM(index = A3Position(data = c(3L, 5L, 7L)))
-  expect_s7_class(x, A3PTM)
-  x <- A3PTM(
-    index = A3Range(data = rbind(c(3L, 7L), c(10L, 12L))),
-    type = "phosphorylation"
+# %% A3Annotations ----
+test_that("A3Annotations holds named entries and variant records", {
+  x <- A3Annotations(
+    site = list(activeSite = A3Site(index = c(3L, 5L))),
+    region = list(KXGS = A3Region(index = rbind(c(1L, 10L)))),
+    ptm = list(Phosphorylation = A3PTM(index = 7L)),
+    processing = list(`Signal peptide` = A3Processing(index = rbind(c(8L, 12L)))),
+    variant = list(list(position = 15L, mutation = "R15H"))
   )
-  expect_s7_class(x, A3PTM)
+  expect_s7_class(x, A3Annotations)
+  expect_identical(x@variant[[1L]][["mutation"]], "R15H")
+  expect_identical(A3Annotations()@site, list())
 })
 
-test_that("A3PTM fails with invalid index or type", {
+test_that("A3Annotations rejects entries of the wrong class or without names", {
   expect_error(
-    A3PTM(index = A3Position(data = c(0L, 5L, 7L))),
-    "Position data must be a positive integer."
+    A3Annotations(site = list(a = A3Region(index = rbind(c(1L, 3L)))))
   )
-  expect_error(
-    A3PTM(index = A3Position(data = c(1.5, 5L, 7L))),
-    "object properties are invalid"
-  )
-  expect_error(
-    A3PTM(index = A3Position(data = c(1.5, 5L, 7L)), type = 99L),
-    "object properties are invalid"
-  )
-})
-
-# %% A3Processing ----
-test_that("A3Processing succeeds with valid index and optional type", {
-  x <- A3Processing(index = A3Position(data = c(3L, 5L, 7L)))
-  expect_s7_class(x, A3Processing)
-  x <- A3Processing(
-    index = A3Range(data = rbind(c(3L, 7L), c(10L, 12L))),
-    type = "signal peptide"
-  )
-  expect_s7_class(x, A3Processing)
-})
-
-test_that("A3Processing fails with invalid index or type", {
-  expect_error(
-    A3Processing(index = A3Position(data = c(0L, 5L, 7L))),
-    "Position data must be a positive integer."
-  )
-  expect_error(
-    A3Processing(index = A3Position(data = c(1.5, 5L, 7L))),
-    "object properties are invalid"
-  )
-  expect_error(
-    A3Processing(index = A3Position(data = c(1.5, 5L, 7L)), type = 99L),
-    "object properties are invalid"
-  )
-})
-
-
-# %% A3Variant ----
-test_that("A3Variant succeeds with valid position and info", {
-  x <- A3Variant(
-    position = 3L,
-    info = list(field_a = "alpha", field_b = 123L)
-  )
-  expect_s7_class(x, A3Variant)
-  expect_identical(x@position, 3L)
-})
-
-test_that("A3Variant fails with invalid position or info", {
-  expect_error(
-    A3Variant(
-      position = c(1L, 3L),
-      info = list(field_a = "alpha")
-    ),
-    "Variant position must be a single integer."
-  )
-})
-
-# %% A3Annotation ----
-test_that("A3Annotation succeeds with valid annotations", {
-  x <- A3Annotation(
-    site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L))))
-  )
-  expect_s7_class(x, A3Annotation)
-  x <- A3Annotation(
-    site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(
-      KXGS = A3Region(
-        index = A3Range(data = rbind(c(1L, 10L)))
-      )
-    )
-  )
-  expect_s7_class(x, A3Annotation)
-  x <- A3Annotation(
-    site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(
-      KXGS = A3Region(
-        index = A3Range(data = rbind(c(1L, 10L)))
-      )
-    ),
-    ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L))))
-  )
-  expect_s7_class(x, A3Annotation)
-  x <- A3Annotation(
-    site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(
-      KXGS = A3Region(
-        index = A3Range(data = rbind(c(1L, 10L)))
-      )
-    ),
-    ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
-    processing = list(
-      `Signal peptide` = A3Processing(
-        index = A3Range(data = rbind(c(20L, 30L)))
-      )
-    )
-  )
-  expect_s7_class(x, A3Annotation)
-  x <- A3Annotation(
-    site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
-    region = list(
-      KXGS = A3Region(
-        index = A3Range(data = rbind(c(1L, 10L)))
-      )
-    ),
-    ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
-    processing = list(
-      `Signal peptide` = A3Processing(
-        index = A3Range(data = rbind(c(20L, 30L)))
-      )
-    ),
-    variant = list(A3Variant(
-      position = 15L,
-      info = list(mutation = "R15H")
-    ))
-  )
-  expect_s7_class(x, A3Annotation)
-})
-
-test_that("A3Annotation fails with invalid data", {
-  expect_error(
-    A3Annotation(
-      site = list("not_a_site"),
-      region = list(),
-      ptm = list(),
-      processing = list(),
-      variant = list()
-    ),
-    "All site annotations must be A3Site objects."
-  )
-  expect_error(
-    A3Annotation(
-      site = list(),
-      region = list("not_a_region"),
-      ptm = list(),
-      processing = list(),
-      variant = list()
-    ),
-    "All region annotations must be A3Region objects."
-  )
-  expect_error(
-    A3Annotation(
-      site = list(),
-      region = list(),
-      ptm = list("not_a_ptm"),
-      processing = list(),
-      variant = list()
-    ),
-    "All PTM annotations must be A3PTM objects."
-  )
-  expect_error(
-    A3Annotation(
-      site = list(),
-      region = list(),
-      ptm = list(),
-      processing = list("not_processing"),
-      variant = list()
-    ),
-    "All processing annotations must be A3Processing objects."
-  )
-  expect_error(
-    A3Annotation(
-      site = list(),
-      region = list(),
-      ptm = list(),
-      processing = list(),
-      variant = list("not_a_variant")
-    ),
-    "All variant annotations must be A3Variant objects."
-  )
-  expect_error(
-    A3Annotation(
-      site = list(A3Site(index = A3Position(data = c(3L, 5L))))
-    ),
-    "All site annotation names must be non-empty strings."
-  )
-  expect_error(
-    A3Annotation(
-      site = setNames(
-        list(A3Site(index = A3Position(data = c(3L, 5L)))),
-        ""
-      )
-    ),
-    "All site annotation names must be non-empty strings."
-  )
-})
-
-
-# %% Metadata ----
-test_that("Metadata can be instantiated", {
-  x <- Metadata()
-  expect_s7_class(x, Metadata)
+  expect_error(A3Annotations(site = list(A3Site(index = 3L))), "named")
+  expect_error(A3Annotations(variant = list(list(from = "R"))), "position")
+  expect_error(A3Annotations(variant = list(list(position = 0L))), ">= 1")
 })
 
 
 # %% A3Metadata ----
-test_that("A3Metadata can be instantiated", {
+test_that("A3Metadata defaults every member to the empty string", {
   x <- A3Metadata()
   expect_s7_class(x, A3Metadata)
   expect_identical(x@uniprot_id, "")
   expect_identical(x@description, "")
   expect_identical(x@reference, "")
   expect_identical(x@organism, "")
-})
-
-test_that("A3Metadata fails with invalid data", {
-  expect_error(
-    A3Metadata(uniprot_id = 123L),
-    "object properties are invalid"
-  )
-  expect_error(
-    A3Metadata(description = 123L),
-    "object properties are invalid"
-  )
-  expect_error(
-    A3Metadata(reference = 123L),
-    "object properties are invalid"
-  )
-  expect_error(
-    A3Metadata(organism = 123L),
-    "object properties are invalid"
-  )
-  expect_error(
-    A3Metadata(uniprot_id = c("P10636", "Q9Y3Q8")),
-    "uniprot_id.*character\\(1\\)"
-  )
-  expect_error(
-    A3Metadata(organism = c("Homo sapiens", "Mus musculus")),
-    "organism.*character\\(1\\)"
-  )
+  expect_error(A3Metadata(uniprot_id = 123L))
+  expect_error(A3Metadata(organism = c("Homo sapiens", "Mus musculus")))
 })
 
 
 # %% A3 ----
-test_that("A3 can be instantiated with valid sequence and annotations", {
+test_that("A3 holds a sequence, annotations, and metadata", {
   x <- A3(
-    sequence = A3Sequence(data = "MKTAYIAKQRQISFVK"),
-    annotations = A3Annotation(
-      site = list(activeSite = A3Site(index = A3Position(data = c(3L, 5L)))),
-      region = list(
-        KXGS = A3Region(
-          index = A3Range(data = rbind(c(1L, 10L)))
-        )
-      ),
-      ptm = list(Phosphorylation = A3PTM(index = A3Position(data = c(7L)))),
-      processing = list(
-        `Signal peptide` = A3Processing(
-          index = A3Range(data = rbind(c(8L, 12L)))
-        )
-      ),
-      variant = list(A3Variant(
-        position = 15L,
-        info = list(mutation = "R15H")
-      ))
+    sequence = "mktayiakqrqisfvk",
+    annotations = A3Annotations(
+      site = list(activeSite = A3Site(index = c(3L, 5L))),
+      variant = list(list(position = 15L, from = "V"))
     )
   )
   expect_s7_class(x, A3)
+  expect_identical(x@sequence, "MKTAYIAKQRQISFVK")
+  expect_identical(x[["sequence"]], "MKTAYIAKQRQISFVK")
+  expect_identical(x$metadata[["uniprot_id"]], "")
 })
 
-test_that("A3 fails with invalid sequence or annotations", {
+test_that("A3 rejects an invalid sequence or annotations", {
+  expect_error(A3(sequence = "M"))
+  expect_error(A3(sequence = "MK1"), "pattern")
+  expect_error(A3(sequence = "MKTAY", annotations = "not_annotations"))
+})
+
+test_that("A3 compares indices and variants with the sequence", {
+  ann <- function(...) A3Annotations(...)
   expect_error(
-    A3(
-      sequence = "not_a_sequence",
-      annotations = A3Annotation()
-    ),
-    "object properties are invalid"
+    A3("MKTAY", ann(site = list(s = A3Site(index = 6L)))),
+    "sequence length"
   )
   expect_error(
-    A3(
-      sequence = A3Sequence(data = "MKTAYIAKQRQISFVK"),
-      annotations = "not_annotations"
-    ),
-    "object properties are invalid"
+    A3("MKTAY", ann(region = list(r = A3Region(index = rbind(c(2L, 9L)))))),
+    "sequence length"
   )
+  expect_error(
+    A3("MKTAY", ann(variant = list(list(position = 9L)))),
+    "sequence length"
+  )
+  expect_error(
+    A3("MKTAY", ann(variant = list(list(position = 2L, from = "R")))),
+    "differs from residue 2"
+  )
+  expect_s7_class(
+    A3("MKTAY", ann(variant = list(list(position = 2L, from = "k")))),
+    A3
+  )
+  expect_s7_class(
+    A3("MKTAY", ann(variant = list(list(position = 2L, from = "Lys")))),
+    A3
+  )
+})
+
+
+# %% Helpers ----
+test_that("annotation_position sorts and checks positions", {
+  x <- annotation_position(c(7, 3), type = "phospho")
+  expect_identical(x, list(index = c(3L, 7L), type = "phospho"))
+  expect_identical(annotation_position(2L)[["type"]], "")
+  expect_error(annotation_position(c(0, 3)), ">= 1")
+  expect_error(annotation_position(c(3, 3)), "unique")
+  expect_error(annotation_position(1.5))
+})
+
+test_that("annotation_range sorts and checks ranges", {
+  x <- annotation_range(rbind(c(15, 22), c(3, 10)), type = "repeat")
+  expect_identical(x[["index"]], rbind(c(3L, 10L), c(15L, 22L)))
+  expect_error(annotation_range(c(1L, 5L)), "2 columns")
+  expect_error(annotation_range(rbind(c(5L, 1L))), "start < end")
+  expect_error(annotation_range(rbind(c(1L, 5L), c(3L, 8L))), "overlap")
+})
+
+test_that("annotation_variant returns a flat record with position first", {
+  x <- annotation_variant(10, info = list(from = "A", to = "T"))
+  expect_identical(x, list(position = 10L, from = "A", to = "T"))
+  expect_identical(annotation_variant(3L), list(position = 3L))
+  expect_error(annotation_variant(0L), ">= 1")
+  expect_error(annotation_variant(c(1L, 2L)), "single integer")
+  expect_error(annotation_variant(5L, info = list(position = 9L)), "position")
+  expect_error(annotation_variant(5L, info = list("x")), "name")
 })
 
 
 # %% create_A3 ----
-test_that("create_A3 succeeds with valid inputs", {
-  x <- create_A3(
+.example_A3 <- function() {
+  create_A3(
     sequence = "MKTAYIAKQRQISFVK",
-    site = list(
-      `N-terminal repeat` = annotation_position(
-        c(3, 5)
-      )
-    ),
-    region = list(
-      Phosphodegron = annotation_range(
-        rbind(c(1, 10)),
-        type = "functional region"
-      )
-    ),
-    ptm = list(
-      Phosphorylation = annotation_position(
-        c(7)
-      )
-    ),
-    processing = list(
-      `Signal peptide` = annotation_range(
-        rbind(c(8, 12))
-      )
-    ),
+    site = list(`Active site` = annotation_position(c(3, 5), type = "activeSite")),
+    region = list(KXGS = annotation_range(rbind(c(1L, 10L)))),
+    ptm = list(Phosphorylation = annotation_position(c(7))),
+    processing = list(`Signal peptide` = annotation_range(rbind(c(8L, 12L)))),
     variant = list(
-      zdorg = annotation_variant(
-        15,
-        info = list(mutation = "R15H")
-      )
+      annotation_variant(15, info = list(from = "V", to = "H", note = NULL))
     ),
     uniprot_id = "P12345",
     description = "Example protein",
     reference = "PMID:12345678",
     organism = "Homo sapiens"
   )
+}
+
+test_that("create_A3 builds an A3 object from helper values", {
+  x <- .example_A3()
   expect_s7_class(x, A3)
+  expect_s7_class(x@annotations@site[["Active site"]], A3Site)
+  expect_identical(x@metadata@organism, "Homo sapiens")
+  expect_identical(create_A3("MKTAY")@metadata@uniprot_id, "")
+})
+
+test_that("create_A3 reports invalid inputs", {
+  expect_error(create_A3(123))
+  expect_error(create_A3("MKTAY", site = "x"))
+  expect_error(
+    create_A3("MKTAY", site = list(a = annotation_position(9L))),
+    "sequence length"
+  )
+  expect_error(create_A3("MKTAY", uniprot_id = c("a", "b")), "uniprot_id")
 })
 
 
 # %% to_json / A3from_json ----
-test_that("to_json produces valid JSON with canonical structure", {
-  x <- create_A3(
-    sequence = "MKTAYIAKQRQISFVK",
-    site = list(
-      `Active site` = annotation_position(c(3, 5), type = "activeSite")
-    ),
-    region = list(
-      KXGS = annotation_range(rbind(c(1L, 10L)))
-    ),
-    ptm = list(
-      Phosphorylation = annotation_position(c(7))
-    ),
-    processing = list(
-      `Signal peptide` = annotation_range(rbind(c(8L, 12L)))
-    ),
-    variant = list(
-      annotation_variant(15, info = list(from = "V", to = "H"))
-    ),
-    uniprot_id = "P12345",
-    description = "Example protein",
-    organism = "Homo sapiens"
+test_that("to_json writes the canonical document", {
+  parsed <- jsonlite::fromJSON(to_json(.example_A3()), simplifyVector = FALSE)
+  expect_identical(
+    names(parsed),
+    c("$schema", "a3_version", "sequence", "annotations", "metadata")
   )
-  json <- to_json(x)
-  expect_type(json, "character")
-  parsed <- jsonlite::fromJSON(json, simplifyVector = FALSE)
-  expect_equal(parsed$sequence, "MKTAYIAKQRQISFVK")
-  expect_equal(parsed$annotations$site$`Active site`$type, "activeSite")
-  expect_equal(parsed$annotations$region$KXGS$index, list(list(1L, 10L)))
-  expect_equal(parsed$metadata$uniprot_id, "P12345")
-  expect_equal(parsed$metadata$organism, "Homo sapiens")
-  expect_equal(parsed$metadata$reference, "")
+  expect_identical(
+    names(parsed$annotations),
+    c("site", "region", "ptm", "processing", "variant")
+  )
+  expect_identical(names(parsed$annotations$site$`Active site`), c("index", "type"))
+  expect_identical(parsed$annotations$region$KXGS$index, list(list(1L, 10L)))
+  expect_identical(parsed$annotations$ptm$Phosphorylation$index, list(7L))
+  expect_identical(
+    parsed$annotations$variant[[1L]],
+    list(position = 15L, from = "V", to = "H", note = NULL)
+  )
+  expect_identical(parsed$metadata$reference, "PMID:12345678")
+})
+
+test_that("to_json writes empty families as empty objects and arrays", {
+  json <- to_json(create_A3("MKTAY"), pretty = FALSE)
+  expect_match(json, '"site":{}', fixed = TRUE)
+  expect_match(json, '"variant":[]', fixed = TRUE)
 })
 
 test_that("A3from_json round-trips to_json with zero loss", {
-  original <- create_A3(
-    sequence = "MKTAYIAKQRQISFVK",
-    site = list(
-      `Active site` = annotation_position(c(3, 5), type = "activeSite")
-    ),
-    region = list(
-      KXGS = annotation_range(rbind(c(1L, 10L)))
-    ),
-    ptm = list(
-      Phosphorylation = annotation_position(c(7))
-    ),
-    processing = list(
-      `Signal peptide` = annotation_range(rbind(c(8L, 12L)))
-    ),
-    variant = list(
-      annotation_variant(15, info = list(from = "V", to = "H"))
-    ),
-    uniprot_id = "P12345",
-    description = "Example protein",
-    reference = "PMID:12345678",
-    organism = "Homo sapiens"
-  )
-
-  restored <- A3from_json(to_json(original))
-
-  # Sequence
-  expect_identical(restored@sequence@data, original@sequence@data)
-
-  # Site annotations
-  expect_identical(
-    names(restored@annotations@site),
-    names(original@annotations@site)
-  )
-  expect_identical(
-    restored@annotations@site[[1]]@index@data,
-    original@annotations@site[[1]]@index@data
-  )
-  expect_identical(
-    restored@annotations@site[[1]]@type,
-    original@annotations@site[[1]]@type
-  )
-
-  # Region annotations
-  expect_identical(
-    names(restored@annotations@region),
-    names(original@annotations@region)
-  )
-  expect_identical(
-    restored@annotations@region[[1]]@index@data,
-    original@annotations@region[[1]]@index@data
-  )
-
-  # PTM annotations
-  expect_identical(
-    restored@annotations@ptm[[1]]@index@data,
-    original@annotations@ptm[[1]]@index@data
-  )
-
-  # Processing annotations
-  expect_identical(
-    restored@annotations@processing[[1]]@index@data,
-    original@annotations@processing[[1]]@index@data
-  )
-
-  # Variant annotations
-  expect_identical(
-    restored@annotations@variant[[1]]@position,
-    original@annotations@variant[[1]]@position
-  )
-  expect_identical(
-    restored@annotations@variant[[1]]@info$from,
-    original@annotations@variant[[1]]@info$from
-  )
-
-  # Metadata
-  expect_identical(restored@metadata@uniprot_id, original@metadata@uniprot_id)
-  expect_identical(restored@metadata@description, original@metadata@description)
-  expect_identical(restored@metadata@reference, original@metadata@reference)
-  expect_identical(restored@metadata@organism, original@metadata@organism)
+  original <- .example_A3()
+  expect_identical(A3from_json(to_json(original)), original)
 })
 
 test_that("A3from_json rejects legacy bare-array format", {

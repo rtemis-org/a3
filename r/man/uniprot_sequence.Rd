@@ -21,8 +21,8 @@ uniprot_sequence(
 Character scalar: amino acid sequence in single-letter code.
 }
 \description{
-Lightweight FASTA-only fetch. Use this when you only need the amino acid
-sequence. For full annotations and metadata use \code{\link[=uniprot_to_A3]{uniprot_to_A3()}}.
+Fetches the amino acid sequence only, from the FASTA endpoint.
+\code{\link[=uniprot_to_A3]{uniprot_to_A3()}} fetches annotations and metadata as well.
 }
 \examples{
 # Requires internet connection and fetches data from UniProt.

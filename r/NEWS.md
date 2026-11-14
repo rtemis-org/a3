@@ -1,3 +1,13 @@
+# rtemis.a3 0.7.0
+
+- New `a3_schema()` returns the A3 JSON Schema, generated from the S7 classes.
+- Every class carries a description, and `A3` a registry publication (`kind: data`); `a3_schema()` writes both.
+- Breaking: the classes declare their properties with the rtemis.core `prop_*` factories. `A3@sequence` is a string; an annotation entry's `@index` is an integer vector or a two-column integer matrix; `A3Annotation` is `A3Annotations`; `A3Sequence`, `A3Position`, `A3Range`, `A3Index`, `A3Feature`, and `A3Variant` are removed.
+- Breaking: a variant record is a named list with `position` first; `annotation_variant()` returns one.
+- `annotation_position()` and `annotation_range()` return an integer vector or matrix as `index`.
+- Constructing an `A3` object checks range order and overlap, bounds against the sequence length, and the variant residue rule.
+- Requires rtemis.core 0.5.0.
+
 # rtemis.a3 0.6.2
 
 - License: BSD 3-Clause.

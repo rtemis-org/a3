@@ -1,459 +1,378 @@
 # A3 S7 implementation
 #  A3
-#  ├── sequence:        A3Sequence
-#  ├── annotations:     A3Annotation
-#  │   ├── site:        list of A3Site
-#  │   ├── region:      list of A3Region
-#  │   ├── ptm:         list of A3PTM
-#  │   ├── processing:  list of A3Processing
-#  │   └── variant:     list of A3Variant
+#  ├── sequence:        character(1)
+#  ├── annotations:     A3Annotations
+#  │   ├── site:        named list of A3Site
+#  │   ├── region:      named list of A3Region
+#  │   ├── ptm:         named list of A3PTM
+#  │   ├── processing:  named list of A3Processing
+#  │   └── variant:     list of variant records (named lists)
 #  └── metadata:        A3Metadata
 #      ├── uniprot_id:  character(1)
 #      ├── description: character(1)
 #      ├── reference:   character(1)
 #      └── organism:    character(1)
+# The property declarations are the document shape: `a3_schema()` emits
+# `schema/a3.schema.json` from these classes.
 # 2026- EDG rtemis.org
 
 .A3_SCHEMA_URI <- "https://schema.rtemis.org/a3/v1/schema.json"
 .A3_VERSION <- "1.0.0"
 
-# %% Level 1: A3Sequence ----
-A3Sequence <- new_class(
-  "A3Sequence",
-  properties = list(
-    data = class_character
-  ),
-  constructor = function(data) {
-    new_object(
-      S7_object,
-      data = toupper(data)
-    )
-  },
-  validator = function(self) {
-    if (length(self@data) > 1) {
-      cli::cli_abort("Sequence must be a single string.")
-    }
-    if (nchar(self@data) < 2) {
-      cli::cli_abort("Sequence must be at least 2 characters long.")
-    }
-    if (!grepl("^[A-Z*]+$", self@data)) {
-      cli::cli_abort(
-        "Sequence must only contain uppercase letters [A-Z] and '*'."
-      )
-    }
-  }
+# %% Declarations ----
+.A3_POSITIONS <- prop_array(
+  prop_integer(min = 1L),
+  min_items = 0L,
+  unique_items = TRUE,
+  def_name = "positionIndex",
+  description = "1-based residue positions, without repeats; any order."
 )
 
+.A3_RANGES <- prop_matrix(
+  prop_integer(min = 1L),
+  ncol = 2L,
+  min_items = 0L,
+  def_name = "rangeIndex",
+  description = "Inclusive [start, end] residue ranges, 1-based; any order."
+)
 
-# %% to_base.A3Sequence ----
-#' Convert A3Sequence to base character string
-#'
-#' @param x A3Sequence object
-#' @return Character string of the sequence
-#' @author EDG
-#' @keywords internal
-#' @noRd
-method(to_base, A3Sequence) <- function(x) {
-  x@data
+.A3_MIXED <- prop_union(
+  list(.A3_POSITIONS, .A3_RANGES),
+  def_name = "mixedIndex",
+  description = "Residue positions or residue ranges; one kind per index."
+)
+
+.A3_TYPE <- prop_string(
+  "",
+  min_length = 0L,
+  description = "Label of the annotation set."
+)
+
+.A3_VARIANT <- prop_struct(
+  list(
+    position = prop_integer(
+      min = 1L,
+      description = "1-based residue position of the variant."
+    )
+  ),
+  additional_members = prop_any(),
+  def_name = "variantRecord",
+  description = "Sequence variant record. Members other than position are kept as written. The position is at most the sequence length, and a from member of one letter names the residue at that position, in either case."
+)
+
+.a3_metadata_field <- function(description) {
+  prop_string("", min_length = 0L, description = description)
 }
 
 
-# %% A3Index ----
-# Abstract superclass for A3Position and A3Range, encoding the location of `A3Feature` objects.
-A3Index <- new_class(
-  "A3Index",
-  properties = list(
-    data = class_integer
-  ),
-  abstract = TRUE
-)
-
-
-# %% A3Position ----
-# A3Index subclass for individual residue annotations
-# Used by `A3Site`, `A3PTM`, and `A3Processing`.
-A3Position <- new_class(
-  "A3Position",
-  parent = A3Index,
-  constructor = function(data) {
-    new_object(
-      S7_object(),
-      data = sort(data)
-    )
-  },
-  validator = function(self) {
-    if (any(self@data < 1)) {
-      cli::cli_abort("Position data must be a positive integer.")
-    }
-    if (any(duplicated(self@data))) {
-      cli::cli_abort("Position data must be unique.")
+# %% .a3_range_problem ----
+#' Describe the first range-order or range-overlap problem in an index
+#'
+#' @param index Integer vector or two-column integer matrix.
+#'
+#' @return Character scalar, or `NULL` when the index has no such problem or is
+#' a position index.
+#'
+#' @author EDG
+#' @keywords internal
+#' @noRd
+.a3_range_problem <- function(index) {
+  if (!is.matrix(index) || nrow(index) == 0L) {
+    return(NULL)
+  }
+  bad <- which(index[, 1L] >= index[, 2L])
+  if (length(bad) > 0L) {
+    i <- bad[[1L]]
+    return(sprintf(
+      "@index range [%d, %d] must have start < end.",
+      index[i, 1L],
+      index[i, 2L]
+    ))
+  }
+  if (nrow(index) > 1L) {
+    sorted <- index[order(index[, 1L], index[, 2L]), , drop = FALSE]
+    overlap <- which(sorted[-1L, 1L] <= sorted[-nrow(sorted), 2L])
+    if (length(overlap) > 0L) {
+      i <- overlap[[1L]]
+      return(sprintf(
+        "@index ranges [%d, %d] and [%d, %d] must not overlap.",
+        sorted[i, 1L],
+        sorted[i, 2L],
+        sorted[i + 1L, 1L],
+        sorted[i + 1L, 2L]
+      ))
     }
   }
-)
-
-
-# %% A3Range ----
-# A3Index subclass for range annotations
-A3Range <- new_class(
-  "A3Range",
-  parent = A3Index,
-  constructor = function(data) {
-    # Sort by start position
-    idx <- order(data[, 1])
-    colnames(data) <- c("start", "end")
-    new_object(
-      S7_object(),
-      data = data[idx, , drop = FALSE]
-    )
-  },
-  validator = function(self) {
-    if (ncol(self@data) != 2L) {
-      cli::cli_abort("Range must be a matrix with 2 columns.")
-    }
-    if (any(self@data[, 1] >= self@data[, 2])) {
-      cli::cli_abort("Start of range must be less than end of range.")
-    }
-    if (any(self@data < 1L)) {
-      cli::cli_abort("Range values must be positive integers.")
-    }
-    if (nrow(self@data) > 1L) {
-      starts <- self@data[-1L, 1L]
-      ends <- self@data[-nrow(self@data), 2L]
-      overlap_idx <- which(starts <= ends)
-      if (length(overlap_idx) > 0L) {
-        i <- overlap_idx[[1L]]
-        cli::cli_abort(
-          "Range entries must not overlap. \\
-          Found: [{self@data[i, 1]}, {self@data[i, 2]}] and \\
-          [{self@data[i + 1L, 1]}, {self@data[i + 1L, 2]}]."
-        )
-      }
-    }
-  }
-)
-
-
-# %% A3Feature ----
-# Abstract base class for annotation feature types.
-A3Feature <- new_class(
-  "A3Feature",
-  properties = list(
-    type = class_character
-  ),
-  abstract = TRUE
-)
+  NULL
+}
 
 
 # %% A3Site ----
-A3Site <- new_class(
+A3Site <- schema_class(
   "A3Site",
-  parent = A3Feature,
+  package = "rtemis.a3",
+  description = "A named set of single residues, given by position, with an optional type label. Every position is at most the sequence length.",
   properties = list(
-    index = A3Position
-  ),
-  constructor = function(index, type = "") {
-    new_object(
-      S7_object(),
-      index = index,
-      type = type
-    )
-  }
+    index = .A3_POSITIONS,
+    type = .A3_TYPE
+  )
 )
 
 
 # %% A3Region ----
-A3Region <- new_class(
+A3Region <- schema_class(
   "A3Region",
-  parent = A3Feature,
+  package = "rtemis.a3",
+  description = "A named set of contiguous residue ranges, with an optional type label. In each range, start is less than end and end is at most the sequence length; no two ranges share a residue.",
   properties = list(
-    index = A3Range
+    index = .A3_RANGES,
+    type = .A3_TYPE
   ),
-  constructor = function(index, type = "") {
-    new_object(
-      S7_object(),
-      index = index,
-      type = type
-    )
-  }
+  validator = function(self) .a3_range_problem(self@index)
 )
 
 
 # %% A3PTM ----
-A3PTM <- new_class(
+A3PTM <- schema_class(
   "A3PTM",
-  parent = A3Feature,
+  package = "rtemis.a3",
+  description = "A named set of post-translational modifications, given as residue positions or residue ranges, with an optional type label. Positions follow the rules of a site entry and ranges those of a region entry.",
   properties = list(
-    index = A3Index
+    index = .A3_MIXED,
+    type = .A3_TYPE
   ),
-  constructor = function(index, type = "") {
-    new_object(
-      S7_object(),
-      index = index,
-      type = type
-    )
-  }
+  validator = function(self) .a3_range_problem(self@index)
 )
 
 
 # %% A3Processing ----
-A3Processing <- new_class(
+A3Processing <- schema_class(
   "A3Processing",
-  parent = A3Feature,
+  package = "rtemis.a3",
+  description = "A named set of processing events, such as signal peptides, cleavage sites, and maturation events, given as residue positions or residue ranges, with an optional type label. Positions follow the rules of a site entry and ranges those of a region entry.",
   properties = list(
-    index = A3Index
+    index = .A3_MIXED,
+    type = .A3_TYPE
   ),
-  constructor = function(index, type = "") {
-    new_object(
-      S7_object(),
-      index = index,
-      type = type
+  validator = function(self) .a3_range_problem(self@index)
+)
+
+
+# %% A3Annotations ----
+A3Annotations <- schema_class(
+  "A3Annotations",
+  package = "rtemis.a3",
+  description = "Residue-level annotations, grouped into five families: site, region, ptm, processing, and variant.",
+  properties = list(
+    site = prop_map(
+      prop_instance(A3Site),
+      default = list(),
+      min_members = 0L,
+      description = "Named sets of single residues."
+    ),
+    region = prop_map(
+      prop_instance(A3Region),
+      default = list(),
+      min_members = 0L,
+      description = "Named sets of contiguous residue ranges."
+    ),
+    ptm = prop_map(
+      prop_instance(A3PTM),
+      default = list(),
+      min_members = 0L,
+      description = "Post-translational modifications, as positions or ranges."
+    ),
+    processing = prop_map(
+      prop_instance(A3Processing),
+      default = list(),
+      min_members = 0L,
+      description = "Signal peptides, cleavage sites, and maturation events, as positions or ranges."
+    ),
+    variant = prop_array(
+      .A3_VARIANT,
+      default = list(),
+      min_items = 0L,
+      description = "Sequence variant records, in order."
     )
-  }
-)
-
-
-# %% A3Variant ----
-# `position` is a plain integer, not an `A3Position`: an A3Position is a whole
-# index object, and wrapping one integer in it bought a length-1 assertion at the
-# cost of surprising every reader and every accessor.
-A3Variant <- new_class(
-  "A3Variant",
-  properties = list(
-    position = class_integer,
-    info = class_list
-  ),
-  validator = function(self) {
-    if (length(self@position) != 1L) {
-      cli::cli_abort("Variant position must be a single integer.")
-    }
-    if (self@position < 1L) {
-      cli::cli_abort("Variant position must be >= 1; positions are 1-based.")
-    }
-  }
-)
-
-
-# %% Level 1: A3Annotation ----
-A3Annotation <- new_class(
-  "A3Annotation",
-  properties = list(
-    site = class_list,
-    region = class_list,
-    ptm = class_list,
-    processing = class_list,
-    variant = class_list
-  ),
-  validator = function(self) {
-    # `vapply(..., logical(1L))` guarantees a logical vector; `sapply()` returns
-    # a list for a zero-length input, and `all(list())` is TRUE only by accident.
-    all_inherit <- function(lst, cls) {
-      length(lst) == 0L ||
-        all(vapply(lst, S7_inherits, logical(1L), class = cls))
-    }
-    check_names <- function(lst, category) {
-      nms <- names(lst)
-      if (length(lst) > 0L && (is.null(nms) || any(!nzchar(nms)))) {
-        cli::cli_abort(
-          "All {category} annotation names must be non-empty strings."
-        )
-      }
-    }
-    if (!all_inherit(self@site, A3Site)) {
-      cli::cli_abort("All site annotations must be A3Site objects.")
-    }
-    check_names(self@site, "site")
-    if (!all_inherit(self@region, A3Region)) {
-      cli::cli_abort("All region annotations must be A3Region objects.")
-    }
-    check_names(self@region, "region")
-    if (!all_inherit(self@ptm, A3PTM)) {
-      cli::cli_abort("All PTM annotations must be A3PTM objects.")
-    }
-    check_names(self@ptm, "ptm")
-    if (!all_inherit(self@processing, A3Processing)) {
-      cli::cli_abort("All processing annotations must be A3Processing objects.")
-    }
-    check_names(self@processing, "processing")
-    if (!all_inherit(self@variant, A3Variant)) {
-      cli::cli_abort("All variant annotations must be A3Variant objects.")
-    }
-  }
-)
-
-
-# %% to_base.A3Annotation ----
-#' Convert A3Annotation to base R list format
-#'
-#' @param x A3Annotation object
-#' @return Named list with site, region, ptm, processing, and variant annotations
-#' @author EDG
-#' @keywords internal
-#' @noRd
-method(to_base, A3Annotation) <- function(x) {
-  list(
-    site = lapply(x@site, function(site) {
-      list(
-        type = site@type,
-        index = site@index@data
-      )
-    }),
-    region = lapply(x@region, function(region) {
-      list(
-        type = region@type,
-        index = region@index@data
-      )
-    }),
-    ptm = lapply(x@ptm, function(ptm) {
-      list(
-        type = ptm@type,
-        index = ptm@index@data
-      )
-    }),
-    processing = lapply(x@processing, function(proc) {
-      list(
-        type = proc@type,
-        index = proc@index@data
-      )
-    }),
-    variant = lapply(x@variant, function(v) {
-      out <- list(position = v@position)
-      # Single-bracket assignment, not double: `out[[nm]] <- NULL` would delete
-      # the element rather than store a JSON null, dropping it from the output.
-      for (nm in names(v@info)) {
-        out[nm] <- list(v@info[[nm]])
-      }
-      out
-    })
   )
-}
-
-
-# %% Metadata ----
-Metadata <- new_class(
-  "Metadata"
 )
 
 
-# %% Level 1: A3Metadata ----
-A3Metadata <- new_class(
+# %% A3Metadata ----
+A3Metadata <- schema_class(
   "A3Metadata",
-  parent = Metadata,
+  package = "rtemis.a3",
+  description = "Free-text metadata about the protein. The empty string records an absent value.",
   properties = list(
-    uniprot_id = class_character,
-    description = class_character,
-    reference = class_character,
-    organism = class_character
-  ),
-  constructor = function(
-    uniprot_id = "",
-    description = "",
-    reference = "",
-    organism = ""
-  ) {
-    new_object(
-      Metadata(),
-      uniprot_id = uniprot_id,
-      description = description,
-      reference = reference,
-      organism = organism
-    )
-  },
-  validator = function(self) {
-    if (length(self@uniprot_id) != 1L) {
-      cli::cli_abort(
-        "{.arg uniprot_id} must be a single string (character(1))."
-      )
-    }
-    if (length(self@description) != 1L) {
-      cli::cli_abort(
-        "{.arg description} must be a single string (character(1))."
-      )
-    }
-    if (length(self@reference) != 1L) {
-      cli::cli_abort("{.arg reference} must be a single string (character(1)).")
-    }
-    if (length(self@organism) != 1L) {
-      cli::cli_abort("{.arg organism} must be a single string (character(1)).")
-    }
-  }
-)
-
-
-# %% to_base.A3Metadata ----
-#' Convert A3Metadata to base R list format
-#'
-#' @param x A3Metadata object
-#' @return Named list with uniprot_id, description, reference, and organism
-#' @author EDG
-#' @keywords internal
-#' @noRd
-method(to_base, A3Metadata) <- function(x) {
-  list(
-    uniprot_id = x@uniprot_id,
-    description = x@description,
-    reference = x@reference,
-    organism = x@organism
+    uniprot_id = .a3_metadata_field("UniProt accession."),
+    description = .a3_metadata_field("Protein description."),
+    reference = .a3_metadata_field("Citation or URL."),
+    organism = .a3_metadata_field("Species name.")
   )
-}
+)
 
 
 # %% A3 ----
-A3 <- new_class(
+A3 <- schema_class(
   "A3",
-  properties = list(
-    sequence = A3Sequence,
-    annotations = A3Annotation,
-    metadata = A3Metadata
+  package = "rtemis.a3",
+  description = "Amino Acid Annotation (A3): an amino acid sequence with named sets of residue-level annotations.",
+  publication = SchemaPublication(
+    scope = "shared",
+    domain = "domain",
+    kind = "data"
   ),
-  validator = function(self) {
-    seq_length <- nchar(self@sequence@data)
+  properties = list(
+    sequence = prop_string(
+      pattern = "^[A-Za-z*]+$",
+      min_length = 2L,
+      description = "Amino acid sequence in IUPAC one-letter codes, with '*' for a stop codon. Lower case is accepted and converted to upper case when read."
+    ),
+    annotations = prop_instance(
+      A3Annotations,
+      default = quote(A3Annotations()),
+      description = "Annotation sets by family."
+    ),
+    metadata = prop_instance(
+      A3Metadata,
+      default = quote(A3Metadata()),
+      description = "Protein metadata."
+    )
+  ),
+  constructor = function(
+    sequence,
+    annotations = A3Annotations(),
+    metadata = A3Metadata()
+  ) {
+    new_object(
+      S7_object(),
+      sequence = toupper(sequence),
+      annotations = annotations,
+      metadata = metadata
+    )
+  },
+  validator = function(self) .a3_context_problems(self)
+)
 
-    # Validate site annotations
-    for (site in self@annotations@site) {
-      if (any(site@index@data > seq_length)) {
-        cli::cli_abort(
-          "Site annotation positions must be within the sequence length."
-        )
-      }
-    }
 
-    # Validate region annotations
-    for (region in self@annotations@region) {
-      if (any(region@index@data > seq_length)) {
-        cli::cli_abort(
-          "Region annotation positions must be within the sequence length."
-        )
-      }
-    }
-
-    # Validate PTM annotations
-    for (ptm in self@annotations@ptm) {
-      if (any(ptm@index@data > seq_length)) {
-        cli::cli_abort(
-          "PTM annotation positions must be within the sequence length."
-        )
-      }
-    }
-
-    # Validate processing annotations
-    for (proc in self@annotations@processing) {
-      if (any(proc@index@data > seq_length)) {
-        cli::cli_abort(
-          "Processing annotation positions must be within the sequence length."
-        )
-      }
-    }
-
-    # Validate variant annotations
-    for (variant in self@annotations@variant) {
-      if (variant@position > seq_length) {
-        cli::cli_abort(
-          "Variant annotation position must be within the sequence length."
+# %% .a3_context_problems ----
+#' Compare every index and variant with the sequence
+#'
+#' Reports indices and variant positions beyond the sequence length, and
+#' variants whose single-character `from` differs from the residue at their
+#' position, as `A3E_POS_OUT_OF_BOUNDS`, `A3E_RANGE_OUT_OF_BOUNDS`,
+#' `A3E_VARIANT_OUT_OF_BOUNDS`, and `A3E_VARIANT_RESIDUE_MISMATCH` do for a
+#' document.
+#'
+#' @param self `A3` object.
+#'
+#' @return Character vector of problems, or `NULL`.
+#'
+#' @author EDG
+#' @keywords internal
+#' @noRd
+.a3_context_problems <- function(self) {
+  n <- nchar(self@sequence)
+  problems <- character(0L)
+  for (family in .A3_NAMED_FAMILIES) {
+    entries <- prop(self@annotations, family)
+    for (name in names(entries)) {
+      index <- entries[[name]]@index
+      if (length(index) > 0L && max(index) > n) {
+        problems <- c(
+          problems,
+          sprintf(
+            "@annotations@%s[[\"%s\"]] has a position greater than the sequence length, %d.",
+            family,
+            name,
+            n
+          )
         )
       }
     }
   }
-)
+  residues <- strsplit(toupper(self@sequence), "", fixed = TRUE)[[1L]]
+  variants <- self@annotations@variant
+  for (i in seq_along(variants)) {
+    position <- variants[[i]][["position"]]
+    from <- variants[[i]][["from"]]
+    if (position > n) {
+      problems <- c(
+        problems,
+        sprintf(
+          "@annotations@variant[[%d]] position %d is greater than the sequence length, %d.",
+          i,
+          position,
+          n
+        )
+      )
+    } else if (
+      is.character(from) &&
+        length(from) == 1L &&
+        nchar(from) == 1L &&
+        toupper(from) != residues[[position]]
+    ) {
+      problems <- c(
+        problems,
+        sprintf(
+          "@annotations@variant[[%d]] from '%s' differs from residue %d, '%s'.",
+          i,
+          from,
+          position,
+          residues[[position]]
+        )
+      )
+    }
+  }
+  if (length(problems) > 0L) problems
+}
+
+
+# %% .a3_entry_base ----
+#' Annotation entry as a named list
+#'
+#' @param entry `A3Site`, `A3Region`, `A3PTM`, or `A3Processing` object.
+#'
+#' @return Named list with `type` and `index`.
+#'
+#' @author EDG
+#' @keywords internal
+#' @noRd
+.a3_entry_base <- function(entry) {
+  list(type = entry@type, index = entry@index)
+}
+
+
+# %% .a3_base ----
+#' Property value of an `A3` object as base R data
+#'
+#' `A3Annotations` becomes a named list of families, each entry a list with
+#' `type` and `index` (an integer vector or a two-column integer matrix), and
+#' `variant` a list of variant records; `A3Metadata` becomes a named list of
+#' strings; any other value is returned as is.
+#'
+#' @param value Property value.
+#'
+#' @return Base R value.
+#'
+#' @author EDG
+#' @keywords internal
+#' @noRd
+.a3_base <- function(value) {
+  if (S7_inherits(value, A3Annotations)) {
+    list(
+      site = lapply(value@site, .a3_entry_base),
+      region = lapply(value@region, .a3_entry_base),
+      ptm = lapply(value@ptm, .a3_entry_base),
+      processing = lapply(value@processing, .a3_entry_base),
+      variant = value@variant
+    )
+  } else if (S7_inherits(value, A3Metadata)) {
+    props(value)
+  } else {
+    value
+  }
+}
 
 
 # %% `.DollarNames.A3` ----
@@ -464,23 +383,13 @@ method(`.DollarNames`, A3) <- function(x, pattern = "") {
 
 # %% `$.A3` ----
 method(`$`, A3) <- function(x, name) {
-  to_base(prop(x, name))
+  .a3_base(prop(x, name))
 }
 
 
 # %% `[[.A3` ----
 method(`[[`, A3) <- function(x, name) {
-  to_base(prop(x, name))
-}
-
-
-# %% to_base.A3 ----
-method(to_base, A3) <- function(x) {
-  list(
-    sequence = to_base(x@sequence),
-    annotations = to_base(x@annotations),
-    metadata = to_base(x@metadata)
-  )
+  .a3_base(prop(x, name))
 }
 
 
@@ -489,52 +398,30 @@ method(repr, A3) <- function(x, output_type = NULL, head_n = 10L) {
   out <- repr_S7name("A3", output_type = output_type)
 
   # Metadata
-  ## Description
-  if (nchar(x@metadata@description) > 0) {
-    out <- paste0(
-      out,
-      "  Description: ",
-      bold(x@metadata@description, output_type = output_type),
-      "\n"
-    )
-  }
-
-  ## Uniprot ID
-  if (nchar(x@metadata@uniprot_id) > 0) {
-    out <- paste0(
-      out,
-      "   Uniprot ID: ",
-      bold(x@metadata@uniprot_id, output_type = output_type),
-      "\n"
-    )
-  }
-
-  ## Organism
-  if (nchar(x@metadata@organism) > 0) {
-    out <- paste0(
-      out,
-      "     Organism: ",
-      bold(x@metadata@organism, output_type = output_type),
-      "\n"
-    )
-  }
-
-  ## Reference
-  if (nchar(x@metadata@reference) > 0) {
-    out <- paste0(
-      out,
-      "    Reference: ",
-      bold(x@metadata@reference, output_type = output_type),
-      "\n"
-    )
+  labels <- c(
+    description = "  Description: ",
+    uniprot_id = "   Uniprot ID: ",
+    organism = "     Organism: ",
+    reference = "    Reference: "
+  )
+  for (field in names(labels)) {
+    value <- prop(x@metadata, field)
+    if (nzchar(value)) {
+      out <- paste0(
+        out,
+        labels[[field]],
+        bold(value, output_type = output_type),
+        "\n"
+      )
+    }
   }
 
   # Sequence
-  seq_length <- nchar(x@sequence@data)
+  seq_length <- nchar(x@sequence)
   display_seq <- if (seq_length > head_n) {
-    paste0(substr(x@sequence@data, 1L, head_n), "...")
+    paste0(substr(x@sequence, 1L, head_n), "...")
   } else {
-    x@sequence@data
+    x@sequence
   }
   out <- paste0(
     out,
@@ -546,87 +433,52 @@ method(repr, A3) <- function(x, output_type = NULL, head_n = 10L) {
   )
 
   # Annotations
-  # Get annotation info
-  site_annotations <- names(x@annotations@site)
-  region_annotations <- names(x@annotations@region)
-  ptm_annotations <- names(x@annotations@ptm)
-  n_processing_annotations <- length(x@annotations@processing)
-  n_variant_annotations <- length(x@annotations@variant)
-
+  ann <- x@annotations
   out <- paste0(out, "  Annotations:\n")
-
-  # Check if no annotations
+  n_processing <- length(ann@processing)
+  n_variant <- length(ann@variant)
   if (
-    is.null(site_annotations) &&
-      is.null(region_annotations) &&
-      is.null(ptm_annotations) &&
-      n_processing_annotations == 0 &&
-      n_variant_annotations == 0
+    length(ann@site) +
+      length(ann@region) +
+      length(ann@ptm) +
+      n_processing +
+      n_variant ==
+      0L
   ) {
     out <- paste0(out, gray("             None\n", output_type = output_type))
   }
-
-  ## Site annotations
-  if (length(site_annotations) > 0) {
-    out <- paste0(
-      out,
-      "          ",
-      gray("Site:", output_type = output_type),
-      " ",
-      paste(bold(site_annotations, output_type = output_type), collapse = ", "),
-      "\n"
-    )
+  named <- list(
+    list("          ", "Site:", names(ann@site)),
+    list("        ", "Region:", names(ann@region)),
+    list("           ", "PTM:", names(ann@ptm))
+  )
+  for (row in named) {
+    if (length(row[[3L]]) > 0L) {
+      out <- paste0(
+        out,
+        row[[1L]],
+        gray(row[[2L]], output_type = output_type),
+        " ",
+        paste(bold(row[[3L]], output_type = output_type), collapse = ", "),
+        "\n"
+      )
+    }
   }
-
-  ## Region annotations
-  if (length(region_annotations) > 0) {
-    out <- paste0(
-      out,
-      "        ",
-      gray("Region:", output_type = output_type),
-      " ",
-      paste(
-        bold(region_annotations, output_type = output_type),
-        collapse = ", "
-      ),
-      "\n"
-    )
-  }
-
-  ## PTM annotations
-  if (length(ptm_annotations) > 0) {
-    out <- paste0(
-      out,
-      "           ",
-      gray("PTM:", output_type = output_type),
-      " ",
-      paste(bold(ptm_annotations, output_type = output_type), collapse = ", "),
-      "\n"
-    )
-  }
-
-  ## Processing annotations
-  if (n_processing_annotations > 0) {
-    out <- paste0(
-      out,
-      " ",
-      gray("   Processing:", output_type = output_type),
-      " ",
-      bold(n_processing_annotations, output_type = output_type),
-      ngettext(n_processing_annotations, " annotation\n", " annotations\n")
-    )
-  }
-
-  ## Variant annotations
-  if (n_variant_annotations > 0) {
-    out <- paste0(
-      out,
-      "      ",
-      gray("Variants:", output_type = output_type),
-      " ",
-      bold(n_variant_annotations, output_type = output_type),
-      ngettext(n_variant_annotations, " annotation\n", " annotations\n")
-    )
+  counted <- list(
+    list("    ", "Processing:", n_processing),
+    list("      ", "Variants:", n_variant)
+  )
+  for (row in counted) {
+    if (row[[3L]] > 0L) {
+      out <- paste0(
+        out,
+        row[[1L]],
+        gray(row[[2L]], output_type = output_type),
+        " ",
+        bold(row[[3L]], output_type = output_type),
+        ngettext(row[[3L]], " annotation\n", " annotations\n")
+      )
+    }
   }
 
   out
@@ -640,20 +492,14 @@ method(print, A3) <- function(x, output_type = NULL, ...) {
 }
 
 
-# %% Public API ------------------------------------------------------------------------------------
-# The public API uses functions to create A3 objects from base R data structures.
-# Minimum set of required functions:
-# * `create_A3(sequence, annotations, metadata)`
-#   * sequence is character(1); can be character(n) that will be concatenated using `concat()`
-#   * site: named list created using `annotation_position()`
-#   * region: named list created using `annotation_range()`
-#   * ptm: named list created using `annotation_position()` OR `annotation_range()`
-#   * processing: named list created using `annotation_position()` OR `annotation_range()`
-#   * variant: named list created using `annotation_variant()`
-#   * uniprot_id: `character(1)`
-#   * description: `character(1)`
-#   * reference: `character(1)`
-#   * organism: `character(1)`
+# %% Public API ----
+# `create_A3()` builds an `A3` object from base R values:
+# * sequence: character(1), or single letters joined by `concat()`
+# * site: named list of `annotation_position()` values
+# * region: named list of `annotation_range()` values
+# * ptm, processing: named lists of `annotation_position()` or `annotation_range()` values
+# * variant: list of `annotation_variant()` values
+# * uniprot_id, description, reference, organism: character(1)
 
 # %% concat ----
 #' Concatenate character vector to single string for sequence input
@@ -683,17 +529,35 @@ concat <- function(x) {
 }
 
 
+# %% .a3_type_or_empty ----
+#' Annotation type, with `NULL` as the empty string
+#'
+#' @param type Optional character scalar.
+#' @param arg_name Character scalar: Argument name for error messages.
+#'
+#' @return Character scalar.
+#'
+#' @author EDG
+#' @keywords internal
+#' @noRd
+.a3_type_or_empty <- function(type, arg_name = "type") {
+  check_optional_scalar_character(type, arg_name = arg_name)
+  if (is.null(type)) "" else type
+}
+
+
 # %% annotation_position ----
 #' Create position-based annotations for A3
 #'
-#' Creates an annotation spec (named list) with an `A3Position` index and optional type,
-#' for use with `create_A3()`.
+#' Creates an annotation entry with a position index, for the `site`, `ptm`,
+#' and `processing` arguments of `create_A3()`.
 #'
 #' @param x Integer vector: Positions of the annotation (1-based indexing).
 #' @param type Optional character scalar: Annotation type. `NULL` is treated as
 #' the empty string in the canonical A3 representation.
 #'
-#' @return Named list with `index` (A3Position) and `type` (character)
+#' @return Named list with `index` (integer vector, sorted) and `type`
+#' (character).
 #'
 #' @author EDG
 #' @export
@@ -702,28 +566,31 @@ concat <- function(x) {
 #' # Create a site annotation for positions 5 and 17, of type "active site"
 #' annotation_position(c(5L, 17L), type = "active site")
 annotation_position <- function(x, type = NULL) {
-  check_optional_scalar_character(type)
-  if (is.null(type)) {
-    type <- ""
+  type <- .a3_type_or_empty(type)
+  index <- clean_int(x)
+  if (anyNA(index) || any(index < 1L)) {
+    cli::cli_abort("Positions must be integers >= 1.")
   }
-  list(
-    index = A3Position(data = clean_int(x)),
-    type = type
-  )
+  if (anyDuplicated(index) > 0L) {
+    cli::cli_abort("Positions must be unique.")
+  }
+  list(index = sort(as.vector(index)), type = type)
 }
+
 
 # %% annotation_range ----
 #' Create range-based annotations for A3
 #'
-#' Creates an annotation spec (named list) with an `A3Range` index and optional type,
-#' for use with `create_A3()`.
+#' Creates an annotation entry with a range index, for the `region`, `ptm`, and
+#' `processing` arguments of `create_A3()`.
 #'
 #' @param x Integer matrix with 2 columns corresponding to start and end positions of the
 #' annotation (1-based indexing).
 #' @param type Optional character scalar: Annotation type. `NULL` is treated as
 #' the empty string in the canonical A3 representation.
 #'
-#' @return Named list with `index` (A3Range) and `type` (character)
+#' @return Named list with `index` (two-column integer matrix, sorted by start)
+#' and `type` (character).
 #'
 #' @author EDG
 #' @export
@@ -732,12 +599,20 @@ annotation_position <- function(x, type = NULL) {
 #' # Create a region annotation for ranges 3-10 and 15-22, of type "repeat"
 #' annotation_range(rbind(c(3L, 10L), c(15L, 22L)), type = "repeat")
 annotation_range <- function(x, type = NULL) {
-  check_optional_scalar_character(type)
-  if (is.null(type)) {
-    type <- ""
+  type <- .a3_type_or_empty(type)
+  if (!is.matrix(x) || ncol(x) != 2L) {
+    cli::cli_abort("Ranges must be a matrix with 2 columns.")
+  }
+  index <- matrix(clean_int(as.vector(x)), ncol = 2L)
+  if (anyNA(index) || any(index < 1L)) {
+    cli::cli_abort("Range endpoints must be integers >= 1.")
+  }
+  problem <- .a3_range_problem(index)
+  if (!is.null(problem)) {
+    cli::cli_abort(sub("^@index r", "R", problem))
   }
   list(
-    index = A3Range(data = clean_int(x)),
+    index = index[order(index[, 1L], index[, 2L]), , drop = FALSE],
     type = type
   )
 }
@@ -746,26 +621,39 @@ annotation_range <- function(x, type = NULL) {
 # %% annotation_variant ----
 #' Create variant annotations for A3
 #'
-#' Creates an `A3Variant` object for variant annotations with position and info.
+#' Creates a variant record: a named list with `position` first, followed by
+#' the members of `info` in order.
 #'
 #' @param x Integer scalar: Position of the variant (1-based indexing).
 #' @param info Named list: Additional information about the variant (e.g. reference and alternate
 #' amino acids, variant type, etc.)
 #'
-#' @return A3Variant object
+#' @return Named list: the variant record.
 #'
 #' @author EDG
 #' @export
 #'
 #' @examples
 #' # Create a variant annotation for position 10 with info about the variant
-#' annotation_variant(10L, info = list(ref = "A", alt = "T", type = "missense"))
+#' annotation_variant(10L, info = list(from = "A", to = "T", type = "missense"))
 annotation_variant <- function(x, info = list()) {
   check_inherits(info, "list")
-  A3Variant(
-    position = clean_int(x),
-    info = info
-  )
+  position <- clean_int(x)
+  if (length(position) != 1L || is.na(position) || position < 1L) {
+    cli::cli_abort("Variant position must be a single integer >= 1.")
+  }
+  if (length(info) > 0L) {
+    nms <- names(info)
+    if (is.null(nms) || anyNA(nms) || any(!nzchar(nms)) || anyDuplicated(nms)) {
+      cli::cli_abort(
+        "Every member of {.arg info} must have a distinct, non-empty name."
+      )
+    }
+    if ("position" %in% nms) {
+      cli::cli_abort("{.arg info} must not have a member named 'position'.")
+    }
+  }
+  c(list(position = as.vector(position)), info)
 }
 
 
@@ -773,11 +661,16 @@ annotation_variant <- function(x, info = list()) {
 #' Create an A3 object from sequence, annotations, and metadata
 #'
 #' @param sequence Character scalar: Amino acid sequence string.
-#' @param site Named list of site annotations
-#' @param region Named list of region annotations
-#' @param ptm Named list of PTM annotations
-#' @param processing Named list of processing annotations
-#' @param variant Named list of variant annotations
+#' @param site Named list of site annotations, created with
+#' [annotation_position()].
+#' @param region Named list of region annotations, created with
+#' [annotation_range()].
+#' @param ptm Named list of PTM annotations, created with
+#' [annotation_position()] or [annotation_range()].
+#' @param processing Named list of processing annotations, created with
+#' [annotation_position()] or [annotation_range()].
+#' @param variant List of variant records, created with
+#' [annotation_variant()].
 #' @param uniprot_id Optional character scalar: UniProt accession.
 #' @param description Optional character scalar: Protein description.
 #' @param reference Optional character scalar: Citation or URL.
@@ -827,157 +720,57 @@ create_A3 <- function(
   check_inherits(ptm, "list")
   check_inherits(processing, "list")
   check_inherits(variant, "list")
-  check_optional_scalar_character(uniprot_id)
-  check_optional_scalar_character(description)
-  check_optional_scalar_character(reference)
-  check_optional_scalar_character(organism)
-  if (is.null(uniprot_id)) {
-    uniprot_id <- ""
+  as_entries <- function(entries, cls) {
+    lapply(entries, function(entry) {
+      if (S7_inherits(entry, cls)) {
+        entry
+      } else {
+        cls(
+          index = entry[["index"]],
+          type = .a3_type_or_empty(entry[["type"]])
+        )
+      }
+    })
   }
-  if (is.null(description)) {
-    description <- ""
-  }
-  if (is.null(reference)) {
-    reference <- ""
-  }
-  if (is.null(organism)) {
-    organism <- ""
-  }
-  site <- lapply(site, function(a) {
-    if (S7_inherits(a, A3Site)) {
-      a
-    } else {
-      A3Site(index = a[["index"]], type = a[["type"]])
-    }
-  })
-  region <- lapply(region, function(a) {
-    if (S7_inherits(a, A3Region)) {
-      a
-    } else {
-      A3Region(index = a[["index"]], type = a[["type"]])
-    }
-  })
-  ptm <- lapply(ptm, function(a) {
-    if (S7_inherits(a, A3PTM)) {
-      a
-    } else {
-      A3PTM(index = a[["index"]], type = a[["type"]])
-    }
-  })
-  processing <- lapply(processing, function(a) {
-    if (S7_inherits(a, A3Processing)) {
-      a
-    } else {
-      A3Processing(index = a[["index"]], type = a[["type"]])
-    }
-  })
   A3(
-    sequence = A3Sequence(concat(sequence)),
-    annotations = A3Annotation(
-      site = site,
-      region = region,
-      ptm = ptm,
-      processing = processing,
-      variant = variant
+    sequence = concat(sequence),
+    annotations = A3Annotations(
+      site = as_entries(site, A3Site),
+      region = as_entries(region, A3Region),
+      ptm = as_entries(ptm, A3PTM),
+      processing = as_entries(processing, A3Processing),
+      variant = unname(variant)
     ),
     metadata = A3Metadata(
-      uniprot_id = uniprot_id,
-      description = description,
-      reference = reference,
-      organism = organism
+      uniprot_id = .a3_type_or_empty(uniprot_id, "uniprot_id"),
+      description = .a3_type_or_empty(description, "description"),
+      reference = .a3_type_or_empty(reference, "reference"),
+      organism = .a3_type_or_empty(organism, "organism")
     )
   )
 }
 
-# %% to_json.A3 ----
-#' Convert an S7 object to a JSON string
+
+# %% to_json ----
+#' Write an `A3` object as A3 JSON text
 #'
-#' @param x S7 object
+#' Each property is written by its declaration through `prop_encode()`, after
+#' the `$schema` and `a3_version` members.
+#'
+#' @param x `A3` object.
 #' @param pretty Logical: if TRUE, pretty-print JSON output.
-#' @param ... Additional arguments (currently unused)
 #'
-#' @return JSON string
+#' @return Character scalar: JSON text.
 #'
 #' @author EDG
 #' @keywords internal
 #' @noRd
-method(to_json, A3) <- function(x, pretty = TRUE, ...) {
-  feature_to_list <- function(feature) {
-    idx <- feature@index
-    if (S7_inherits(idx, A3Range)) {
-      mat <- idx@data
-      index_data <- lapply(
-        seq_len(nrow(mat)),
-        function(i) as.integer(mat[i, ])
-      )
-    } else {
-      index_data <- as.integer(idx@data)
-    }
-    list(
-      index = index_data,
-      type = jsonlite::unbox(feature@type)
-    )
-  }
-
-  # A variant record is open, so its members round-trip verbatim — including
-  # nested objects, arrays, and nulls. R has no scalar type, so every length-1
-  # atomic has to be unboxed explicitly at every depth, or `{"pmid": 12345}`
-  # would come back out as `{"pmid": [12345]}`.
-  unbox_deep <- function(val) {
-    if (is.null(val)) {
-      return(NULL)
-    }
-    if (is.list(val)) {
-      out <- lapply(val, unbox_deep)
-      names(out) <- names(val)
-      return(out)
-    }
-    # A vector marked with I() stays a JSON array at any length, so a
-    # one-element list member such as `conditions` keeps its array type.
-    if (inherits(val, "AsIs")) {
-      return(as.vector(unclass(val)))
-    }
-    if (is.atomic(val) && length(val) == 1L) jsonlite::unbox(val) else val
-  }
-
-  variant_to_list <- function(v) {
-    out <- list(position = jsonlite::unbox(as.integer(v@position)))
-    # Single-bracket assignment, not double: `out[[nm]] <- NULL` would delete
-    # the element rather than emit a JSON null, dropping it from the round-trip.
-    for (nm in names(v@info)) {
-      out[nm] <- list(unbox_deep(v@info[[nm]]))
-    }
-    out
-  }
-
-  force_named <- function(x) {
-    if (length(x) == 0) structure(list(), names = character(0)) else x
-  }
-
-  lst <- list(
-    `$schema` = jsonlite::unbox(.A3_SCHEMA_URI),
-    a3_version = jsonlite::unbox(.A3_VERSION),
-    sequence = jsonlite::unbox(x@sequence@data),
-    annotations = list(
-      site = force_named(lapply(x@annotations@site, feature_to_list)),
-      region = force_named(lapply(x@annotations@region, feature_to_list)),
-      ptm = force_named(lapply(x@annotations@ptm, feature_to_list)),
-      processing = force_named(lapply(
-        x@annotations@processing,
-        feature_to_list
-      )),
-      # `variant` is a JSON array; unname() keeps a named list of variants,
-      # such as the one clinvar_variants() returns, from becoming an object.
-      variant = unname(lapply(x@annotations@variant, variant_to_list))
-    ),
-    metadata = list(
-      uniprot_id = jsonlite::unbox(x@metadata@uniprot_id),
-      description = jsonlite::unbox(x@metadata@description),
-      reference = jsonlite::unbox(x@metadata@reference),
-      organism = jsonlite::unbox(x@metadata@organism)
-    )
+to_json <- function(x, pretty = TRUE) {
+  document <- c(
+    list(`$schema` = .A3_SCHEMA_URI, a3_version = .A3_VERSION),
+    prop_encode(prop_instance(A3), x)
   )
-  jsonlite::toJSON(lst, pretty = pretty, null = "null")
+  to_JSON(document, pretty = pretty)
 }
 
 

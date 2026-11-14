@@ -5,7 +5,10 @@ The five A3 implementations release together from one commit when a change reach
 ## Unreleased
 
 - License: all five packages, the specification, the schema, and the conformance corpus are BSD 3-Clause.
-- Schema: `positionIndex` sets `uniqueItems: true`. `just schema-check`, a dependency of `just conformance`, and the CI job `schema-matches-corpus` validate the conformance corpus against `schema/a3.schema.json`.
+- Schema: `schema/a3.schema.json` is generated from the `rtemis.a3` S7 classes (`just schema`); CI fails when it differs from regeneration. It accepts the same documents as before, with `uniqueItems: true` on `positionIndex`, and emits no `default` keyword.
+- Schema: every class definition carries a description, and the root carries `x-rtemis.publication` (`scope: shared`, `domain: domain`, `kind: data`).
+- Schema: `just schema-check`, a dependency of `just conformance`, and the CI job `schema-matches-corpus` validate the conformance corpus against the schema.
+- R: `rtemis.a3` 0.7.0 declares its classes with the rtemis.core `prop_*` factories; variant records are named lists.
 - R: `clinvar_variants(gene, protein, classification)` positions each variant on one RefSeq protein from its HGVS protein expression.
 - R: `write_A3json()` writes a named variant list, and a member wrapped in `I()`, as a JSON array.
 - Example: `examples/mapt.a3.json` is tau isoform 2N4R (UniProtKB P10636-8), built by `examples/mapt/build_mapt.R`; the conformance case `valid/mapt` is generated from it.

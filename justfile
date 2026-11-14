@@ -148,9 +148,20 @@ corpus-check: corpus
         exit 1; \
     }
 
-# Fail unless the JSON Schema accepts every valid case and rejects every
-# invalid case except those that break only cross-field rules
-schema-check:
+# Regenerate schema/a3.schema.json from the rtemis.a3 S7 classes
+schema:
+    @just _msg "─── Generating the JSON Schema from the R classes ───"
+    {{ rscript }} schema/generate_schema.R
+
+# Fail if the committed schema differs from regeneration, or unless the schema
+# accepts every valid case and rejects every invalid case except those that
+# break only cross-field rules
+schema-check: schema
+    @just _msg "─── Checking the committed schema matches the R classes ───"
+    @git diff --exit-code --stat schema/a3.schema.json || { \
+        echo "   Error: schema/a3.schema.json is out of date. Run 'just schema' and commit."; \
+        exit 1; \
+    }
     @just _msg "─── Checking the JSON Schema against the corpus ───"
     {{ uv }} run --quiet --no-project --with jsonschema python schema/check_corpus.py
 

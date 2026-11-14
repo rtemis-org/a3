@@ -1186,28 +1186,29 @@ validate_a3_raw <- function(x) {
 #' @keywords internal
 #' @noRd
 .a3_build <- function(draft) {
-  make_index <- function(entry) {
+  index_value <- function(entry) {
+    values <- entry[["values"]]
     if (entry[["geometry"]] == "positions") {
-      A3Position(data = as.integer(entry[["values"]]))
+      as.integer(values)
     } else {
-      A3Range(data = entry[["values"]])
+      matrix(as.integer(values), ncol = 2L)
     }
   }
-  make_family <- function(family, feature_class) {
+  make_family <- function(family, cls) {
     lapply(draft[[family]], function(entry) {
-      feature_class(index = make_index(entry), type = entry[["type"]])
+      cls(index = index_value(entry), type = entry[["type"]])
     })
   }
 
   A3(
-    sequence = A3Sequence(data = draft[["sequence"]]),
-    annotations = A3Annotation(
+    sequence = draft[["sequence"]],
+    annotations = A3Annotations(
       site = make_family("site", A3Site),
       region = make_family("region", A3Region),
       ptm = make_family("ptm", A3PTM),
       processing = make_family("processing", A3Processing),
       variant = lapply(draft[["variant"]], function(v) {
-        A3Variant(position = v[["position"]], info = v[["extra"]])
+        c(list(position = v[["position"]]), v[["extra"]])
       })
     ),
     metadata = A3Metadata(

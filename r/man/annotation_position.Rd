@@ -13,11 +13,12 @@ annotation_position(x, type = NULL)
 the empty string in the canonical A3 representation.}
 }
 \value{
-Named list with \code{index} (A3Position) and \code{type} (character)
+Named list with \code{index} (integer vector, sorted) and \code{type}
+(character).
 }
 \description{
-Creates an annotation spec (named list) with an \code{A3Position} index and optional type,
-for use with \code{create_A3()}.
+Creates an annotation entry with a position index, for the \code{site}, \code{ptm},
+and \code{processing} arguments of \code{create_A3()}.
 }
 \examples{
 # Create a site annotation for positions 5 and 17, of type "active site"
