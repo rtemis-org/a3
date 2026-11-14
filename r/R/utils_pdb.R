@@ -66,7 +66,7 @@ pdb_annotations <- function(
   # -- SIFTS mappings via Graph API `best_structures` ----
   # Returns a flat list of segments, each with:
   #   pdb_id, chain_id, unp_start, unp_end, pdb_start, pdb_end, coverage
-  # PDBe ranks them by coverage then resolution, so the first entry is best.
+  # PDBe orders them by coverage, then resolution; the first entry ranks first.
   best_dat <- fetch_json(paste0(
     pdbe_graph_url,
     "/mappings/best_structures/",
@@ -173,7 +173,7 @@ pdb_annotations <- function(
             return(NULL)
           }
           A3Region(
-            index = A3Range(data = matrix(unp, nrow = 1L)),
+            index = matrix(as.integer(unp), nrow = 1L),
             type = a3_type
           )
         })
@@ -238,7 +238,7 @@ pdb_annotations <- function(
       site_list <- c(
         site_list,
         list(
-          A3Site(index = A3Position(data = unp_positions), type = "bindingSite")
+          A3Site(index = as.integer(unp_positions), type = "bindingSite")
         )
       )
     }

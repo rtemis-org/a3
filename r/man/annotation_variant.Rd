@@ -13,14 +13,15 @@ annotation_variant(x, info = list())
 amino acids, variant type, etc.)}
 }
 \value{
-A3Variant object
+Named list: the variant record.
 }
 \description{
-Creates an \code{A3Variant} object for variant annotations with position and info.
+Creates a variant record: a named list with \code{position} first, followed by
+the members of \code{info} in order.
 }
 \examples{
 # Create a variant annotation for position 10 with info about the variant
-annotation_variant(10L, info = list(ref = "A", alt = "T", type = "missense"))
+annotation_variant(10L, info = list(from = "A", to = "T", type = "missense"))
 }
 \author{
 EDG

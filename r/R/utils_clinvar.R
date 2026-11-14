@@ -3,8 +3,8 @@
 #'
 #' Lists every ClinVar record for `gene` through NCBI E-utilities, keeps the
 #' records whose only gene is `gene` and whose aggregate germline
-#' classification is in `classification`, and returns one `A3Variant` per
-#' record with a single-residue change on `protein`.
+#' classification is in `classification`, and returns one variant record
+#' per record with a single-residue change on `protein`.
 #'
 #' The position, reference residue, and alternate residue come from the
 #' record's HGVS protein expression on `protein` (for example
@@ -17,7 +17,7 @@
 #' Supported changes are missense (`P301L`), nonsense (`R5*`), and deletion of
 #' one residue (`N279del`). A deletion record has no `to` member.
 #'
-#' Each variant's `info` holds `from`, `to`, `type` (`"missense"`,
+#' Each variant record holds `position`, `from`, `to`, `type` (`"missense"`,
 #' `"nonsense"`, or `"deletion"`), `source` (`"ClinVar"`), `id` (the VCV
 #' accession with its version), `hgvs_p`, `clinical_significance`,
 #' `review_status`, and `conditions` (a character vector of condition names).
@@ -32,7 +32,7 @@
 #' @param eutils_url Character scalar: Base URL of NCBI E-utilities.
 #' @param verbosity Integer scalar: Verbosity level.
 #'
-#' @return Named list of `A3Variant` objects, ordered by position. Names use
+#' @return Named list of variant records, ordered by position. Names use
 #'   `{from}{position}{to}` notation (e.g. `"P301L"`, `"N279del"`), with a
 #'   numeric suffix to disambiguate duplicates.
 #'
@@ -192,10 +192,7 @@ clinvar_variants <- function(
   positions <- vapply(records, function(r) r[["position"]], integer(1L))
   records <- records[order(positions)]
   variant_list <- lapply(records, function(r) {
-    A3Variant(
-      position = r[["position"]],
-      info = r[setdiff(names(r), "position")]
-    )
+    annotation_variant(r[["position"]], info = r[setdiff(names(r), "position")])
   })
   names(variant_list) <- .clinvar_unique_names(vapply(
     records,

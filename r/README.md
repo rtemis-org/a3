@@ -2,12 +2,9 @@
 
 # rtemis.a3
 
-R implementation of the **Amino Acid Annotation (A3)** format —
-a structured JSON format for amino acid sequences with site, region, PTM,
-processing, and variant annotations.
+R implementation of the **Amino Acid Annotation (A3)** format — a structured JSON format for amino acid sequences with site, region, PTM, processing, and variant annotations.
 
-Part of the [rtemis-org/a3](https://github.com/rtemis-org/a3) monorepo,
-which provides A3 implementations in R, Python, Julia, TypeScript, and Rust.
+Part of the [rtemis-org/a3](https://github.com/rtemis-org/a3) monorepo, which provides A3 implementations in R, Python, Julia, TypeScript, and Rust.
 
 ## Installation
 
@@ -30,7 +27,7 @@ pak::pak("rtemis.a3")
 pak::pak("rtemis-org/a3/r")
 ```
 
-## Quick Start
+## Usage
 
 ```r
 library(rtemis.a3)
@@ -68,7 +65,7 @@ a3 <- read_A3json("path/to/protein.json")
 | `create_A3(sequence, site, region, ptm, ...)` | Create an A3 object                        |
 |                `annotation_position(x, type)` | Create a position-indexed annotation entry |
 |                   `annotation_range(x, type)` | Create a range-indexed annotation entry    |
-|                 `annotation_variant(x, info)` | Create a variant annotation                |
+|                 `annotation_variant(x, info)` | Create a variant record                    |
 
 ### I/O
 
@@ -81,13 +78,13 @@ a3 <- read_A3json("path/to/protein.json")
 
 ```
 A3
- ├── sequence:     A3Sequence
- ├── annotations:  A3Annotation
- │   ├── site:        named list of A3Site       (A3Position index)
- │   ├── region:      named list of A3Region     (A3Range index)
- │   ├── ptm:         named list of A3PTM        (A3Index — position or range)
- │   ├── processing:  named list of A3Processing (A3Index — position or range)
- │   └── variant:     list of A3Variant
+ ├── sequence:     character(1)
+ ├── annotations:  A3Annotations
+ │   ├── site:        named list of A3Site       (index: integer vector)
+ │   ├── region:      named list of A3Region     (index: two-column integer matrix)
+ │   ├── ptm:         named list of A3PTM        (index: either)
+ │   ├── processing:  named list of A3Processing (index: either)
+ │   └── variant:     list of variant records    (named lists, `position` first)
  └── metadata:     A3Metadata
      ├── uniprot_id
      ├── description
@@ -95,26 +92,19 @@ A3
      └── organism
 ```
 
+Every property is declared with an rtemis.core `prop_*` factory, and `a3_schema()` generates the A3 JSON Schema from these declarations.
+
 ## Validation
 
-Validation is **collect-all**. A document is checked in four stages — envelope,
-structural, intra-field, contextual — and every issue in the earliest failing
-stage is reported at once. Each issue carries a stable `code` and an
-[RFC 6901](https://www.rfc-editor.org/info/rfc6901/) JSON Pointer `path`, both of
-which are identical across the R, Python, Julia, TypeScript, and Rust
-implementations of A3. Messages are for humans and are not contractual.
+Validation is **collect-all**. A document is checked in four stages — envelope, structural, intra-field, contextual — and every issue in the earliest failing stage is reported at once. Each issue carries a stable `code` and an [RFC 6901](https://www.rfc-editor.org/info/rfc6901/) JSON Pointer `path`, both of which are identical across the R, Python, Julia, TypeScript, and Rust implementations of A3. Messages are for humans and are not contractual.
 
-Two entry points, two behaviors, on purpose:
+Three entry points:
 
 | Entry point | Behavior |
 |---|---|
 | `read_A3json(path)` | **collect-all** — aborts once with every issue in the failing stage |
 | `validate_A3json(path)` | **collect-all, non-throwing** — returns the issues as a data frame |
-| `create_A3(...)` | **fail-fast** — one corrective message, from the S7 validators |
-
-A 500-annotation document assembled from four public resources should not be
-fixed one error per run. A programmer who passed a bad argument wants one
-specific message immediately.
+| `create_A3(...)` | aborts with the messages of the S7 validators, without codes or paths |
 
 ```r
 validate_A3json("mapt.a3.json")
@@ -122,8 +112,7 @@ validate_A3json("mapt.a3.json")
 #> 1 A3E_POS_OUT_OF_BOUNDS     4 /annotations/site/Active/index/2  Position 999 is out of ...
 ```
 
-`read_A3json()` attaches the issue list to the condition object, so it is
-reachable without parsing the message:
+`read_A3json()` attaches the issue list to the condition object, so it is reachable without parsing the message:
 
 ```r
 issues <- tryCatch(
@@ -132,7 +121,4 @@ issues <- tryCatch(
 )
 ```
 
-See [`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md)
-for the full rule registry and
-[`spec/error-paths.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-paths.md)
-for the path grammar.
+See [`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) for the full rule registry and [`spec/error-paths.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-paths.md) for the path grammar.

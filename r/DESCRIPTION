@@ -1,7 +1,7 @@
 Package: rtemis.a3
 Title: Amino Acid Annotation (A3) Format
-Version: 0.6.2
-Date: 2026-11-11
+Version: 0.7.0
+Date: 2026-11-13
 Authors@R:
     person(given = "E.D.", family = "Gennatas", role = c("aut", "cre", "cph"),
            email = "gennatas@gmail.com",
@@ -22,7 +22,7 @@ Imports:
     cli,
     data.table,
     jsonlite,
-    rtemis.core,
+    rtemis.core (>= 0.5.0),
     S7,
     stats,
     utils

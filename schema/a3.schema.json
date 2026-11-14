@@ -1,152 +1,237 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schema.rtemis.org/a3/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "A3",
-  "description": "Amino Acid Annotation (A3) format — structured annotation of amino acid sequences.",
+  "description": "Amino Acid Annotation (A3): an amino acid sequence with named sets of residue-level annotations.",
   "type": "object",
-  "required": ["$schema", "a3_version", "sequence"],
-  "additionalProperties": false,
   "properties": {
     "$schema": {
+      "description": "Identifier of the A3 JSON Schema.",
       "type": "string",
       "const": "https://schema.rtemis.org/a3/v1/schema.json",
-      "description": "JSON Schema URI for this A3 document."
+      "minLength": 1
     },
     "a3_version": {
+      "description": "A3 format version.",
       "type": "string",
       "const": "1.0.0",
-      "description": "A3 specification version."
+      "minLength": 1
     },
     "sequence": {
+      "description": "Amino acid sequence in IUPAC one-letter codes, with '*' for a stop codon. Lower case is accepted and converted to upper case when read.",
       "type": "string",
       "minLength": 2,
-      "pattern": "^[A-Za-z*]+$",
-      "description": "Amino acid sequence using IUPAC single-letter codes plus '*' (stop codon). Lowercase is accepted and uppercased on parse."
+      "pattern": "^[A-Za-z*]+$"
     },
     "annotations": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "site": {
-          "type": "object",
-          "propertyNames": { "minLength": 1 },
-          "additionalProperties": { "$ref": "#/$defs/positionAnnotationEntry" },
-          "description": "Named sets of individual residue positions."
-        },
-        "region": {
-          "type": "object",
-          "propertyNames": { "minLength": 1 },
-          "additionalProperties": { "$ref": "#/$defs/rangeAnnotationEntry" },
-          "description": "Named sets of contiguous sequence spans."
-        },
-        "ptm": {
-          "type": "object",
-          "propertyNames": { "minLength": 1 },
-          "additionalProperties": { "$ref": "#/$defs/mixedAnnotationEntry" },
-          "description": "Post-translational modifications (positions or ranges)."
-        },
-        "processing": {
-          "type": "object",
-          "propertyNames": { "minLength": 1 },
-          "additionalProperties": { "$ref": "#/$defs/mixedAnnotationEntry" },
-          "description": "Signal peptides, cleavage sites, maturation events (positions or ranges)."
-        },
-        "variant": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/variantRecord" },
-          "description": "Ordered list of sequence variant records."
-        }
-      }
+      "description": "Annotation sets by family.",
+      "$ref": "#/$defs/A3Annotations"
     },
     "metadata": {
-      "type": "object",
-      "additionalProperties": false,
       "description": "Protein metadata.",
-      "properties": {
-        "uniprot_id": {
-          "type": "string",
-          "description": "UniProt accession."
-        },
-        "description": {
-          "type": "string",
-          "description": "Human-readable protein description."
-        },
-        "reference": {
-          "type": "string",
-          "description": "Citation or URL."
-        },
-        "organism": {
-          "type": "string",
-          "description": "Species name."
-        }
-      }
+      "$ref": "#/$defs/A3Metadata"
+    }
+  },
+  "required": ["$schema", "a3_version", "sequence"],
+  "additionalProperties": false,
+  "x-rtemis": {
+    "publication": {
+      "producer": "rtemis.a3",
+      "language": "r",
+      "scope": "shared",
+      "domain": "domain",
+      "class": "rtemis.a3::A3",
+      "role": "document",
+      "kind": "data",
+      "order": 1
     }
   },
   "$defs": {
-    "position": {
-      "type": "integer",
-      "minimum": 1,
-      "description": "1-based residue position."
+    "A3Annotations": {
+      "description": "Residue-level annotations, grouped into five families: site, region, ptm, processing, and variant.",
+      "type": "object",
+      "properties": {
+        "site": {
+          "description": "Named sets of single residues.",
+          "type": "object",
+          "propertyNames": {
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/A3Site"
+          }
+        },
+        "region": {
+          "description": "Named sets of contiguous residue ranges.",
+          "type": "object",
+          "propertyNames": {
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/A3Region"
+          }
+        },
+        "ptm": {
+          "description": "Post-translational modifications, as positions or ranges.",
+          "type": "object",
+          "propertyNames": {
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/A3PTM"
+          }
+        },
+        "processing": {
+          "description": "Signal peptides, cleavage sites, and maturation events, as positions or ranges.",
+          "type": "object",
+          "propertyNames": {
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/A3Processing"
+          }
+        },
+        "variant": {
+          "description": "Sequence variant records, in order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/variantRecord"
+          }
+        }
+      },
+      "additionalProperties": false
     },
-    "range": {
-      "type": "array",
-      "items": { "type": "integer", "minimum": 1 },
-      "minItems": 2,
-      "maxItems": 2,
-      "description": "Inclusive [start, end] range pair; start < end is enforced at validation time."
+    "A3Metadata": {
+      "description": "Free-text metadata about the protein. The empty string records an absent value.",
+      "type": "object",
+      "properties": {
+        "uniprot_id": {
+          "description": "UniProt accession.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Protein description.",
+          "type": "string"
+        },
+        "reference": {
+          "description": "Citation or URL.",
+          "type": "string"
+        },
+        "organism": {
+          "description": "Species name.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
     },
-    "positionIndex": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/position" },
-      "uniqueItems": true,
-      "description": "Ordered array of 1-based residue positions."
+    "A3PTM": {
+      "description": "A named set of post-translational modifications, given as residue positions or residue ranges, with an optional type label. Positions follow the rules of a site entry and ranges those of a region entry.",
+      "type": "object",
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/mixedIndex"
+        },
+        "type": {
+          "description": "Label of the annotation set.",
+          "type": "string"
+        }
+      },
+      "required": ["index"],
+      "additionalProperties": false
     },
-    "rangeIndex": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/range" },
-      "description": "Ordered array of [start, end] range pairs."
+    "A3Processing": {
+      "description": "A named set of processing events, such as signal peptides, cleavage sites, and maturation events, given as residue positions or residue ranges, with an optional type label. Positions follow the rules of a site entry and ranges those of a region entry.",
+      "type": "object",
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/mixedIndex"
+        },
+        "type": {
+          "description": "Label of the annotation set.",
+          "type": "string"
+        }
+      },
+      "required": ["index"],
+      "additionalProperties": false
+    },
+    "A3Region": {
+      "description": "A named set of contiguous residue ranges, with an optional type label. In each range, start is less than end and end is at most the sequence length; no two ranges share a residue.",
+      "type": "object",
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/rangeIndex"
+        },
+        "type": {
+          "description": "Label of the annotation set.",
+          "type": "string"
+        }
+      },
+      "required": ["index"],
+      "additionalProperties": false
+    },
+    "A3Site": {
+      "description": "A named set of single residues, given by position, with an optional type label. Every position is at most the sequence length.",
+      "type": "object",
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/positionIndex"
+        },
+        "type": {
+          "description": "Label of the annotation set.",
+          "type": "string"
+        }
+      },
+      "required": ["index"],
+      "additionalProperties": false
     },
     "mixedIndex": {
+      "description": "Residue positions or residue ranges; one kind per index.",
       "anyOf": [
-        { "$ref": "#/$defs/positionIndex" },
-        { "$ref": "#/$defs/rangeIndex" }
-      ],
-      "description": "Either an array of positions or a homogeneous array of [start, end] range pairs."
+        {
+          "$ref": "#/$defs/positionIndex"
+        },
+        {
+          "$ref": "#/$defs/rangeIndex"
+        }
+      ]
     },
-    "positionAnnotationEntry": {
-      "type": "object",
-      "required": ["index"],
-      "additionalProperties": false,
-      "properties": {
-        "index": { "$ref": "#/$defs/positionIndex" },
-        "type": { "type": "string", "default": "" }
-      }
+    "positionIndex": {
+      "description": "1-based residue positions, without repeats; any order.",
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "uniqueItems": true
     },
-    "rangeAnnotationEntry": {
-      "type": "object",
-      "required": ["index"],
-      "additionalProperties": false,
-      "properties": {
-        "index": { "$ref": "#/$defs/rangeIndex" },
-        "type": { "type": "string", "default": "" }
-      }
-    },
-    "mixedAnnotationEntry": {
-      "type": "object",
-      "required": ["index"],
-      "additionalProperties": false,
-      "properties": {
-        "index": { "$ref": "#/$defs/mixedIndex" },
-        "type": { "type": "string", "default": "" }
+    "rangeIndex": {
+      "description": "Inclusive [start, end] residue ranges, 1-based; any order.",
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minItems": 2,
+        "maxItems": 2
       }
     },
     "variantRecord": {
+      "description": "Sequence variant record. Members other than position are kept as written. The position is at most the sequence length, and a from member of one letter names the residue at that position, in either case.",
       "type": "object",
-      "required": ["position"],
       "properties": {
-        "position": { "$ref": "#/$defs/position" }
+        "position": {
+          "description": "1-based residue position of the variant.",
+          "type": "integer",
+          "minimum": 1
+        }
       },
-      "description": "Sequence variant record. 'position' is required; all other fields are open (must be JSON-compatible)."
+      "required": ["position"],
+      "propertyNames": {
+        "minLength": 1
+      },
+      "additionalProperties": {}
     }
   }
 }

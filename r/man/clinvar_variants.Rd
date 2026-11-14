@@ -28,15 +28,15 @@ to keep, compared exactly with ClinVar's
 \item{verbosity}{Integer scalar: Verbosity level.}
 }
 \value{
-Named list of \code{A3Variant} objects, ordered by position. Names use
+Named list of variant records, ordered by position. Names use
 \verb{\{from\}\{position\}\{to\}} notation (e.g. \code{"P301L"}, \code{"N279del"}), with a
 numeric suffix to disambiguate duplicates.
 }
 \description{
 Lists every ClinVar record for \code{gene} through NCBI E-utilities, keeps the
 records whose only gene is \code{gene} and whose aggregate germline
-classification is in \code{classification}, and returns one \code{A3Variant} per
-record with a single-residue change on \code{protein}.
+classification is in \code{classification}, and returns one variant record
+per record with a single-residue change on \code{protein}.
 }
 \details{
 The position, reference residue, and alternate residue come from the
@@ -50,7 +50,7 @@ changes in exons the isoform lacks) is skipped and counted in a message.
 Supported changes are missense (\code{P301L}), nonsense (\verb{R5*}), and deletion of
 one residue (\code{N279del}). A deletion record has no \code{to} member.
 
-Each variant's \code{info} holds \code{from}, \code{to}, \code{type} (\code{"missense"},
+Each variant record holds \code{position}, \code{from}, \code{to}, \code{type} (\code{"missense"},
 \code{"nonsense"}, or \code{"deletion"}), \code{source} (\code{"ClinVar"}), \code{id} (the VCV
 accession with its version), \code{hgvs_p}, \code{clinical_significance},
 \code{review_status}, and \code{conditions} (a character vector of condition names).

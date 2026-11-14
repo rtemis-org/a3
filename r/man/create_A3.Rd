@@ -20,15 +20,20 @@ create_A3(
 \arguments{
 \item{sequence}{Character scalar: Amino acid sequence string.}
 
-\item{site}{Named list of site annotations}
+\item{site}{Named list of site annotations, created with
+\code{\link[=annotation_position]{annotation_position()}}.}
 
-\item{region}{Named list of region annotations}
+\item{region}{Named list of region annotations, created with
+\code{\link[=annotation_range]{annotation_range()}}.}
 
-\item{ptm}{Named list of PTM annotations}
+\item{ptm}{Named list of PTM annotations, created with
+\code{\link[=annotation_position]{annotation_position()}} or \code{\link[=annotation_range]{annotation_range()}}.}
 
-\item{processing}{Named list of processing annotations}
+\item{processing}{Named list of processing annotations, created with
+\code{\link[=annotation_position]{annotation_position()}} or \code{\link[=annotation_range]{annotation_range()}}.}
 
-\item{variant}{Named list of variant annotations}
+\item{variant}{List of variant records, created with
+\code{\link[=annotation_variant]{annotation_variant()}}.}
 
 \item{uniprot_id}{Optional character scalar: UniProt accession.}
 

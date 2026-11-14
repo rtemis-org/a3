@@ -10,7 +10,7 @@ A3 monorepo: specification and cross-language implementations of the Amino Acid 
 
 ## Schema
 
-[A3 JSON Schema](https://schema.rtemis.org/a3/v1/schema.json)
+[A3 JSON Schema](https://schema.rtemis.org/a3/v1/schema.json), generated from the `rtemis.a3` S7 classes (`schema/a3.schema.json`).
 
 ## Specification
 

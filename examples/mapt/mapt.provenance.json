@@ -1,6 +1,6 @@
 {
   "document": "examples/mapt.a3.json",
-  "built": "2026-11-11T19:21:43-0800",
+  "built": "2026-11-13T16:25:49-0800",
   "sequence": {
     "uniprot": "P10636-8",
     "isoform": "Tau-F",
@@ -148,6 +148,6 @@
   },
   "r": {
     "version": "R version 4.6.2 (2026-10-29)",
-    "rtemis.a3": "0.6.1"
+    "rtemis.a3": "0.7.0"
   }
 }

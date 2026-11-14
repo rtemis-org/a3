@@ -1,8 +1,8 @@
 # %% uniprot_sequence ----
 #' Fetch a protein sequence from UniProt
 #'
-#' Lightweight FASTA-only fetch. Use this when you only need the amino acid
-#' sequence. For full annotations and metadata use [uniprot_to_A3()].
+#' Fetches the amino acid sequence only, from the FASTA endpoint.
+#' [uniprot_to_A3()] fetches annotations and metadata as well.
 #'
 #' @param accession Character scalar: UniProt accession, e.g. `"P10636"`.
 #' @param base_url Character scalar: UniProt REST API base URL.
@@ -145,17 +145,18 @@ uniprot_to_A3 <- function(
   # -- Feature parsers ----
   loc_start <- function(f) as.integer(f[["location"]][["start"]][["value"]])
   loc_end <- function(f) as.integer(f[["location"]][["end"]][["value"]])
+  loc_range <- function(f) matrix(c(loc_start(f), loc_end(f)), ncol = 2L)
 
   parse_site <- function(f) {
     A3Site(
-      index = A3Position(data = loc_start(f)),
+      index = loc_start(f),
       type = site_types[[f[["type"]]]]
     )
   }
 
   parse_region <- function(f) {
     A3Region(
-      index = A3Range(data = rbind(c(loc_start(f), loc_end(f)))),
+      index = loc_range(f),
       type = region_types[[f[["type"]]]]
     )
   }
@@ -164,9 +165,9 @@ uniprot_to_A3 <- function(
     a3_type <- ptm_types[[f[["type"]]]]
     # Disulfide bond encodes a residue pair as a two-position range
     idx <- if (f[["type"]] == "Disulfide bond") {
-      A3Range(data = rbind(c(loc_start(f), loc_end(f))))
+      loc_range(f)
     } else {
-      A3Position(data = loc_start(f))
+      loc_start(f)
     }
     A3PTM(index = idx, type = a3_type)
   }
@@ -175,9 +176,9 @@ uniprot_to_A3 <- function(
     a3_type <- processing_types[[f[["type"]]]]
     # Initiator methionine is a single-residue site; all others are ranges
     idx <- if (f[["type"]] == "Initiator methionine") {
-      A3Position(data = loc_start(f))
+      loc_start(f)
     } else {
-      A3Range(data = rbind(c(loc_start(f), loc_end(f))))
+      loc_range(f)
     }
     A3Processing(index = idx, type = a3_type)
   }
@@ -210,7 +211,7 @@ uniprot_to_A3 <- function(
         info[["dbSnp"]] <- paste(dbsnp_ids, collapse = ",")
       }
     }
-    A3Variant(position = clean_int(loc_start(f)), info = info)
+    annotation_variant(loc_start(f), info = info)
   }
 
   # -- Dispatch features to families ----
@@ -260,8 +261,8 @@ uniprot_to_A3 <- function(
   }
 
   A3(
-    sequence = A3Sequence(data = sequence),
-    annotations = A3Annotation(
+    sequence = sequence,
+    annotations = A3Annotations(
       site = site_list,
       region = region_list,
       ptm = ptm_list,
