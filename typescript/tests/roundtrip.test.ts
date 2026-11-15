@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { A3 } from "../src/a3";
+import { A3 } from "../src/a3.ts";
 
 const EXAMPLES_DIR = join(import.meta.dirname, "../../examples");
 

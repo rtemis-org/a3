@@ -26,7 +26,8 @@
 //! document whose `sequence` fails Stage 2 has no known length, so Stage 4
 //! would emit one spurious out-of-bounds issue per annotated position.
 //!
-//! The full contract lives in `spec/error-codes.md` and `spec/error-paths.md`.
+//! The full contract lives in [`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) and
+//! [`spec/error-paths.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-paths.md).
 
 use indexmap::IndexMap;
 use serde_json::{Map, Value};
@@ -483,9 +484,9 @@ fn parse_index(
     }
 
     // For ptm / processing, a homogeneity failure is its own rule. For site and
-    // region the schema fixes the geometry, so a wrong element is just a wrong
-    // element and was already reported above by `classify` — except that a
-    // correctly-shaped element of the *other* geometry still has to be caught.
+    // region the schema fixes the geometry, so `classify` has already reported a
+    // wrong element above, except a correctly shaped element of the *other*
+    // geometry, which this check catches.
     let geometry = if flexible {
         if n_int > 0 && n_arr > 0 {
             issues.push(A3Issue::new(
@@ -1136,7 +1137,7 @@ mod tests {
     fn subscripts_name_the_sorted_index() {
         let mut v = minimal();
         v["annotations"] = json!({"site": {"s": {"index": [5, 0, -3]}}});
-        // Sorted to [-3, 0, 5]; the two bad values are now at 0 and 1.
+        // Sorted to [-3, 0, 5], which places the two bad values at subscripts 0 and 1.
         assert_eq!(
             issues_of(&v),
             vec![

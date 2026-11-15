@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isJsonCompatible, sortDedup, sortRanges } from "../src/normalize";
+import { isJsonCompatible, sortDedup, sortRanges } from "../src/normalize.ts";
 
 describe("sortDedup", () => {
   it("sorts ascending", () => {

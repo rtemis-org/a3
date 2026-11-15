@@ -11,8 +11,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { A3_ISSUE_CODES, type A3Issue, type A3IssueCode, stageOf } from "../src/issues";
-import { validate } from "../src/validate";
+import { A3_ISSUE_CODES, type A3Issue, type A3IssueCode, stageOf } from "../src/issues.ts";
+import { validate } from "../src/validate.ts";
 
 // tests/ -> typescript/ -> <repo>
 const CORPUS = join(import.meta.dirname, "..", "..", "spec", "conformance");

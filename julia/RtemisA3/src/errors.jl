@@ -10,7 +10,8 @@
 
 Every A3 validation issue code, mapped to the validation stage it belongs to.
 
-Codes are never renumbered and never reused. See `spec/error-codes.md` for the
+Codes are never renumbered and never reused. See
+[`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) for the
 full registry, including each code's trigger condition and the path it reports.
 """
 const A3_ISSUE_STAGES = OrderedDict{String,Int}(
@@ -87,7 +88,7 @@ struct A3Issue
 
     function A3Issue(code::AbstractString, path::AbstractString, message::AbstractString)
         haskey(A3_ISSUE_STAGES, code) ||
-            error("'$code' is not a registered A3 issue code (see spec/error-codes.md)")
+            error("'$code' is not a registered A3 issue code (see https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md)")
         new(String(code), String(path), String(message))
     end
 end

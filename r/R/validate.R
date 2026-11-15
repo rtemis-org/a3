@@ -109,7 +109,7 @@
   # so reject it here rather than at the far end of a conformance run.
   if (!code %in% names(.A3_ISSUE_STAGES)) {
     cli::cli_abort(
-      "{.val {code}} is not a registered A3 issue code. See {.file spec/error-codes.md}."
+      "{.val {code}} is not a registered A3 issue code. See {.url https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md}."
     )
   }
   list(code = code, path = path, message = message)

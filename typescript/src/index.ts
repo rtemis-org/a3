@@ -9,9 +9,9 @@
  * @module
  */
 
-export { A3, A3ParseError, A3ValidationError } from "./a3";
-export { readJSON, writeJSON } from "./io";
-export type { A3Issue, A3IssueCode, A3Stage } from "./issues";
+export { A3, A3ParseError, A3ValidationError } from "./a3.ts";
+export { readJSON, writeJSON } from "./io.ts";
+export type { A3Issue, A3IssueCode, A3Stage } from "./issues.ts";
 export {
   A3_ISSUE_CODES,
   A3_ISSUE_STAGES,
@@ -19,15 +19,15 @@ export {
   pointer,
   resolvePointer,
   stageOf,
-} from "./issues";
-export type { ParsedIndex, ParseResult } from "./parse";
+} from "./issues.ts";
+export type { ParsedIndex, ParseResult } from "./parse.ts";
 export {
   formatPositions,
   formatRanges,
   parseIndex,
   parsePositions,
   parseRanges,
-} from "./parse";
+} from "./parse.ts";
 export type {
   A3Data,
   A3FlexData,
@@ -35,7 +35,7 @@ export type {
   A3RangeData,
   MetadataData,
   VariantData,
-} from "./schemas";
-export { A3_SCHEMA_URI, A3_VERSION } from "./schemas";
-export type { ValidationResult } from "./validate";
-export { validate } from "./validate";
+} from "./schemas.ts";
+export { A3_SCHEMA_URI, A3_VERSION } from "./schemas.ts";
+export type { ValidationResult } from "./validate.ts";
+export { validate } from "./validate.ts";

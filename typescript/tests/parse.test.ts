@@ -5,7 +5,7 @@ import {
   parseIndex,
   parsePositions,
   parseRanges,
-} from "../src/parse";
+} from "../src/parse.ts";
 
 describe("parsePositions", () => {
   it("returns empty array for empty input", () => {

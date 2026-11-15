@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { A3, A3ParseError, A3ValidationError } from "../src/a3";
-import { A3_SCHEMA_URI, A3_VERSION } from "../src/schemas";
+import { A3, A3ParseError, A3ValidationError } from "../src/a3.ts";
+import { A3_SCHEMA_URI, A3_VERSION } from "../src/schemas.ts";
 
 const MINI_SEQ = "MKTAYIAKQR";
 

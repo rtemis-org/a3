@@ -1,5 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { A3, A3ParseError } from "./a3";
+import { A3, A3ParseError } from "./a3.ts";
 
 /**
  * Read an A3 JSON file from disk and return a validated A3 instance.

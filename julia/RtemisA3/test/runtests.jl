@@ -340,6 +340,8 @@ end
         @test b.annotations.ptm == a.annotations.ptm
         @test b.annotations.processing == a.annotations.processing
         @test b.annotations.variant == a.annotations.variant
+        @test b == a
+        @test b != create_a3(a.sequence)
     else
         @warn "Example file not found, skipping: $example_path"
     end

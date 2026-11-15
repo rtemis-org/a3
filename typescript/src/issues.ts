@@ -1,8 +1,8 @@
 /**
  * Validation issues: stable codes, RFC 6901 paths, and human messages.
  *
- * The contract is defined in `spec/error-codes.md` and `spec/error-paths.md` at
- * the repository root, and is shared by all five A3 implementations. An issue's
+ * The contract is defined in [`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) and
+ * [`spec/error-paths.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-paths.md), and is shared by all five A3 implementations. An issue's
  * `code` and `path` are contractual; its `message` is not and may be reworded
  * freely.
  *
@@ -21,8 +21,8 @@ export type A3Stage = 1 | 2 | 3 | 4;
 /**
  * A stable, machine-readable validation issue code.
  *
- * Codes are never renumbered and never reused. See `spec/error-codes.md` for
- * the full registry, including each code's trigger condition and the path it
+ * Codes are never renumbered and never reused. See
+ * [`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) for the full registry, including each code's trigger condition and the path it
  * reports.
  */
 export type A3IssueCode =
@@ -177,7 +177,7 @@ export function pointer(base: string, token: string | number): string {
  *
  * Returns `undefined` when the pointer does not resolve — which for a
  * missing-member issue is the expected outcome, not a failure. See
- * `spec/error-paths.md`, Rule 1.
+ * [`spec/error-paths.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-paths.md), Rule 1.
  */
 export function resolvePointer(document: unknown, path: string): unknown {
   if (path === "") return document;

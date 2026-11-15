@@ -1,4 +1,4 @@
-[![CRAN status](https://www.r-pkg.org/badges/version/rtemis.a3)](https://CRAN.R-project.org/package=rtemis.a3) [![rtemis.a3 status badge](https://rtemis-org.r-universe.dev/rtemis.a3/badges/version)](https://rtemis-org.r-universe.dev/rtemis.a3) [![PyPI version](https://img.shields.io/pypi/v/rtemis_a3.svg)](https://pypi.org/project/rtemis_a3/) [![Julia](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/rtemis-org/a3/main/julia/RtemisA3/Project.toml&query=$.version&label=Julia&logo=julia&color=9558B2)](https://juliahub.com/ui/Packages/General/RtemisA3) [![npm version](https://img.shields.io/npm/v/@rtemis/a3.svg)](https://www.npmjs.com/package/@rtemis/a3) [![JSR](https://jsr.io/badges/@rtemis/a3)](https://jsr.io/@rtemis/a3) [![Crates.io Version](https://img.shields.io/crates/v/rtemis_a3)](https://crates.io/crates/rtemis_a3)
+[![CRAN status](https://www.r-pkg.org/badges/version/rtemis.a3)](https://CRAN.R-project.org/package=rtemis.a3) [![rtemis.a3 status badge](https://rtemis-org.r-universe.dev/rtemis.a3/badges/version)](https://rtemis-org.r-universe.dev/rtemis.a3) [![PyPI version](https://img.shields.io/pypi/v/rtemis-a3.svg)](https://pypi.org/project/rtemis-a3/) [![Julia](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/rtemis-org/a3/main/julia/RtemisA3/Project.toml&query=$.version&label=Julia&logo=julia&color=9558B2)](https://juliahub.com/ui/Packages/General/RtemisA3) [![npm version](https://img.shields.io/npm/v/@rtemis/a3.svg)](https://www.npmjs.com/package/@rtemis/a3) [![JSR](https://jsr.io/badges/@rtemis/a3)](https://jsr.io/@rtemis/a3) [![Crates.io Version](https://img.shields.io/crates/v/rtemis-a3)](https://crates.io/crates/rtemis-a3)
 
 [![r-ci](https://github.com/rtemis-org/a3/actions/workflows/r-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/r-ci.yml) [![python-ci](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/python-ci.yml) [![julia-ci](https://github.com/rtemis-org/a3/actions/workflows/julia-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/julia-ci.yml) [![typescript-ci](https://github.com/rtemis-org/a3/actions/workflows/typescript-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/typescript-ci.yml) [![rust-ci](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/rust-ci.yml) [![conformance](https://github.com/rtemis-org/a3/actions/workflows/conformance.yml/badge.svg)](https://github.com/rtemis-org/a3/actions/workflows/conformance.yml)
 
@@ -24,31 +24,33 @@ Conformance is exact, not approximate. Given the same document, all five impleme
 
 ## Implementation
 
-- `r/`: `rtemis.a3`
-- `python/`: `rtemis.a3`
-- `julia/`: `RtemisA3`
-- `typescript/`: `@rtemis/a3`
-- `rust/`: `rtemis_a3`
+| Directory | Language | Package | Registry | Import |
+|---|---|---|---|---|
+| [`r/`](r/) | R | `rtemis.a3` | CRAN, r-universe | `library(rtemis.a3)` |
+| [`python/`](python/) | Python | `rtemis-a3` | PyPI | `from rtemis.a3 import ...` |
+| [`julia/`](julia/) | Julia | `RtemisA3` | General | `using RtemisA3` |
+| [`typescript/`](typescript/) | TypeScript | `@rtemis/a3` | npm, JSR | `import { ... } from "@rtemis/a3"` |
+| [`rust/`](rust/) | Rust | `rtemis-a3` | crates.io | `use rtemis_a3::...` |
 
 ## Cross-language API
 
-The five APIs are idiomatic per language and structurally identical: the same operations, the same arity, and the same return shapes.
+Each row names one operation in each language; — marks an operation a language does not provide.
 
 | Operation | R | Python | TypeScript | Julia | Rust |
 |---|---|---|---|---|---|
 | Build from parts | `create_A3()` | `create_a3()` | `new A3()` | `create_a3()` | — |
-| Parse JSON text | `read_A3json()` | `a3_from_json()` | `A3.fromJSONText()` | `a3_from_json()` | `a3_from_json()` |
+| Parse JSON text | — | `a3_from_json()` | `A3.fromJSONText()` | `a3_from_json()` | `a3_from_json()` |
 | Validate, throwing | `read_A3json()` | `a3_from_json()` | `new A3()` | `A3()` | `validate()` |
 | Validate, not throwing | `validate_A3json()` | `validate_a3()` | `validate()` | `validate()` | `validate()` |
 | Read a file | `read_A3json()` | `read_a3json()` | `readJSON()` | `read_a3json()` | *(`a3` CLI)* |
 | Write a file | `write_A3json()` | `write_a3json()` | `writeJSON()` | `write_a3json()` | *(`a3` CLI)* |
-| Serialize to JSON | `write_A3json()` | `a3_to_json()` | `toJSONString()` | `a3_to_json()` | `a3_to_json()` |
-| Residue at a position | `aa_sub()` helpers | `residue_at()` | `residueAt()` | `residue_at()` | `residue_at()` |
-| Variants at a position | `x@annotations@variant` | `variants_at()` | `variantsAt()` | `variants_at()` | `variants_at()` |
+| Serialize to JSON | — | `a3_to_json()` | `toJSONString()` | `a3_to_json()` | `a3_to_json()` |
+| Residue at a position | — | `residue_at()` | `residueAt()` | `residue_at()` | `residue_at()` |
+| Variants at a position | — | `variants_at()` | `variantsAt()` | `variants_at()` | `variants_at()` |
 | Issue list on failure | condition `issues` | `err.issues` | `err.issues` | `err.issues` | `err.issues()` |
-| Issue stage | `issues[["stage"]]` | `err.stage` | `err.stage` | `stage(err)` | `err.stage()` |
+| Issue stage | `stage` column of `validate_A3json()` | `err.stage` | `err.stage` | `stage(err)` | `err.stage()` |
 
-Rust has no file helpers; the `a3` CLI covers that use. R's non-throwing entry point takes a path, and applies the `jsonlite` settings that R's parse step requires.
+TypeScript's `new A3()` takes a whole document; Python's and Julia's `create_a3()` take its parts as arguments. Rust has no file helpers; the `a3` CLI covers that use. R reads and writes documents as files, and its non-throwing entry point takes a path; an `A3` object exposes its sequence as `x@sequence` and its variant records as `x@annotations@variant`.
 
 ## Validation
 
@@ -59,7 +61,7 @@ Validation is **collect-all**: a document is checked in four stages, every issue
   position 99 is out of bounds for a sequence of length 24 (must be 1-24)
 ```
 
-Reading a **document** collects every issue; calling a **constructor** stops at the first issue with one corrective message ([`spec/README.md`](spec/README.md)).
+Reading a document and building one from parts both report every issue of the earliest failing stage, with one exception: in R's `create_A3()`, each annotation entry is an S7 object whose validator runs when the entry is constructed, and the first entry that fails stops construction with its message; the `A3` validator then reports every cross-field problem (bounds and the variant `from` residue) at once. These messages carry no codes or paths ([`spec/README.md`](spec/README.md#entry-points)).
 
 ## Development
 
