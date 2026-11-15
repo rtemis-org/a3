@@ -11,6 +11,10 @@ The five A3 implementations release together from one commit when a change reach
 - R: `rtemis.a3` 0.7.0 declares its classes with the rtemis.core `prop_*` factories; variant records are named lists.
 - R: `clinvar_variants(gene, protein, classification)` positions each variant on one RefSeq protein from its HGVS protein expression.
 - R: `write_A3json()` writes a named variant list, and a member wrapped in `I()`, as a JSON array.
+- TypeScript: `@rtemis/a3` 0.3.2 on npm and JSR. The npm build imports in Node.js ESM, and `@rtemis/a3/browser` resolves from npm.
+- Julia: `==` compares `A3` and `A3Annotations` objects by value.
+- Documentation: each README states its entry points' error behavior, documents its full public API, and links the canonical schema; the conformance contract lists every entry point.
+- TypeScript: `pnpm publish` runs the tests, a clean build, and a smoke test of both entry points; CI runs the smoke test.
 - Example: `examples/mapt.a3.json` is tau isoform 2N4R (UniProtKB P10636-8), built by `examples/mapt/build_mapt.R`; the conformance case `valid/mapt` is generated from it.
 
 ## 2026-11-02: R S7 compatibility
@@ -25,11 +29,11 @@ The five A3 implementations release together from one commit when a change reach
 
 | Package | Version |
 |---|---|
-| `@rtemis/a3` (npm, JSR) | 0.3.1 |
+| `@rtemis/a3` (JSR) | 0.3.1 |
 
 - TypeScript: JSR publishes from GitHub Actions, with a SLSA provenance attestation.
 - TypeScript: every member of `ParseResult` and `ParsedIndex` is documented.
-- npm moves from 0.2.1 to 0.3.1, matching JSR.
+- npm carries 0.2.1.
 
 ## 2026-08-06: Conformance release
 

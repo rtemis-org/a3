@@ -8,8 +8,7 @@
 //!
 //! These types deliberately derive `Serialize` but **not** `Deserialize`. A
 //! `Deserialize` impl would let a caller construct an `A3` straight from JSON,
-//! bypassing validation entirely — the one thing the `pub(crate)` fields exist
-//! to prevent. The only way in is [`crate::validate()`].
+//! bypassing validation, which the `pub(crate)` fields prevent. The only way in is [`crate::validate()`].
 //!
 //! Named maps use [`IndexMap`] rather than `HashMap` because annotation names
 //! are author-supplied and their order is part of the document.
@@ -46,7 +45,7 @@ pub struct SiteEntry {
     /// Optional label (e.g. `"activeSite"`). Empty string when absent.
     ///
     /// `#[serde(rename = "type")]` maps this field to the JSON key `"type"`.
-    /// We cannot name the Rust field `type` because that is a reserved keyword.
+    /// `type` is a reserved keyword in Rust, so the field is named `kind`.
     #[serde(rename = "type")]
     pub(crate) kind: String,
 }
@@ -244,7 +243,8 @@ impl Annotations {
 /// Descriptive metadata attached to the sequence.
 ///
 /// All four members are free text and default to `""`. A3 validates their type
-/// and nothing else — see `spec/README.md`, "Validation is not linting".
+/// and nothing else; see [`spec/README.md`](https://github.com/rtemis-org/a3/blob/main/spec/README.md#scope-of-validation),
+/// "Scope of validation".
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct Metadata {
     pub(crate) uniprot_id: String,

@@ -2,9 +2,11 @@
 
 # rtemis.a3
 
-R implementation of the **Amino Acid Annotation (A3)** format — a structured JSON format for amino acid sequences with site, region, PTM, processing, and variant annotations.
+R implementation of the **Amino Acid Annotation (A3)** format, a JSON format for an amino acid sequence with site, region, PTM, processing, and variant annotations.
 
-Part of the [rtemis-org/a3](https://github.com/rtemis-org/a3) monorepo, which provides A3 implementations in R, Python, Julia, TypeScript, and Rust.
+- Canonical JSON Schema: [`https://schema.rtemis.org/a3/v1/schema.json`](https://schema.rtemis.org/a3/v1/schema.json) (source: [`schema/a3.schema.json`](https://github.com/rtemis-org/a3/blob/main/schema/a3.schema.json)), generated from this package's S7 classes by `a3_schema()`
+- Conformance contract: [`spec/`](https://github.com/rtemis-org/a3/tree/main/spec)
+- Monorepo, with the Python, Julia, TypeScript, and Rust implementations: [rtemis-org/a3](https://github.com/rtemis-org/a3)
 
 ## Installation
 
@@ -43,6 +45,9 @@ a3 <- create_A3(
   ptm = list(
     Phosphorylation = annotation_position(c(7L))
   ),
+  variant = list(
+    annotation_variant(3L, info = list(from = "T", to = "A"))
+  ),
   uniprot_id  = "P12345",
   description = "Example protein",
   organism    = "Homo sapiens"
@@ -52,9 +57,11 @@ a3 <- create_A3(
 ## Read / Write JSON
 
 ```r
-write_A3json(a3, "path/to/protein.json")
-a3 <- read_A3json("path/to/protein.json")
+write_A3json(a3, "path/to/protein.a3.json")
+a3 <- read_A3json("path/to/protein.a3.json")
 ```
+
+Package versions and `a3_version` are independent. This package reads and writes A3 format version 1.0.0.
 
 ## API
 
@@ -67,12 +74,34 @@ a3 <- read_A3json("path/to/protein.json")
 |                   `annotation_range(x, type)` | Create a range-indexed annotation entry    |
 |                 `annotation_variant(x, info)` | Create a variant record                    |
 
-### I/O
+### I/O and validation
 
-|                Function | Description                        |
-|-------------------------|------------------------------------|
-| `write_A3json(x, path)` | Write an A3 object to a JSON file  |
-|     `read_A3json(path)` | Read an A3 object from a JSON file |
+| Function | Description |
+|---|---|
+| `write_A3json(x, filepath, overwrite = FALSE)` | Write an A3 object to a JSON file |
+| `read_A3json(filepath)` | Read and validate an A3 JSON file |
+| `validate_A3json(filepath)` | Validate an A3 JSON file without throwing; returns the issues as a data frame |
+| `a3_schema()` | The A3 JSON Schema, generated from the S7 classes |
+
+### Data retrieval
+
+These functions query public web services and require a network connection, and each requires packages listed in `Suggests`.
+
+| Function | Description | Requires |
+|---|---|---|
+| `uniprot_to_A3(accession)` | Fetch a UniProt entry and parse it into an A3 object | `httr` |
+| `uniprot_sequence(accession)` | Fetch a protein sequence from UniProt | `seqinr` |
+| `clinvar_variants(gene, protein, classification)` | Fetch ClinVar variants for a gene, positioned on one RefSeq protein | `httr`, `xml2` |
+| `pdb_annotations(accession, pdb_id)` | Fetch PDB structural annotations for a UniProt accession | `httr` |
+| `get_alphafold(uniprotid)` | Get AlphaFold information for a UniProt ID | `httr` |
+| `gene2sequence(gene, organism)` | Get the coding sequence of a gene from Ensembl BioMart | `biomaRt` |
+
+### Sequence utilities
+
+| Function | Description |
+|---|---|
+| `concat(x)` | Concatenate a character vector into a single sequence string |
+| `aa_sub(x, substitutions)` | Perform amino acid substitutions, such as `"K2R"` |
 
 ### S7 Class Hierarchy
 
@@ -104,7 +133,7 @@ Three entry points:
 |---|---|
 | `read_A3json(path)` | **collect-all** — aborts once with every issue in the failing stage |
 | `validate_A3json(path)` | **collect-all, non-throwing** — returns the issues as a data frame |
-| `create_A3(...)` | aborts with the messages of the S7 validators, without codes or paths |
+| `create_A3(...)` | aborts at the first annotation entry whose S7 validator fails; otherwise with every cross-field problem (bounds, variant `from` residue) of the `A3` object; messages without codes or paths |
 
 ```r
 validate_A3json("mapt.a3.json")
@@ -122,3 +151,7 @@ issues <- tryCatch(
 ```
 
 See [`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) for the full rule registry and [`spec/error-paths.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-paths.md) for the path grammar.
+
+## License
+
+[BSD 3-Clause](https://github.com/rtemis-org/a3/blob/main/r/LICENSE.md)

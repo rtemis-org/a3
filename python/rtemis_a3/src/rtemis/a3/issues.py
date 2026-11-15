@@ -1,7 +1,10 @@
 """Validation issues: stable codes, RFC 6901 paths, and human messages.
 
-The contract is defined in ``spec/error-codes.md`` and ``spec/error-paths.md``
-at the repository root, and is shared by all five A3 implementations. An
+The contract is defined in ``spec/error-codes.md``
+(https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) and
+``spec/error-paths.md``
+(https://github.com/rtemis-org/a3/blob/main/spec/error-paths.md), and is shared by
+all five A3 implementations. An
 issue's ``code`` and ``path`` are contractual; its ``message`` is not and may
 be reworded freely.
 """
@@ -19,8 +22,9 @@ class A3IssueCode(StrEnum):
     means a member compares equal to its wire string, so
     ``issue.code == "A3E_SEQ_TOO_SHORT"`` works without an explicit conversion.
 
-    See ``spec/error-codes.md`` for the full registry, including each code's
-    trigger condition and the path it reports.
+    See ``spec/error-codes.md``
+    (https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) for the full
+    registry, including each code's trigger condition and the path it reports.
     """
 
     # ── Stage 1 — Envelope ────────────────────────────────────────────────

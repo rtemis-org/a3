@@ -29,12 +29,16 @@ Message wording, emission order, the type that carries an issue, and how it is s
 - **Subscripts are 0-based; sequence positions are 1-based.**
 - **`3.0` is the position 3.** `2.5` is not a position, and `true` never is.
 
-## Two entry points
+## Entry points
 
 | Entry point | On error |
 |---|---|
-| reading a document: `read_A3json`, `a3_from_json`, `A3.fromJSONText`, `A3(::AbstractDict)` | every issue in the earliest failing stage |
-| calling a constructor: `create_A3`, `create_a3`, `new A3(...)` | one corrective message for the first problem |
+| reading a document: `read_A3json` (R); `a3_from_json`, `read_a3json` (Python, Julia); `A3(::AbstractDict)` (Julia); `A3.fromJSONText`, `readJSON` (TypeScript); `a3_from_json` (Rust) | every issue in the earliest failing stage |
+| validating without throwing: `validate_A3json` (R), `validate_a3` (Python), `validate` (Julia, TypeScript, Rust) | returns every issue in the earliest failing stage |
+| building from parts: `create_a3` (Python, Julia), `new A3(...)` (TypeScript) | every issue in the earliest failing stage |
+| building from parts in R: `create_A3`, `annotation_position`, `annotation_range`, `annotation_variant` | per S7 object: the first entry that fails its own validator, or every cross-field problem of the `A3` object; messages without codes or paths |
+
+The Python, Julia, and TypeScript constructors assemble a document from their arguments and run the same four-stage validator as the readers. In R, each annotation entry is an S7 object whose validator runs when the entry is constructed, and the first entry that fails stops construction with its message; the `A3` validator then reports every cross-field problem (bounds and the variant `from` residue) at once. These messages carry no codes or paths. `read_A3json` and `validate_A3json` report codes and paths.
 
 ## Scope of validation
 

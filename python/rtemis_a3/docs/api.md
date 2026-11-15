@@ -6,6 +6,8 @@
 
 ::: rtemis.a3.a3_from_json
 
+::: rtemis.a3.validate_a3
+
 ::: rtemis.a3.a3_to_json
 
 ::: rtemis.a3.residue_at
@@ -29,3 +31,9 @@
 ::: rtemis.a3.A3ValidationError
 
 ::: rtemis.a3.A3ParseError
+
+## Issues
+
+::: rtemis.a3.A3Issue
+
+::: rtemis.a3.A3IssueCode

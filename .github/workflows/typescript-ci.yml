@@ -63,6 +63,11 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      # Imports both entry points from dist/ in Node.js, through the package's
+      # exports map: the files npm publishes.
+      - name: Smoke-test the npm build
+        run: pnpm run smoke
+
       - name: Test
         run: pnpm test
 

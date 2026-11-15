@@ -5,7 +5,7 @@
 //! A3 is a structured format for annotating amino acid sequences with site,
 //! region, post-translational modification, processing, and variant information.
 //!
-//! ## Quick start
+//! ## Usage
 //!
 //! ```rust
 //! use rtemis_a3::{a3_from_json, a3_to_json};
@@ -47,7 +47,8 @@
 //!
 //! Codes and paths are contractual and identical across the R, Python, Julia,
 //! TypeScript, and Rust implementations. Messages are not — they may be
-//! reworded freely. See `spec/error-codes.md` and `spec/error-paths.md`.
+//! reworded freely. See [`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) and
+//! [`spec/error-paths.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-paths.md).
 //!
 //! ## Module layout
 //!
@@ -88,7 +89,7 @@ use serde_json::Value;
 /// 2. [`validate()`] — four staged passes producing a normalized [`A3`], or
 ///    every issue found in the earliest failing stage.
 ///
-/// Note that step 1 deliberately does *not* deserialize into [`A3`]. Serde
+/// Step 1 does *not* deserialize into [`A3`]. Serde
 /// would reject the first shape problem and report it as a parse error, so a
 /// document with three wrong types would surface one of them, without a code
 /// or a path.
@@ -112,8 +113,8 @@ pub fn a3_to_json(a3: &A3, indent: Option<usize>) -> Result<String, A3Error> {
     match indent {
         None => serde_json::to_string(a3).map_err(A3Error::Serialize),
 
-        // `serde_json::to_string_pretty` hard-codes 2 spaces, so we use the
-        // lower-level `Serializer` + `PrettyFormatter` API to get any width.
+        // `serde_json::to_string_pretty` hard-codes 2 spaces; the lower-level
+        // `Serializer` + `PrettyFormatter` API writes any width.
         Some(n) => {
             let indent_str = " ".repeat(n);
             let formatter = serde_json::ser::PrettyFormatter::with_indent(indent_str.as_bytes());

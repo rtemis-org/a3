@@ -1,6 +1,6 @@
 {
   "name": "@rtemis/a3",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Amino Acid Annotation (A3) format — TypeScript implementation",
   "homepage": "https://a3.rtemis.org",
   "keywords": [
@@ -18,13 +18,18 @@
   "packageManager": "pnpm@9.0.0",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "browser": {
-        "import": "./dist/index-browser.js",
-        "types": "./dist/index-browser.d.ts"
+        "types": "./dist/index-browser.d.ts",
+        "default": "./dist/index-browser.js"
       },
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+      "default": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/index-browser.d.ts",
+      "default": "./dist/index-browser.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"
@@ -34,7 +39,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "smoke": "node --input-type=module -e \"await import('@rtemis/a3'); await import('@rtemis/a3/browser')\"",
     "typecheck": "tsc --noEmit -p tsconfig.build.json",
     "test": "pnpm typecheck && pnpm check && vitest run",
     "check": "biome check src tests",
@@ -44,7 +51,8 @@
     "lint:fix": "biome lint --write src tests",
     "fix": "biome check --write src tests",
     "publish:jsr": "deno publish",
-    "publish:jsr:dry": "deno publish --dry-run"
+    "publish:jsr:dry": "deno publish --dry-run",
+    "prepublishOnly": "pnpm test && pnpm build && pnpm smoke"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.7",

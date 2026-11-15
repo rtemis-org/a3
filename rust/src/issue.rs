@@ -1,7 +1,7 @@
 //! Validation issues: stable codes, RFC 6901 paths, and human messages.
 //!
-//! The contract is defined in `spec/error-codes.md` and `spec/error-paths.md`
-//! at the repository root, and is shared by all five A3 implementations. The
+//! The contract is defined in [`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) and
+//! [`spec/error-paths.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-paths.md), and is shared by all five A3 implementations. The
 //! `code` and `path` of every issue are contractual; the `message` is not and
 //! may be reworded freely.
 
@@ -24,7 +24,7 @@ macro_rules! issue_codes {
         /// A stable, machine-readable validation issue code.
         ///
         /// Codes are never renumbered and never reused. See
-        /// `spec/error-codes.md` for the full registry.
+        /// [`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md) for the full registry.
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
         pub enum A3IssueCode {
             $(

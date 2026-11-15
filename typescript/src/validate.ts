@@ -1,12 +1,10 @@
 /**
  * Four-stage A3 validation over the raw parsed JSON.
  *
- * Validation runs against the plain value `JSON.parse` produces. It is written
- * by hand rather than delegated to a schema library because the contract this
- * has to meet is very specific: exact `{code, path}` pairs, four stages that
+ * Validation runs against the plain value `JSON.parse` produces and emits the
+ * contract's issues directly: exact `{code, path}` pairs, four stages that
  * short-circuit, and guard rules that suppress a subtree without suppressing
- * its siblings. A general-purpose validator produces its own issue vocabulary,
- * and translating that into A3's would be a layer that silently drifts.
+ * its siblings.
  *
  * **Within a stage, collect everything. Across stages, short-circuit.**
  *
@@ -33,8 +31,8 @@
  * @module
  */
 
-import type { A3Issue, A3IssueCode } from "./issues";
-import { pointer } from "./issues";
+import type { A3Issue, A3IssueCode } from "./issues.ts";
+import { pointer } from "./issues.ts";
 import {
   A3_SCHEMA_URI,
   A3_VERSION,
@@ -44,7 +42,7 @@ import {
   type A3RangeData,
   type MetadataData,
   type VariantData,
-} from "./schemas";
+} from "./schemas.ts";
 
 const TOP_LEVEL_KEYS = ["$schema", "a3_version", "sequence", "annotations", "metadata"] as const;
 const FAMILIES = ["site", "region", "ptm", "processing", "variant"] as const;

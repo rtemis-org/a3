@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { A3, A3ValidationError } from "../src/a3";
-import { A3_SCHEMA_URI, A3_VERSION, type A3Data } from "../src/schemas";
+import { A3, A3ValidationError } from "../src/a3.ts";
+import { A3_SCHEMA_URI, A3_VERSION, type A3Data } from "../src/schemas.ts";
 
 const MINIMAL_VALID = {
   $schema: A3_SCHEMA_URI,
@@ -399,7 +399,7 @@ describe("metadata validation", () => {
     // A3 validates that these members are strings and nothing else. Checks on
     // their *content* (is this a well-formed UniProt accession?) belong in a
     // separate lint layer, so that "valid" keeps meaning "conforms to the
-    // published schema". See spec/README.md, "Validation is not linting".
+    // published schema". See spec/README.md, "Scope of validation".
     for (const uniprot_id of ["P12345", "A0A0A0AAA1", "P10636-8", "MAPT", ""]) {
       const result = safeParseA3({
         ...MINIMAL_VALID,

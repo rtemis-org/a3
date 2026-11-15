@@ -50,3 +50,11 @@ Base.:(==)(a::A3Position, b::A3Position) = a.index == b.index && a.type == b.typ
 Base.:(==)(a::A3Range, b::A3Range) = a.index == b.index && a.type == b.type
 Base.:(==)(a::VariantRecord, b::VariantRecord) =
     a.position == b.position && a.extra == b.extra
+Base.:(==)(a::A3Annotations, b::A3Annotations) =
+    a.site == b.site &&
+    a.region == b.region &&
+    a.ptm == b.ptm &&
+    a.processing == b.processing &&
+    a.variant == b.variant
+Base.:(==)(a::A3, b::A3) =
+    a.sequence == b.sequence && a.annotations == b.annotations && a.metadata == b.metadata

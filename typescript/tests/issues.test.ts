@@ -6,7 +6,7 @@ import {
   pointer,
   resolvePointer,
   stageOf,
-} from "../src/issues";
+} from "../src/issues.ts";
 
 describe("escapeToken", () => {
   it("escapes exactly the two characters RFC 6901 escapes", () => {

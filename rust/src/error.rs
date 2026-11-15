@@ -40,7 +40,7 @@ pub enum A3Error {
     /// The input is structurally valid JSON but violates A3 rules.
     ///
     /// Carries every issue found in the earliest validation stage that produced
-    /// one. See [`A3Issue`] and `spec/error-codes.md`.
+    /// one. See [`A3Issue`] and [`spec/error-codes.md`](https://github.com/rtemis-org/a3/blob/main/spec/error-codes.md).
     #[error("A3 validation failed with {} issue(s):\n{}", .0.len(), format_issues(.0))]
     Validate(Vec<A3Issue>),
 }

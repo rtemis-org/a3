@@ -4,11 +4,11 @@
  * @module
  */
 
-import type { A3Issue } from "./issues";
-import { stageOf } from "./issues";
-import { isJsonCompatible } from "./normalize";
-import { A3_SCHEMA_URI, A3_VERSION, type A3Data, type VariantData } from "./schemas";
-import { validate } from "./validate";
+import type { A3Issue } from "./issues.ts";
+import { stageOf } from "./issues.ts";
+import { isJsonCompatible } from "./normalize.ts";
+import { A3_SCHEMA_URI, A3_VERSION, type A3Data, type VariantData } from "./schemas.ts";
+import { validate } from "./validate.ts";
 
 // ── Error classes ─────────────────────────────────────────────────────────────
 

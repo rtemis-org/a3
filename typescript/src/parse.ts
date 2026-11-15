@@ -19,7 +19,7 @@
  * @module
  */
 
-import { sortDedup, sortRanges } from "./normalize";
+import { sortDedup, sortRanges } from "./normalize.ts";
 
 /** Result of a parse: either successful with a value, or failed with a message. */
 export type ParseResult<T> =
