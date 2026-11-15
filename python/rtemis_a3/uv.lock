@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.13"
 
 [[package]]
@@ -797,7 +797,7 @@ wheels = [
 
 [[package]]
 name = "rtemis-a3"
-version = "0.2.0"
+version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
@@ -992,13 +992,8 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c2/db/cc4e555d2e816f2d91304ff969d62cc3a401ee477dbb7c720b874bec67d6/zensical-0.0.31-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:b489936d670733dd204f16b689a2acc0e45b69e42cc4901f5131ae57658b8fbc", size = 12419980, upload-time = "2026-04-01T11:29:44.01Z" },
     { url = "https://files.pythonhosted.org/packages/e7/c1/6789f73164c7f5821f5defb8a80b1dba8d5af24bdec7db36876793c5afd9/zensical-0.0.31-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:d9f678efc0d9918e45eeb8bc62847b2cce23db7393c8c59c1be6d1c064bbaacd", size = 12292301, upload-time = "2026-04-01T11:29:47.277Z" },
     { url = "https://files.pythonhosted.org/packages/4f/9a/6a83ad209081a953e0285d5056e5452c4fbcabd2f104f3797d53e4bdd96f/zensical-0.0.31-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:fb2b50ecf674997f818e53f12f2a67875a21b0c79ed74c151dfaef2f1475e5bf", size = 12661472, upload-time = "2026-04-01T11:29:50.706Z" },
-    { url = "https://files.pythonhosted.org/packages/9c/4a/a82f5c81893b7a607cf9d439b75c3c3894b4ef4d3e92d5d818b4fa5c6f23/zensical-0.0.31-cp310-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:6fb5c634fe88254770a2d4db5c05b06f1c3ee5e29d2ae3e7efdae8905e435b1d", size = 12603784, upload-time = "2026-04-01T11:29:53.623Z" },
-    { url = "https://files.pythonhosted.org/packages/f7/1c/79c198628b8e006be32dfb1c5b73561757a349a6cf3069600a67ffa62495/zensical-0.0.31-cp310-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:94e64630552793274db1ec66c971e49a15ad351536d5d12de67ec6da7358ac50", size = 12959832, upload-time = "2026-04-01T11:29:56.736Z" },
     { url = "https://files.pythonhosted.org/packages/db/9d/45839d9ca0f69622e8a3b944f2d8d7f7d2b7c2da78201079c4feb275feb6/zensical-0.0.31-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:738a2fd5832e3b3c10ff642eebaf89c89ca1d28e4451dad0f36fdac53c415577", size = 12704024, upload-time = "2026-04-01T11:29:59.836Z" },
     { url = "https://files.pythonhosted.org/packages/df/5f/451d7f4d94092bc38bd8d514826fb7b0329c188db506795b1d20bd07d517/zensical-0.0.31-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:bd601f6132e285ef6c3e4c3852be2094fc0473295a8080003db76a79760f84fb", size = 12837788, upload-time = "2026-04-01T11:30:03.048Z" },
-    { url = "https://files.pythonhosted.org/packages/d8/39/390a8fc384fb174ebd4450343a0aa2877b3a31ddcedf5ef0b8d26944e12c/zensical-0.0.31-cp310-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:dc3b6a9dfb5903c0aa779ef65cd6185add2b8aa1db237be840874b8c9db761b8", size = 12876822, upload-time = "2026-04-01T11:30:06.418Z" },
-    { url = "https://files.pythonhosted.org/packages/d5/60/640da2f095782cf38974cd851fb7afa62651d09a36543a1d8942b31aabdc/zensical-0.0.31-cp310-abi3-musllinux_1_2_i686.whl", hash = "sha256:ddd4321b275e82c4897aa45b05038ce204b88fb311ad55f8c2af572173a9b56c", size = 13024036, upload-time = "2026-04-01T11:30:09.501Z" },
     { url = "https://files.pythonhosted.org/packages/3f/06/0564377cbfccea3653254adfa851c1b20d1696e4b16770c7b2e1dd1ef1d7/zensical-0.0.31-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:147ab4bc17f3088f703aa6c4b9c416411f4ea8ca64d26f6586beae49d97fd3c7", size = 12975505, upload-time = "2026-04-01T11:30:12.268Z" },
-    { url = "https://files.pythonhosted.org/packages/35/4b/b8a0c4e5937cb05882dcce667798403e00897135080a69f92363e5e3ff9f/zensical-0.0.31-cp310-abi3-win32.whl", hash = "sha256:03fa11e629a308507693489541f43e751697784e94365e7435b02104aefd1c2c", size = 12011233, upload-time = "2026-04-01T11:30:15.496Z" },
     { url = "https://files.pythonhosted.org/packages/3e/99/0eacdb466d344c0c86596932201268517be42f3e0bb6c78b2b0cd84c55f6/zensical-0.0.31-cp310-abi3-win_amd64.whl", hash = "sha256:d6621d4bb46af4143560045d4a18c8c76302db56bf1dbb6e2ce107d7fb643e09", size = 12207545, upload-time = "2026-04-01T11:30:19.054Z" },
 ]
