@@ -11,6 +11,7 @@ The five A3 implementations release together from one commit when a change reach
 - R: `rtemis.a3` 0.7.0 declares its classes with the rtemis.core `prop_*` factories; variant records are named lists.
 - R: `clinvar_variants(gene, protein, classification)` positions each variant on one RefSeq protein from its HGVS protein expression.
 - R: `write_A3json()` writes a named variant list, and a member wrapped in `I()`, as a JSON array.
+- Rust: `rtemis-a3` 0.3.1 on crates.io, licensed BSD 3-Clause; documentation links to the conformance contract are absolute URLs.
 - Python: `rtemis-a3` 0.2.1 on PyPI, licensed BSD 3-Clause, built with `uv_build` 0.13.
 - TypeScript: `@rtemis/a3` 0.3.2 on npm and JSR. The npm build imports in Node.js ESM, and `@rtemis/a3/browser` resolves from npm.
 - Julia: `==` compares `A3` and `A3Annotations` objects by value.
