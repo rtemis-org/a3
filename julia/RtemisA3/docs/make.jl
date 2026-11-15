@@ -2,10 +2,13 @@ using Documenter, DocumenterVitepress
 
 using RtemisA3
 
+# Doctests run with the package loaded, so `RtemisA3.escape_token` resolves.
+DocMeta.setdocmeta!(RtemisA3, :DocTestSetup, :(using RtemisA3); recursive = true)
+
 makedocs(;
     modules = [RtemisA3],
     authors = "E.D. Gennatas",
-    repo = "https://github.com/rtemis-org/a3/julia/RtemisA3",
+    repo = Remotes.GitHub("rtemis-org", "a3"),
     sitename = "RtemisA3.jl",
     format = DocumenterVitepress.MarkdownVitepress(
         repo = "github.com/rtemis-org/a3",
@@ -16,8 +19,3 @@ makedocs(;
     pages = ["Home" => "index.md"],
     warnonly = false,
 )
-
-# DocumenterVitepress.deploydocs(;
-#     repo="github.com/YourGithubUsername/RtemisA3.jl",
-#     push_preview=true,
-# )
