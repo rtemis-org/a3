@@ -1,6 +1,6 @@
 name = "RtemisA3"
 uuid = "375ea531-7347-4d8b-abc6-73f2d355a625"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["E.D. Gennatas <gennatas@gmail.com>"]
 license = "BSD-3-Clause"
 
@@ -16,5 +16,5 @@ test = ["Test"]
 
 [compat]
 julia = "1.10"
-JSON = "0.21"
+JSON = "0.21, 1"
 OrderedCollections = "1"

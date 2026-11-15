@@ -14,7 +14,7 @@ The five A3 implementations release together from one commit when a change reach
 - Rust: `rtemis-a3` 0.3.1 on crates.io, licensed BSD 3-Clause; documentation links to the conformance contract are absolute URLs.
 - Python: `rtemis-a3` 0.2.1 on PyPI, licensed BSD 3-Clause, built with `uv_build` 0.13.
 - TypeScript: `@rtemis/a3` 0.3.2 on npm and JSR. The npm build imports in Node.js ESM, and `@rtemis/a3/browser` resolves from npm.
-- Julia: `==` compares `A3` and `A3Annotations` objects by value.
+- Julia: `RtemisA3` 0.2.1 in the General registry, licensed BSD 3-Clause, compatible with JSON.jl 0.21 and 1. `==` compares `A3` and `A3Annotations` objects by value.
 - Documentation: each README states its entry points' error behavior, documents its full public API, and links the canonical schema; the conformance contract lists every entry point.
 - TypeScript: `pnpm publish` runs the tests, a clean build, and a smoke test of both entry points; CI runs the smoke test.
 - Example: `examples/mapt.a3.json` is tau isoform 2N4R (UniProtKB P10636-8), built by `examples/mapt/build_mapt.R`; the conformance case `valid/mapt` is generated from it.
