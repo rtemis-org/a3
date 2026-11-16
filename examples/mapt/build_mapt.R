@@ -278,6 +278,13 @@ region_ranges <- split(
   lapply(regions, function(i) map_range(fstart[i], fend[i])),
   fdesc[regions]
 )
+# A set stays in the document unless other sets in it already determine its
+# residues. A Region that covers exactly the residues of the repeats (the
+# microtubule-binding domain is R1-R4) adds nothing at residue level.
+covered <- function(ranges) {
+  sort(unique(unlist(lapply(ranges, function(r) seq(r[[1L]], r[[2L]])))))
+}
+repeat_residues <- covered(lapply(region, function(e) e$index[[1L]]))
 for (name in names(region_ranges)) {
   rr <- Filter(function(r) !anyNA(r), region_ranges[[name]])
   exclude(
@@ -285,6 +292,10 @@ for (name in names(region_ranges)) {
     "absent from the isoform",
     length(region_ranges[[name]]) - length(rr)
   )
+  if (length(rr) > 0L && identical(covered(rr), repeat_residues)) {
+    exclude("UniProtKB Region", "covers exactly the repeats R1-R4")
+    next
+  }
   if (length(rr) > 0L) {
     region[[name]] <- list(index = rr, type = "region")
   }
@@ -431,12 +442,13 @@ for (i in which(ftype == "Initiator methionine")) {
     type = "initiator methionine removed"
   )
 }
-for (i in which(ftype == "Chain")) {
-  processing[["Chain"]] <- list(
-    index = list(map_range(fstart[i], fend[i])),
-    type = "chain"
-  )
-}
+# The mature chain spans every residue after the initiator methionine, which
+# has its own entry, so the Chain feature adds nothing at residue level.
+exclude(
+  "UniProtKB Chain",
+  "spans every residue after the initiator methionine",
+  sum(ftype == "Chain")
+)
 
 # %% Literature: epitopes and cleavage sites ----
 # `literature.tsv` holds residue-level annotations that UniProtKB does not
@@ -475,7 +487,8 @@ for (i in which(ftype == "Natural variant")) {
     record$type <- "missense"
   } else {
     # UniProtKB writes a deleted residue as a feature with no alternative
-    # sequence.
+    # sequence; `from` is the residue at that position of the isoform.
+    record$from <- substr(isoform_seq, p, p)
     record$type <- "deletion"
   }
   dbsnp <- Filter(
@@ -691,9 +704,16 @@ make_document <- function(variant) {
         "Microtubule-associated protein tau, isoform 2N4R",
         "(UniProtKB isoform Tau-F; RefSeq NP_005901.2)"
       ),
-      reference = paste(
-        "UniProtKB P10636; ClinVar; literature.tsv;",
-        "see mapt.provenance.json"
+      reference = paste0(
+        "UniProtKB ",
+        cfg$uniprot_accession,
+        " release ",
+        uniprot_resp$headers[["x-uniprot-release"]],
+        "; ClinVar, retrieved ",
+        format(as.Date(clinvar_retrieved, format = "%a, %d %b %Y"), "%Y-%m-%d"),
+        "; epitope literature and full provenance: ",
+        "https://github.com/rtemis-org/a3/blob/main/examples/mapt/",
+        "mapt.provenance.json"
       ),
       organism = "Homo sapiens"
     )
@@ -734,10 +754,47 @@ validate_text <- function(text) {
   validate_A3json(tmp)
 }
 
-variants <- c(uniprot_variants, clinvar_variants)
+# One record per change. A change is its position, `from` residue, and `to`
+# residue, or a deletion; UniProtKB and ClinVar records of one change merge
+# into one record, `source` lists the sources in alphabetical order, and each
+# source's accession is a member of its own (`clinvar_id`, `uniprotkb_id`).
+change_key <- function(v) {
+  paste(v$position, v$from, if (is.null(v$to)) "del" else v$to)
+}
+merge_records <- function(records) {
+  records <- records[order(vapply(records, `[[`, character(1L), "source"))]
+  merged <- list(position = records[[1L]]$position)
+  merged$from <- records[[1L]]$from
+  merged$to <- records[[1L]]$to
+  merged$type <- records[[1L]]$type
+  merged$source <- I(vapply(records, `[[`, character(1L), "source"))
+  for (r in records) {
+    id_member <- switch(
+      r$source,
+      ClinVar = "clinvar_id",
+      UniProtKB = "uniprotkb_id"
+    )
+    merged[[id_member]] <- r$id
+    extra <- r[setdiff(
+      names(r),
+      c("position", "from", "to", "type", "source", "id")
+    )]
+    merged[names(extra)] <- extra
+  }
+  merged
+}
+source_records <- c(uniprot_variants, clinvar_variants)
+by_change <- split(
+  source_records,
+  factor(
+    vapply(source_records, change_key, character(1L)),
+    levels = unique(vapply(source_records, change_key, character(1L)))
+  )
+)
+variants <- unname(lapply(by_change, merge_records))
 variants <- variants[order(
   vapply(variants, `[[`, numeric(1L), "position"),
-  vapply(variants, `[[`, character(1L), "source")
+  vapply(variants, function(v) if (is.null(v$to)) "" else v$to, character(1L))
 )]
 document_text <- to_json_text(make_document(variants))
 issues <- validate_text(document_text)
@@ -822,8 +879,14 @@ provenance <- list(
     ptm = as.list(count_index(ptm)),
     processing = as.list(count_index(processing)),
     variant = list(
+      records = length(variants),
       UniProtKB = length(uniprot_variants),
-      ClinVar = length(clinvar_variants)
+      ClinVar = length(clinvar_variants),
+      both_sources = sum(vapply(
+        variants,
+        function(v) length(v$source) > 1L,
+        logical(1L)
+      ))
     )
   ),
   excluded = excluded,
