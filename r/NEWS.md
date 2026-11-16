@@ -7,6 +7,7 @@
 - `annotation_position()` and `annotation_range()` return an integer vector or matrix as `index`.
 - Constructing an `A3` object checks range order and overlap, bounds against the sequence length, and the variant residue rule.
 - Requires rtemis.core 0.5.0.
+- `plot()` on an `A3` object draws it with `rtemis.draw::draw_a3()`; rtemis.draw is a suggested package.
 
 # rtemis.a3 0.6.2
 

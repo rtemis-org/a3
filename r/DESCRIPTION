@@ -29,6 +29,7 @@ Imports:
 Suggests:
     biomaRt,
     httr,
+    rtemis.draw,
     seqinr,
     testthat (>= 3.0.0),
     xml2
