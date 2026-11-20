@@ -327,7 +327,7 @@ end
         @test haskey(a.annotations.site, "AT8 epitope")
         @test haskey(a.annotations.region, "R1")
         @test haskey(a.annotations.ptm, "Phosphorylation")
-        @test haskey(a.annotations.processing, "Chain")
+        @test haskey(a.annotations.processing, "Initiator methionine")
         @test !isempty(a.annotations.variant)
 
         # round-trip

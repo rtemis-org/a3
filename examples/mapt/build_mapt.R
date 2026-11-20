@@ -8,11 +8,8 @@
 # table `literature.tsv`, then validated and normalized with rtemis.a3.
 #
 # Writes `mapt.provenance.json` beside it: source releases and retrieval dates,
-# counts of included and excluded records with the reason for each exclusion,
-# and the validation result of a ClinVar import that reads the first entry of
-# ClinVar's `protein_change` summary field instead of the isoform-specific HGVS
-# expression. That import is written to `first-entry-import.a3.json`, an
-# invalid document for demonstrating validation.
+# and counts of included and excluded records with the reason for each
+# exclusion.
 #
 # Usage, from the repository root:
 #   Rscript examples/mapt/build_mapt.R            # uses cached downloads
@@ -63,7 +60,6 @@ cfg <- list(
   ),
   out_document = file.path(dirname(script_dir), "mapt.a3.json"),
   out_provenance = file.path(script_dir, "mapt.provenance.json"),
-  out_first_entry = file.path(script_dir, "first-entry-import.a3.json"),
   literature = file.path(script_dir, "literature.tsv"),
   user_agent = "a3-mapt-example (https://github.com/rtemis-org/a3)",
   eutils = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
@@ -614,9 +610,6 @@ parse_change <- function(x) {
 }
 
 clinvar_variants <- list()
-first_entry_variants <- list()
-first_entry_same_position <- 0L
-first_entry_displaced <- character(0L)
 for (s in selected) {
   node <- archives[[s$uid]]
   expr <- xml_find_first(
@@ -630,15 +623,6 @@ for (s in selected) {
     NULL
   } else {
     parse_change(xml_attr(expr, "singleLetterProteinChange"))
-  }
-
-  # The import that `protein_change` invites: its first single-residue entry,
-  # whichever isoform it was written on.
-  entries <- trimws(strsplit(s$protein_change, ",", fixed = TRUE)[[1L]])
-  first <- NULL
-  for (e in entries) {
-    first <- parse_change(e)
-    if (!is.null(first)) break
   }
 
   if (is.null(change)) {
@@ -670,19 +654,6 @@ for (s in selected) {
     Negate(is.null),
     record
   )
-  if (!is.null(first)) {
-    first_entry_variants[[length(first_entry_variants) + 1L]] <- list(
-      position = first$position,
-      from = first$from,
-      source = "ClinVar",
-      id = record$id
-    )
-    first_entry_same_position <- first_entry_same_position +
-      as.integer(first$position == change$position)
-    if (first$position != change$position) {
-      first_entry_displaced <- c(first_entry_displaced, record$id)
-    }
-  }
 }
 
 # %% Assemble, validate, normalize, write ----
@@ -811,24 +782,6 @@ a3 <- read_A3json(tmp, verbosity = 0L)
 unlink(tmp)
 write_A3json(a3, cfg$out_document, overwrite = TRUE)
 
-# The first-entry import, validated against the same sequence and written
-# beside the document as an invalid example. An issue path
-# `/annotations/variant/N/...` names the record at 0-based subscript N.
-first_entry_text <- to_json_text(make_document(first_entry_variants))
-writeLines(first_entry_text, cfg$out_first_entry)
-first_entry_issues <- validate_text(first_entry_text)
-flagged_subscripts <- unique(as.integer(sub(
-  "^/annotations/variant/([0-9]+).*$",
-  "\\1",
-  first_entry_issues$path
-)))
-first_entry_flagged <- vapply(
-  first_entry_variants[flagged_subscripts + 1L],
-  `[[`,
-  character(1L),
-  "id"
-)
-
 # %% Provenance ----
 # Positions in a position index, ranges in a range index.
 count_index <- function(entries) {
@@ -890,28 +843,6 @@ provenance <- list(
     )
   ),
   excluded = excluded,
-  first_entry_import = list(
-    description = paste(
-      "ClinVar records above, positioned by the first single-residue entry of",
-      "the esummary `protein_change` field instead of the HGVS expression on",
-      cfg$refseq_protein,
-      "and validated against the same sequence."
-    ),
-    document = basename(cfg$out_first_entry),
-    records = length(first_entry_variants),
-    records_at_refseq_position = first_entry_same_position,
-    records_displaced = I(first_entry_displaced),
-    records_flagged = I(first_entry_flagged),
-    displaced_not_flagged = I(setdiff(
-      first_entry_displaced,
-      first_entry_flagged
-    )),
-    flagged_not_displaced = I(setdiff(
-      first_entry_flagged,
-      first_entry_displaced
-    )),
-    issues = as.list(table(first_entry_issues$code))
-  ),
   r = list(
     version = R.version.string,
     rtemis.a3 = as.character(utils::packageVersion("rtemis.a3"))
@@ -938,8 +869,5 @@ message(
   length(processing),
   " sets; variant: ",
   length(variants),
-  " records",
-  "\nFirst-entry ClinVar import: ",
-  nrow(first_entry_issues),
-  " validation issues"
+  " records"
 )

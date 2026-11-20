@@ -18,6 +18,8 @@ The five A3 implementations release together from one commit when a change reach
 - Documentation: each README states its entry points' error behavior, documents its full public API, and links the canonical schema; the conformance contract lists every entry point.
 - TypeScript: `pnpm publish` runs the tests, a clean build, and a smoke test of both entry points; CI runs the smoke test.
 - Example: `examples/mapt.a3.json` is tau isoform 2N4R (UniProtKB P10636-8), built by `examples/mapt/build_mapt.R`; the conformance case `valid/mapt` is generated from it.
+- Example: the MAPT document holds one variant record per change (34), merging UniProtKB and ClinVar records of one change, with `source` a list and each accession under `clinvar_id` or `uniprotkb_id`; a UniProtKB deletion carries its `from` residue. It omits the Chain feature and the microtubule-binding domain, which other sets determine, and its `reference` names the source releases and links the provenance file.
+- R: `plot()` on an `A3` object calls `rtemis.draw::draw_a3()`.
 
 ## 2026-11-02: R S7 compatibility
 

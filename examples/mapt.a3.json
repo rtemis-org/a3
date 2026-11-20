@@ -61,12 +61,6 @@
         ],
         "type": "region"
       },
-      "Microtubule-binding domain": {
-        "index": [
-          [244, 368]
-        ],
-        "type": "region"
-      },
       "N-terminal inserts": {
         "index": [
           [45, 73],
@@ -114,12 +108,6 @@
         "index": [1],
         "type": "initiator methionine removed"
       },
-      "Chain": {
-        "index": [
-          [2, 441]
-        ],
-        "type": "chain"
-      },
       "Caspase cleavage": {
         "index": [421],
         "type": "proteolytic cleavage"
@@ -133,24 +121,12 @@
       {
         "position": 5,
         "from": "R",
-        "to": "L",
-        "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014263.4",
-        "hgvs_p": "NP_005901.2:p.Arg5Leu",
-        "clinical_significance": "Pathogenic",
-        "review_status": "no assertion criteria provided",
-        "conditions": [
-          "Supranuclear palsy, progressive, 1"
-        ]
-      },
-      {
-        "position": 5,
-        "from": "R",
         "to": "H",
         "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_019660",
+        "source": [
+          "UniProtKB"
+        ],
+        "uniprotkb_id": "VAR_019660",
         "description": "in FTD1; reduces the ability of tau to promote microtubule assembly and promotes fibril formation in vitro",
         "dbsnp": "rs63750959"
       },
@@ -159,8 +135,18 @@
         "from": "R",
         "to": "L",
         "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_019661",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014263.4",
+        "hgvs_p": "NP_005901.2:p.Arg5Leu",
+        "clinical_significance": "Pathogenic",
+        "review_status": "no assertion criteria provided",
+        "conditions": [
+          "Supranuclear palsy, progressive, 1"
+        ],
+        "uniprotkb_id": "VAR_019661",
         "description": "in PSNP1; delays assembly initiation and lowers the mass of microtubules formed; but the assembly rate is increased compared to normal tau",
         "dbsnp": "rs63750959"
       },
@@ -169,8 +155,10 @@
         "from": "T",
         "to": "M",
         "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_064622",
+        "source": [
+          "UniProtKB"
+        ],
+        "uniprotkb_id": "VAR_064622",
         "description": "in dbSNP:rs144611688",
         "dbsnp": "rs144611688"
       },
@@ -179,8 +167,10 @@
         "from": "T",
         "to": "A",
         "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_064623",
+        "source": [
+          "UniProtKB"
+        ],
+        "uniprotkb_id": "VAR_064623",
         "description": "in dbSNP:rs748728879",
         "dbsnp": "rs748728879"
       },
@@ -189,22 +179,18 @@
         "from": "K",
         "to": "T",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014259.1",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014259.1",
         "hgvs_p": "NP_005901.2:p.Lys257Thr",
         "clinical_significance": "Pathogenic",
         "review_status": "no assertion criteria provided",
         "conditions": [
           "Pick disease"
-        ]
-      },
-      {
-        "position": 257,
-        "from": "K",
-        "to": "T",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_010344",
+        ],
+        "uniprotkb_id": "VAR_010344",
         "description": "in PIDB; reduces the ability to promote microtubule assembly by 70%",
         "dbsnp": "rs63750129"
       },
@@ -213,22 +199,18 @@
         "from": "L",
         "to": "V",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014266.6",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014266.6",
         "hgvs_p": "NP_005901.2:p.Leu266Val",
         "clinical_significance": "Pathogenic",
         "review_status": "criteria provided, multiple submitters, no conflicts",
         "conditions": [
           "Frontotemporal dementia"
-        ]
-      },
-      {
-        "position": 266,
-        "from": "L",
-        "to": "V",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_019662",
+        ],
+        "uniprotkb_id": "VAR_019662",
         "description": "in FTD1; less able to promote microtubule assembly than wild-type tau",
         "dbsnp": "rs63750349"
       },
@@ -237,22 +219,18 @@
         "from": "G",
         "to": "V",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014246.4",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014246.4",
         "hgvs_p": "NP_005901.2:p.Gly272Val",
         "clinical_significance": "Pathogenic",
         "review_status": "no assertion criteria provided",
         "conditions": [
           "Frontotemporal dementia"
-        ]
-      },
-      {
-        "position": 272,
-        "from": "G",
-        "to": "V",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_010345",
+        ],
+        "uniprotkb_id": "VAR_010345",
         "description": "in FTD1",
         "dbsnp": "rs63750376"
       },
@@ -261,8 +239,10 @@
         "from": "G",
         "to": "R",
         "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_084361",
+        "source": [
+          "UniProtKB"
+        ],
+        "uniprotkb_id": "VAR_084361",
         "description": "in FTD1; increased aggregation propensity and altered binding affinity towards microtubules and F-actin",
         "dbsnp": "rs1247408229"
       },
@@ -270,8 +250,10 @@
         "position": 279,
         "from": "N",
         "type": "deletion",
-        "source": "ClinVar",
-        "id": "VCV004056341.1",
+        "source": [
+          "ClinVar"
+        ],
+        "clinvar_id": "VCV004056341.1",
         "hgvs_p": "NP_005901.2:p.Asn279del",
         "clinical_significance": "Likely pathogenic",
         "review_status": "criteria provided, single submitter",
@@ -284,8 +266,11 @@
         "from": "N",
         "to": "K",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014253.37",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014253.37",
         "hgvs_p": "NP_005901.2:p.Asn279Lys",
         "clinical_significance": "Pathogenic",
         "review_status": "criteria provided, multiple submitters, no conflicts",
@@ -296,23 +281,19 @@
           "Progressive supranuclear palsy-parkinsonism syndrome",
           "Frontotemporal dementia",
           "Progressive supranuclear ophthalmoplegia"
-        ]
-      },
-      {
-        "position": 279,
-        "from": "N",
-        "to": "K",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_010346",
+        ],
+        "uniprotkb_id": "VAR_010346",
         "description": "in FTD1; with parkinsonism",
         "dbsnp": "rs63750756"
       },
       {
         "position": 280,
+        "from": "K",
         "type": "deletion",
-        "source": "UniProtKB",
-        "id": "VAR_010347",
+        "source": [
+          "UniProtKB"
+        ],
+        "uniprotkb_id": "VAR_010347",
         "description": "in FTD1",
         "dbsnp": "rs63750688"
       },
@@ -321,8 +302,10 @@
         "from": "L",
         "to": "H",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV003778831.1",
+        "source": [
+          "ClinVar"
+        ],
+        "clinvar_id": "VCV003778831.1",
         "hgvs_p": "NP_005901.2:p.Leu284His",
         "clinical_significance": "Likely pathogenic",
         "review_status": "criteria provided, single submitter",
@@ -334,37 +317,39 @@
         "position": 296,
         "from": "N",
         "type": "deletion",
-        "source": "ClinVar",
-        "id": "VCV000098243.38",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000098243.38",
         "hgvs_p": "NP_005901.2:p.Asn296del",
         "clinical_significance": "Pathogenic",
         "review_status": "criteria provided, single submitter",
-        "conditions": []
+        "conditions": [],
+        "uniprotkb_id": "VAR_019664",
+        "description": "in PSNP1/atypical PSNP1; heterozygosity may be a risk factor for both a PSNP1-like syndrome and Parkinson disease; reduced the ability of tau to promote microtubule assembly without having a significant effect on tau filament formation; effects at both the RNA and the protein level"
       },
       {
         "position": 296,
         "from": "N",
         "to": "H",
         "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_019663",
+        "source": [
+          "UniProtKB"
+        ],
+        "uniprotkb_id": "VAR_019663",
         "description": "in FTD1; reduced the ability of tau to promote microtubule assembly without having a significant effect on tau filament formation; effects at both the RNA and the protein level",
         "dbsnp": "rs63750416"
-      },
-      {
-        "position": 296,
-        "type": "deletion",
-        "source": "UniProtKB",
-        "id": "VAR_019664",
-        "description": "in PSNP1/atypical PSNP1; heterozygosity may be a risk factor for both a PSNP1-like syndrome and Parkinson disease; reduced the ability of tau to promote microtubule assembly without having a significant effect on tau filament formation; effects at both the RNA and the protein level"
       },
       {
         "position": 300,
         "from": "V",
         "to": "I",
         "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_064624",
+        "source": [
+          "UniProtKB"
+        ],
+        "uniprotkb_id": "VAR_064624",
         "description": "in dbSNP:rs116733906",
         "dbsnp": "rs116733906"
       },
@@ -373,8 +358,10 @@
         "from": "P",
         "to": "A",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV003075676.1",
+        "source": [
+          "ClinVar"
+        ],
+        "clinvar_id": "VCV003075676.1",
         "hgvs_p": "NP_005901.2:p.Pro301Ala",
         "clinical_significance": "Likely pathogenic",
         "review_status": "criteria provided, single submitter",
@@ -385,24 +372,13 @@
       {
         "position": 301,
         "from": "P",
-        "to": "S",
-        "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014256.4",
-        "hgvs_p": "NP_005901.2:p.Pro301Ser",
-        "clinical_significance": "Likely pathogenic",
-        "review_status": "criteria provided, multiple submitters, no conflicts",
-        "conditions": [
-          "Frontotemporal dementia"
-        ]
-      },
-      {
-        "position": 301,
-        "from": "P",
         "to": "L",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014245.60",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014245.60",
         "hgvs_p": "NP_005901.2:p.Pro301Leu",
         "clinical_significance": "Pathogenic",
         "review_status": "criteria provided, multiple submitters, no conflicts",
@@ -414,15 +390,8 @@
           "Frontotemporal dementia",
           "Supranuclear palsy, progressive, 1",
           "Progressive supranuclear ophthalmoplegia"
-        ]
-      },
-      {
-        "position": 301,
-        "from": "P",
-        "to": "L",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_010348",
+        ],
+        "uniprotkb_id": "VAR_010348",
         "description": "in FTD1; most common mutation; reduction in the ability to promote microtubule assembly; accelerates aggregation of tau into filaments",
         "dbsnp": "rs63751273"
       },
@@ -431,8 +400,18 @@
         "from": "P",
         "to": "S",
         "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_010349",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014256.4",
+        "hgvs_p": "NP_005901.2:p.Pro301Ser",
+        "clinical_significance": "Likely pathogenic",
+        "review_status": "criteria provided, multiple submitters, no conflicts",
+        "conditions": [
+          "Frontotemporal dementia"
+        ],
+        "uniprotkb_id": "VAR_010349",
         "description": "in FTD1 and CBD; reduction in the ability to promote microtubule assembly",
         "dbsnp": "rs63751438"
       },
@@ -441,22 +420,18 @@
         "from": "G",
         "to": "V",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014269.2",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014269.2",
         "hgvs_p": "NP_005901.2:p.Gly303Val",
         "clinical_significance": "Pathogenic",
         "review_status": "no assertion criteria provided",
         "conditions": [
           "Supranuclear palsy, progressive, 1"
-        ]
-      },
-      {
-        "position": 303,
-        "from": "G",
-        "to": "V",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_037439",
+        ],
+        "uniprotkb_id": "VAR_037439",
         "description": "in PSNP1",
         "dbsnp": "rs63751391"
       },
@@ -465,22 +440,18 @@
         "from": "S",
         "to": "N",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014254.3",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014254.3",
         "hgvs_p": "NP_005901.2:p.Ser305Asn",
         "clinical_significance": "Pathogenic",
         "review_status": "criteria provided, single submitter",
         "conditions": [
           "Frontotemporal dementia"
-        ]
-      },
-      {
-        "position": 305,
-        "from": "S",
-        "to": "N",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_010350",
+        ],
+        "uniprotkb_id": "VAR_010350",
         "description": "in FTD1; minimal parkinsonism; very early age of onset",
         "dbsnp": "rs63751165"
       },
@@ -489,8 +460,10 @@
         "from": "L",
         "to": "R",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000098226.3",
+        "source": [
+          "ClinVar"
+        ],
+        "clinvar_id": "VCV000098226.3",
         "hgvs_p": "NP_005901.2:p.Leu315Arg",
         "clinical_significance": "Pathogenic",
         "review_status": "no assertion criteria provided",
@@ -501,22 +474,18 @@
         "from": "K",
         "to": "M",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014268.2",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014268.2",
         "hgvs_p": "NP_005901.2:p.Lys317Met",
         "clinical_significance": "Pathogenic",
         "review_status": "no assertion criteria provided",
         "conditions": [
           "Frontotemporal dementia"
-        ]
-      },
-      {
-        "position": 317,
-        "from": "K",
-        "to": "M",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_037440",
+        ],
+        "uniprotkb_id": "VAR_037440",
         "description": "in FTD1",
         "dbsnp": "rs63750092"
       },
@@ -525,22 +494,18 @@
         "from": "S",
         "to": "F",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014262.5",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014262.5",
         "hgvs_p": "NP_005901.2:p.Ser320Phe",
         "clinical_significance": "Pathogenic",
         "review_status": "criteria provided, single submitter",
         "conditions": [
           "Frontotemporal dementia"
-        ]
-      },
-      {
-        "position": 320,
-        "from": "S",
-        "to": "F",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_019665",
+        ],
+        "uniprotkb_id": "VAR_019665",
         "description": "in PIDB; markedly reduced ability of tau to promote microtubule assembly",
         "dbsnp": "rs63750635"
       },
@@ -549,8 +514,10 @@
         "from": "G",
         "to": "S",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000098228.5",
+        "source": [
+          "ClinVar"
+        ],
+        "clinvar_id": "VCV000098228.5",
         "hgvs_p": "NP_005901.2:p.Gly335Ser",
         "clinical_significance": "Pathogenic/Likely pathogenic",
         "review_status": "criteria provided, multiple submitters, no conflicts",
@@ -563,8 +530,10 @@
         "from": "Q",
         "to": "H",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000665222.12",
+        "source": [
+          "ClinVar"
+        ],
+        "clinvar_id": "VCV000665222.12",
         "hgvs_p": "NP_005901.2:p.Gln336His",
         "clinical_significance": "Pathogenic/Likely pathogenic",
         "review_status": "criteria provided, multiple submitters, no conflicts",
@@ -577,22 +546,18 @@
         "from": "V",
         "to": "M",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014252.13",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014252.13",
         "hgvs_p": "NP_005901.2:p.Val337Met",
         "clinical_significance": "Pathogenic",
         "review_status": "criteria provided, multiple submitters, no conflicts",
         "conditions": [
           "Frontotemporal dementia"
-        ]
-      },
-      {
-        "position": 337,
-        "from": "V",
-        "to": "M",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_010351",
+        ],
+        "uniprotkb_id": "VAR_010351",
         "description": "in FTD1; ultrastructural and biochemical characteristics indistinguishable from Alzheimer disease; accelerates aggregation of tau into filaments",
         "dbsnp": "rs63750570"
       },
@@ -601,22 +566,18 @@
         "from": "E",
         "to": "V",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014258.2",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014258.2",
         "hgvs_p": "NP_005901.2:p.Glu342Val",
         "clinical_significance": "Pathogenic",
         "review_status": "no assertion criteria provided",
         "conditions": [
           "Frontotemporal dementia"
-        ]
-      },
-      {
-        "position": 342,
-        "from": "E",
-        "to": "V",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_019666",
+        ],
+        "uniprotkb_id": "VAR_019666",
         "description": "in FTD1",
         "dbsnp": "rs63750711"
       },
@@ -625,22 +586,18 @@
         "from": "S",
         "to": "L",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014267.2",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014267.2",
         "hgvs_p": "NP_005901.2:p.Ser352Leu",
         "clinical_significance": "Pathogenic",
         "review_status": "no assertion criteria provided",
         "conditions": [
           "Supranuclear palsy, progressive, 1"
-        ]
-      },
-      {
-        "position": 352,
-        "from": "S",
-        "to": "L",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_019667",
+        ],
+        "uniprotkb_id": "VAR_019667",
         "description": "in fatal respiratory hypoventilation; unusual apparent autosomal recessive inheritance; reduced binding to microtubules as well as increased fibrillization and aggregation",
         "dbsnp": "rs63750425"
       },
@@ -649,8 +606,10 @@
         "from": "H",
         "to": "Y",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000599620.1",
+        "source": [
+          "ClinVar"
+        ],
+        "clinvar_id": "VCV000599620.1",
         "hgvs_p": "NP_005901.2:p.His362Tyr",
         "clinical_significance": "Likely pathogenic",
         "review_status": "criteria provided, single submitter",
@@ -663,8 +622,10 @@
         "from": "P",
         "to": "S",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV002573094.1",
+        "source": [
+          "ClinVar"
+        ],
+        "clinvar_id": "VCV002573094.1",
         "hgvs_p": "NP_005901.2:p.Pro364Ser",
         "clinical_significance": "Pathogenic",
         "review_status": "criteria provided, single submitter",
@@ -677,8 +638,10 @@
         "from": "P",
         "to": "T",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000807628.3",
+        "source": [
+          "ClinVar"
+        ],
+        "clinvar_id": "VCV000807628.3",
         "hgvs_p": "NP_005901.2:p.Pro364Thr",
         "clinical_significance": "Likely pathogenic",
         "review_status": "criteria provided, single submitter",
@@ -691,22 +654,18 @@
         "from": "K",
         "to": "I",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014260.1",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014260.1",
         "hgvs_p": "NP_005901.2:p.Lys369Ile",
         "clinical_significance": "Pathogenic",
         "review_status": "no assertion criteria provided",
         "conditions": [
           "Pick disease"
-        ]
-      },
-      {
-        "position": 369,
-        "from": "K",
-        "to": "I",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_019668",
+        ],
+        "uniprotkb_id": "VAR_019668",
         "description": "in PIDB; 90% reduction in the rate of microtubule assembly",
         "dbsnp": "rs63751264"
       },
@@ -715,22 +674,18 @@
         "from": "G",
         "to": "R",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014255.10",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014255.10",
         "hgvs_p": "NP_005901.2:p.Gly389Arg",
         "clinical_significance": "Pathogenic/Likely pathogenic",
         "review_status": "criteria provided, multiple submitters, no conflicts",
         "conditions": [
           "Frontotemporal dementia"
-        ]
-      },
-      {
-        "position": 389,
-        "from": "G",
-        "to": "R",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_010352",
+        ],
+        "uniprotkb_id": "VAR_010352",
         "description": "in PIDB; in vitro the mutation reduces the ability of tau to promote microtubule assembly by 25 to 30%",
         "dbsnp": "rs63750512"
       },
@@ -739,8 +694,11 @@
         "from": "R",
         "to": "W",
         "type": "missense",
-        "source": "ClinVar",
-        "id": "VCV000014247.59",
+        "source": [
+          "ClinVar",
+          "UniProtKB"
+        ],
+        "clinvar_id": "VCV000014247.59",
         "hgvs_p": "NP_005901.2:p.Arg406Trp",
         "clinical_significance": "Pathogenic",
         "review_status": "criteria provided, multiple submitters, no conflicts",
@@ -751,15 +709,8 @@
           "Progressive supranuclear palsy-parkinsonism syndrome",
           "Frontotemporal dementia",
           "Supranuclear palsy, progressive, 1"
-        ]
-      },
-      {
-        "position": 406,
-        "from": "R",
-        "to": "W",
-        "type": "missense",
-        "source": "UniProtKB",
-        "id": "VAR_010353",
+        ],
+        "uniprotkb_id": "VAR_010353",
         "description": "in FTD1/Alzheimer disease; accelerates aggregation of tau into filaments; reduces tau phosphorylation in cells compared to both the wild-type and other mutant forms",
         "dbsnp": "rs63750424"
       }
@@ -768,7 +719,7 @@
   "metadata": {
     "uniprot_id": "P10636-8",
     "description": "Microtubule-associated protein tau, isoform 2N4R (UniProtKB isoform Tau-F; RefSeq NP_005901.2)",
-    "reference": "UniProtKB P10636; ClinVar; literature.tsv; see mapt.provenance.json",
+    "reference": "UniProtKB P10636 release 2026_04; ClinVar, retrieved 2026-11-12; epitope literature and full provenance: https://github.com/rtemis-org/a3/blob/main/examples/mapt/mapt.provenance.json",
     "organism": "Homo sapiens"
   }
 }

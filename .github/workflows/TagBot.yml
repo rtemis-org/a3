@@ -6,6 +6,23 @@ on:
       - created
   workflow_dispatch:
 
+# The repository default grants GITHUB_TOKEN read-only access. TagBot pushes
+# the tag over SSH (TAGBOT_KEY) and creates the GitHub release with
+# GITHUB_TOKEN, which requires contents: write.
+permissions:
+  actions: read
+  checks: read
+  contents: write
+  deployments: read
+  issues: write
+  discussions: read
+  packages: read
+  pages: read
+  pull-requests: read
+  repository-projects: read
+  security-events: read
+  statuses: read
+
 jobs:
   TagBot:
     if: github.event_name == 'workflow_dispatch' || github.actor == 'JuliaTagBot'
@@ -17,7 +34,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           ssh: ${{ secrets.TAGBOT_KEY }}
           subdir: julia/RtemisA3
-          # If you later add a deploy key or PAT, uncomment/configure one of
-          # these to let TagBot handle commits that touch workflow files too.
-          # ssh: ${{ secrets.DOCUMENTER_KEY }}
-          # changelog_format: github

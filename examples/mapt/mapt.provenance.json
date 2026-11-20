@@ -1,6 +1,6 @@
 {
   "document": "examples/mapt.a3.json",
-  "built": "2026-11-13T16:25:49-0800",
+  "built": "2026-11-16T14:25:32-0800",
   "sequence": {
     "uniprot": "P10636-8",
     "isoform": "Tau-F",
@@ -93,7 +93,6 @@
       "R3": 1,
       "R4": 1,
       "Disordered": 2,
-      "Microtubule-binding domain": 1,
       "N-terminal inserts": 2
     },
     "ptm": {
@@ -108,16 +107,18 @@
     },
     "processing": {
       "Initiator methionine": 1,
-      "Chain": 1,
       "Caspase cleavage": 1,
       "AEP cleavage": 2
     },
     "variant": {
+      "records": 34,
       "UniProtKB": 25,
-      "ClinVar": 27
+      "ClinVar": 27,
+      "both_sources": 18
     }
   },
   "excluded": {
+    "UniProtKB Region: covers exactly the repeats R1-R4": 1,
     "UniProtKB Compositional bias: feature type not included": 14,
     "UniProtKB Helix: feature type not included": 6,
     "UniProtKB Beta strand: feature type not included": 21,
@@ -127,24 +128,11 @@
     "UniProtKB Site: feature type not included": 31,
     "UniProtKB Alternative sequence: used for the coordinate map and the N-terminal inserts, not annotated": 8,
     "UniProtKB modification: absent from the isoform": 1,
+    "UniProtKB Chain: spans every residue after the initiator methionine": 1,
     "UniProtKB Natural variant: absent from the isoform": 5,
     "ClinVar: classification not pathogenic or likely pathogenic": 597,
     "ClinVar: pathogenic or likely pathogenic, not MAPT alone": 58,
     "ClinVar: no single-residue change on NP_005901.2 (noncoding, splice, multi-residue, or outside the isoform)": 9
-  },
-  "first_entry_import": {
-    "description": "ClinVar records above, positioned by the first single-residue entry of the esummary `protein_change` field instead of the HGVS expression on NP_005901.2 and validated against the same sequence.",
-    "document": "first-entry-import.a3.json",
-    "records": 27,
-    "records_at_refseq_position": 18,
-    "records_displaced": ["VCV004056341.1", "VCV003778831.1", "VCV003075676.1", "VCV002573094.1", "VCV000807628.3", "VCV000665222.12", "VCV000098243.38", "VCV000098228.5", "VCV000098226.3"],
-    "records_flagged": ["VCV004056341.1", "VCV003778831.1", "VCV003075676.1", "VCV002573094.1", "VCV000807628.3", "VCV000665222.12", "VCV000098243.38", "VCV000098228.5", "VCV000098226.3"],
-    "displaced_not_flagged": [],
-    "flagged_not_displaced": [],
-    "issues": {
-      "A3E_VARIANT_OUT_OF_BOUNDS": 3,
-      "A3E_VARIANT_RESIDUE_MISMATCH": 6
-    }
   },
   "r": {
     "version": "R version 4.6.2 (2026-10-29)",

@@ -87,7 +87,9 @@ describe("mapt.a3.json (canonical format)", () => {
   it("contains ClinVar variant records on 2N4R coordinates", async () => {
     const text = await readExample("mapt.a3.json");
     const a3 = A3.fromJSONText(text);
-    const p301l = a3.variantsAt(301).filter((v) => v.source === "ClinVar" && v.to === "L");
+    const p301l = a3
+      .variantsAt(301)
+      .filter((v) => Array.isArray(v.source) && v.source.includes("ClinVar") && v.to === "L");
     expect(p301l).toHaveLength(1);
     expect(p301l[0]?.from).toBe("P");
   });

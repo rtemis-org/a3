@@ -61,16 +61,18 @@ $ a3 examples/mapt.a3.json
 
   Annotations
   ├── site        6  (AT8 epitope, AT100 epitope, AT180 epitope…)
-  ├── region      7  (R1, R2, R3…)
+  ├── region      6  (R1, R2, R3…)
   ├── ptm         8  (Phosphorylation, Acetylation, Methylation…)
-  ├── processing  4  (Initiator methionine, Chain, Caspase cleavage…)
-  └── variant     52  (pos 5, pos 5, pos 5…)
+  ├── processing  3  (Initiator methionine, Caspase cleavage, AEP cleavage)
+  └── variant     34  (pos 5, pos 5, pos 17…)
 
   Metadata
   ├── UniProt ID   P10636-8
   ├── Description  Microtubule-associated protein tau, isoform 2N4R (UniProtKB isoform
   │                Tau-F; RefSeq NP_005901.2)
-  ├── Reference    UniProtKB P10636; ClinVar; literature.tsv; see mapt.provenance.json
+  ├── Reference    UniProtKB P10636 release 2026_04; ClinVar, retrieved 2026-11-12;
+  │                epitope literature and full provenance:
+  │                https://github.com/rtemis-org/a3/blob/main/examples/mapt/mapt.provenance.json
   └── Organism     Homo sapiens
 ```
 
